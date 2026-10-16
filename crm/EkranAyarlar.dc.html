@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="animation:gkIn .3s cubic-bezier(.2,.8,.2,1);max-width:1360px;margin:0 auto;display:flex;flex-direction:column;gap:16px" data-screen-label="Ayarlar">
+  <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap"><div style="flex:1 1 240px"><h1 style="margin:0;font-size:26px;font-weight:600">Ayarlar</h1><div style="font-size:14px;color:#747B85;margin-top:4px">İşletme, katalog, personel ve veri ayarları</div></div>
+    <sc-if value="{{ isKatalog }}"><button onClick="{{ newModel }}" style="height:44px;padding:0 18px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;white-space:nowrap">Yeni model ekle</button></sc-if>
+  </div>
+  <div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:start">
+    <sc-if value="{{ notMobile }}"><nav aria-label="Ayar bölümleri" style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0"><sc-for list="{{ sections }}" as="x"><button onClick="{{ x.pick }}" aria-current="{{ x.sel }}" style="height:42px;padding:0 12px;border:none;border-radius:8px;text-align:left;cursor:pointer;font-size:14px;font-weight:{{ x.fw }};background:{{ x.bg }};color:{{ x.fg }}" style-hover="background:#F5F6F8">{{ x.l }}</button></sc-for></nav></sc-if>
+    <sc-if value="{{ mobile }}"><select aria-label="Ayar bölümü" value="{{ section }}" data-v="{{ section }}" onChange="{{ onSection }}" style="height:46px;padding:0 12px;border:1px solid #CDD2D9;border-radius:10px;font-size:15px;background:#FFFFFF"><sc-for list="{{ sections }}" as="x"><option value="{{ x.k }}">{{ x.l }}</option></sc-for></select></sc-if>
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+
+      <sc-if value="{{ isIsletme }}"><button onClick="{{ openBusiness }}" class="gk-tools-button">İşletme bilgilerini düzenle</button>
+        <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px">
+          <img sc-camel-src="{{ logoSrc }}" alt="Günay Klima" style="height:48px;width:auto;align-self:flex-start">
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14px"><span style="color:#747B85">Ad</span><span>{{ biz.name }}</span><span style="color:#747B85">Tanım</span><span>{{ biz.desc }}</span><span style="color:#747B85">Adres</span><span>{{ biz.address }}</span><span style="color:#747B85">Telefon</span><span>{{ biz.phone }}</span><span style="color:#747B85">Web</span><a href="{{ biz.web }}" target="_blank" rel="noopener">{{ biz.web }}</a><span style="color:#747B85">Instagram</span><a href="{{ biz.instagram }}" target="_blank" rel="noopener">@gunayklima</a></div>
+          <span style="font-size:12px;color:#747B85">Bu bilgiler işletmenin resmî sitesinden alındı. Logo yeniden çizilmedi; oranı korunur. Logo kırmızısı #B1001A ölçülmüş renktir; diğer renkler tasarım önerisidir.</span>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isKatalog }}">
+        <div style="padding:12px 14px;border-radius:10px;background:#E8F0FB;color:#1D4F91;font-size:13px;line-height:1.5">Başlangıç referans kataloğu 58 seri/ürün kaydıdır (6 kategori). Şu anda katalogda {{ shownN }} kayıt yer alıyor. Katalogdaki model tanımı ile müşteriye takılmış fiziksel cihaz ayrı kayıtlardır. Yeni model eklemek stok girişi yapmaz.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ cats }}" as="c"><button onClick="{{ c.pick }}" aria-pressed="{{ c.sel }}" style="height:38px;padding:0 12px;border-radius:999px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap">{{ c.l }}</button></sc-for></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input value="{{ q }}" onChange="{{ onQ }}" aria-label="Katalogda ara" placeholder="Seri, model kodu veya tip ara" style="flex:1 1 220px;max-width:320px;height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;background:#FFFFFF"><select aria-label="Marka" value="{{ brand }}" data-v="{{ brand }}" onChange="{{ onBrand }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;background:#FFFFFF"><option value="">Tüm markalar</option><sc-for list="{{ brands }}" as="o"><option value="{{ o }}">{{ o }}</option></sc-for></select><sc-for list="{{ levels }}" as="c"><button onClick="{{ c.pick }}" aria-pressed="{{ c.sel }}" style="height:38px;padding:0 12px;border-radius:999px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-weight:600;font-size:13px;cursor:pointer">{{ c.l }}</button></sc-for></div>
+        <sc-if value="{{ catEmpty }}"><div style="padding:24px;border:1px dashed #CDD2D9;border-radius:12px;color:#4B525B;font-size:14px">{{ catEmptyText }}</div></sc-if>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+          <sc-for list="{{ products }}" as="p" hint-placeholder-count="8">
+            <article style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;transition:box-shadow .22s,transform .22s" style-hover="box-shadow:0 12px 28px rgba(37,43,50,.09);transform:translateY(-2px)">
+              <div style="position:relative;height:120px;background:#F5F6F8;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:12px;color:#747B85">{{ p.noImg }}<sc-if value="{{ p.img }}"><img sc-camel-src="{{ p.img }}" alt="{{ p.title }}" onError="{{ hideImg }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#FFFFFF;padding:6px"></sc-if></div>
+              <span style="font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:14px">{{ p.title }}</span>
+              <span style="font-size:13px;color:#4B525B">{{ p.sub }}</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:700;background:{{ p.lvBg }};color:{{ p.lvFg }}">{{ p.level }}</span><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:600;background:#F0F1F3;color:#4B525B">{{ p.cat }}</span></div>
+              <span style="font-size:12px;color:#4B525B">{{ p.stock }}</span>
+              <div style="display:flex;gap:6px;margin-top:auto"><button onClick="{{ p.edit }}" style="flex:1;height:38px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px">Düzenle</button><sc-if value="{{ p.isSeri }}"><button onClick="{{ p.variant }}" style="flex:1.4;height:38px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-size:13px;font-weight:600">Model varyantı tanımla</button></sc-if></div>
+              <sc-if value="{{ p.src }}"><a href="{{ p.src }}" target="_blank" rel="noopener" style="font-size:12px">Kaynak sayfası</a></sc-if>
+            </article>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPersonel }}"><button onClick="{{ openHours }}" class="gk-tools-button">Personel bilgileri, mesai ve mola düzenle</button>
+        <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+          <div style="padding:14px 18px;border-bottom:1px solid #EEF0F3;display:flex;align-items:center;gap:8px"><h2 style="margin:0;font-size:17px;font-weight:600;flex:1">Personel</h2><button onClick="{{ newStaff }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">+ Yeni personel</button></div>
+          <sc-if value="{{ staffForm }}"><div style="padding:14px 18px;border-bottom:1px solid #EEF0F3;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;background:#FAFBFC"><label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">Ad soyad *<input value="{{ sf.name }}" onChange="{{ sfOn.name }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label><label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">Telefon (bilinmiyorsa boş)<input type="tel" inputmode="tel" placeholder="0 5XX XXX XX XX" value="{{ sf.phone }}" onChange="{{ sfOn.phone }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label><button onClick="{{ saveStaff }}" style="height:44px;padding:0 16px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">Kaydet</button><sc-if value="{{ sfErr }}"><span style="font-size:13px;color:#A3001A;font-weight:600">{{ sfErr }}</span></sc-if></div></sc-if>
+          <sc-for list="{{ staff }}" as="t"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid #EEF0F3"><span style="flex:1 1 200px;display:flex;flex-direction:column"><span style="font-weight:600">{{ t.name }}</span><span style="font-size:13px;color:#4B525B">{{ t.phone }} · {{ t.jobs }}</span></span><span style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ t.b.fg }};background:{{ t.b.bg }}">{{ t.b.label }}</span><button onClick="{{ t.toggle }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px">{{ t.toggleL }}</button></div></sc-for>
+          <div style="padding:12px 18px;font-size:12px;color:#747B85">Geçmiş kaydı olan personel silinmez; pasife alınır ve önceki işlerde adı korunur.</div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isDepolar }}">
+        <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+          <div style="padding:14px 18px;border-bottom:1px solid #EEF0F3;display:flex;align-items:center;gap:8px"><h2 style="margin:0;font-size:17px;font-weight:600;flex:1">Depolar</h2><button onClick="{{ newDepot }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">+ Yeni depo</button></div>
+          <sc-if value="{{ depotForm }}"><div style="padding:14px 18px;border-bottom:1px solid #EEF0F3;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;background:#FAFBFC"><label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">Depo adı *<input value="{{ df.name }}" onChange="{{ dfOn.name }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label><label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">Not<input value="{{ df.note }}" onChange="{{ dfOn.note }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label><button onClick="{{ saveDepot }}" style="height:44px;padding:0 16px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">Kaydet</button></div></sc-if>
+          <sc-for list="{{ depots }}" as="w"><div style="display:flex;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #EEF0F3"><span style="flex:1;display:flex;flex-direction:column"><span style="font-weight:600">{{ w.name }}</span><span style="font-size:13px;color:#4B525B">{{ w.note }}</span></span><span style="font-size:13px">{{ w.units }}</span></div></sc-for>
+          <div style="padding:12px 18px;font-size:12px;color:#747B85">Gerçek depo sayısı işletmece belirlenecek; birden fazla depo tanımlanabilir. Stoklu depo silinmez.</div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isBakim }}">
+        <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px">
+          <h2 style="margin:0;font-size:17px;font-weight:600">Bakım kuralı</h2>
+          <span style="font-size:14px;color:#4B525B">İşletmenin standart bakım aralığı: <strong>{{ ruleNow }}</strong>. Yeni kural eski cihaz tarihlerini sessizce değiştirmez; önce etkilenen kayıtları görürsünüz.</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Yeni standart aralık<select value="{{ ruleVal }}" data-v="{{ ruleVal }}" onChange="{{ onRule }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><option value="6">6 ay</option><option value="12">12 ay</option><option value="24">24 ay</option></select></label><button onClick="{{ previewRule }}" disabled="{{ noRule }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Etkilenecek kayıtları göster</button></div>
+          <sc-if value="{{ rulePreview }}">
+            <div style="border:1px solid #E7E9ED;border-radius:10px;overflow:hidden">
+              <div style="padding:10px 14px;background:#F5F6F8;font-size:13px;font-weight:600">Yalnız aralığı tanımlı olmayan {{ affectedN }} cihaz etkilenir. Aralığı tanımlı cihazlar değişmez.</div>
+              <sc-for list="{{ affected }}" as="a"><div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:10px;padding:10px 14px;border-top:1px solid #EEF0F3;font-size:13px"><span><strong>{{ a.name }}</strong><br>{{ a.dev }}</span><span>Önce: {{ a.before }}</span><span>Sonra: {{ a.after }}</span></div></sc-for>
+              <div style="padding:12px 14px;display:flex;gap:8px;border-top:1px solid #EEF0F3"><button onClick="{{ cancelRule }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer">Vazgeç</button><button onClick="{{ applyRule }}" disabled="{{ saving }}" style="height:40px;padding:0 14px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">Kuralı {{ affectedN }} cihaza uygula</button></div>
+            </div>
+          </sc-if>
+          <span style="font-size:12px;color:#747B85">12 ay yalnız demo senaryosunda örnek olarak kullanılmıştır. Yeni cihaz formunda otomatik seçili periyot yoktur.</span>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isKur }}">
+        <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+          <div style="padding:16px 18px;border-bottom:1px solid #EEF0F3;display:flex;flex-direction:column;gap:6px"><h2 style="margin:0;font-size:17px;font-weight:600">Günlük döviz kurları</h2><span style="font-size:13px;color:#4B525B;line-height:1.5">Her satış, tahsilat ve bakım ücreti işlem günündeki USD ve EUR karşılığıyla birlikte saklanır. Kurları aşağıdaki formdan tarih ve kaynağıyla girin. İşlem günü için kayıtlı son kur kullanılır; otomatik dış kaynak bağlantısı yoktur. Kur alınamazsa işlem “kur eksik” olarak işaretlenir; elle girilen kur kaynağıyla birlikte saklanır.</span><span style="font-size:13px;color:#7A4A00;font-weight:600">Deneme alanındaki kur kayıtları kurgusaldır. Gerçek alanda girdiğiniz kaynaklı değerler kullanılır.</span></div>
+          <div style="display:grid;grid-template-columns:140px 1fr 1fr 1fr;gap:10px;padding:10px 18px;font-size:12px;font-weight:700;color:#747B85;border-bottom:1px solid #EEF0F3"><span>TARİH</span><span style="text-align:right">1 USD</span><span style="text-align:right">1 EUR</span><span>KAYNAK</span></div>
+          <sc-for list="{{ fxRows }}" as="x"><div style="display:grid;grid-template-columns:140px 1fr 1fr 1fr;gap:10px;padding:10px 18px;font-size:14px;border-bottom:1px solid #EEF0F3"><span>{{ x.date }}</span><span style="text-align:right">{{ x.usd }}</span><span style="text-align:right">{{ x.eur }}</span><span style="font-size:13px;color:#4B525B">{{ x.src }}</span></div></sc-for>
+          <div style="padding:14px 18px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;background:#FAFBFC">
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">Tarih<input type="date" value="{{ xf.date }}" onChange="{{ xfOn.date }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-weight:400"></label>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">1 USD (₺)<input inputmode="decimal" value="{{ xf.usd }}" onChange="{{ xfOn.usd }}" style="width:110px;height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-weight:400"></label>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600">1 EUR (₺)<input inputmode="decimal" value="{{ xf.eur }}" onChange="{{ xfOn.eur }}" style="width:110px;height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-weight:400"></label>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;flex:1 1 180px">Kaynak notu *<input value="{{ xf.src }}" onChange="{{ xfOn.src }}" placeholder="Örn. TCMB döviz satış, elle" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-weight:400"></label>
+            <button onClick="{{ saveFx }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">Elle kur ekle</button>
+            <sc-if value="{{ xfErr }}"><span style="font-size:13px;color:#A3001A;font-weight:600;width:100%">{{ xfErr }}</span></sc-if>
+          </div>
+          <div style="padding:12px 18px;font-size:12px;color:#747B85;line-height:1.5">Enflasyon etkisi: döviz karşılığı, yıllar sonra aynı işlemin bugünkü değerini kıyaslamaya yarar. Resmî enflasyon (TÜİK TÜFE) endeksiyle reel değer hesabı sonraki aşamada endeks verisi eklenince yapılır; şimdilik tahmini enflasyon gösterilmez.</div>
+        </section>
+      </sc-if>
+
+      <sc-if value="{{ isKullanici }}"><section style="background:#fff;border:1px solid #E7E9ED;border-radius:12px;padding:20px"><h2>Erişim</h2><p>Bu panel şu anda yalnız site sahibinin oturumuna açık. Yetkili kullanıcı bütün ekranları yönetebilir.</p><p>Personel kayıtları iş ataması içindir. Personel eklemek, panel giriş yetkisi vermez.</p></section></sc-if>
+      <sc-if value="{{ isVeri }}">
+        <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px">
+          <h2 style="margin:0;font-size:17px;font-weight:600">Veri aktarımı ve yedekleme</h2><p>Tam adres kontrolüyle CSV müşteri aktarımı, JSON yedeği ve işlem geçmişi.</p><button onClick="{{ openData }}" style="align-self:flex-start;height:44px;padding:0 16px;border-radius:8px;border:1px solid #B1001A;background:#fff;color:#B1001A;cursor:pointer;font-weight:600">Veri yönetimini aç</button>
+          <div style="height:1px;background:#E7E9ED"></div>
+          <h2 style="margin:0;font-size:17px;font-weight:600">Dışa aktarım</h2>
+          <span style="font-size:13px;color:#4B525B">Müşteri listesini CSV olarak indirir. Bu bir veri dışa aktarımıdır; tam sunucu yedeği değildir.</span>
+          <button onClick="{{ exportCsv }}" style="align-self:flex-start;height:44px;padding:0 16px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">Müşteri listesini indir (CSV)</button>
+          <div style="padding:12px 14px;border-radius:10px;border:1px dashed #CDD2D9;font-size:13px;color:#4B525B">Veri yönetiminden bütün CRM kayıtlarını JSON olarak yedekleyebilir ve geri yükleyebilirsiniz. Fotoğraflar dosya deposunda tutulur; JSON yedeği fotoğraf dosyalarını içermez. Gerçek müşteri verisi, veritabanı ve kullanıcı yüklemeleri GitHub deposuna konmaz.</div>
+        </section>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ mfOpen }}">
+    <div style="position:fixed;inset:0;background:rgba(20,24,28,.45);z-index:2000;animation:gkFadeBg .2s ease"></div>
+    <div style="position:fixed;inset:0;z-index:2001;display:flex;align-items:{{ mAlign }};justify-content:center;padding:{{ mPad }}">
+      <div role="dialog" aria-modal="true" aria-label="Model formu" style="animation:gkPop .24s cubic-bezier(.2,.8,.2,1);width:100%;max-width:680px;max-height:92%;overflow:auto;background:#FFFFFF;border-radius:{{ mRadius }};display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #E7E9ED;position:sticky;top:0;background:#FFFFFF;z-index:1"><span style="flex:1;font-size:18px;font-weight:600">{{ mf.title }}</span><button onClick="{{ closeMf }}" aria-label="Kapat" style="width:44px;height:44px;border:none;background:none;font-size:22px;cursor:pointer">×</button></div>
+        <sc-if value="{{ mf.done }}">
+          <div style="padding:24px 20px;display:flex;flex-direction:column;gap:14px">
+            <div style="padding:14px 16px;border-radius:10px;background:#E5F3EB;color:#1B6B3F;font-weight:600">{{ mf.doneText }}</div>
+            <span style="font-size:14px;color:#4B525B">Yeni model eklemek stok girişi yapmaz. Depoya ürün geldiyse ayrı bir stok girişi ekleyin.</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><button onClick="{{ mf.toStock }}" style="height:44px;padding:0 18px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">Stok girişi ekle</button><button onClick="{{ closeMf }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer">Kapat</button></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ mf.form }}">
+          <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+            <sc-if value="{{ mf.error }}"><div role="alert" style="padding:10px 12px;border-radius:8px;background:#FDECEE;color:#A3001A;font-size:14px;font-weight:600">{{ mf.error }}</div></sc-if>
+            <sc-if value="{{ mf.parent }}"><div style="padding:10px 12px;border-radius:8px;background:#E8F0FB;color:#1D4F91;font-size:13px">{{ mf.parent }}</div></sc-if>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Marka *<input value="{{ mf.v.brand }}" onChange="{{ mf.on.brand }}" style="height:44px;padding:0 12px;border:1px solid {{ mf.eb.brand }};border-radius:8px;font-size:15px;font-weight:400"></label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Seri / ürün adı *<input value="{{ mf.v.series }}" onChange="{{ mf.on.series }}" style="height:44px;padding:0 12px;border:1px solid {{ mf.eb.series }};border-radius:8px;font-size:15px;font-weight:400"></label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Tip<input value="{{ mf.v.type }}" onChange="{{ mf.on.type }}" placeholder="Örn. Duvar tipi" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Kategori *<select value="{{ mf.v.cat }}" data-v="{{ mf.v.cat }}" onChange="{{ mf.on.cat }}" style="height:44px;padding:0 10px;border:1px solid {{ mf.eb.cat }};border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><sc-for list="{{ catOpts }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Tam model kodu<input value="{{ mf.v.code }}" onChange="{{ mf.on.code }}" disabled="{{ mf.seriesLevel }}" placeholder="Örn. MSZ-AP25VGK" style="height:44px;padding:0 12px;border:1px solid {{ mf.eb.code }};border-radius:8px;font-size:15px;font-weight:400;font-family:'IBM Plex Mono',monospace;text-transform:uppercase"><sc-if value="{{ mf.e.code }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ mf.e.code }}</span></sc-if></label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Kritik stok eşiği<input inputmode="numeric" value="{{ mf.v.threshold }}" onChange="{{ mf.on.threshold }}" placeholder="Boş = eşik yok" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+            </div>
+            <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer"><input type="checkbox" checked="{{ mf.seriesLevel }}" onChange="{{ mf.on.seriesLevel }}" style="width:20px;height:20px;accent-color:#B1001A">Seri düzeyinde kayıt (kesin model kodu yok; farklı kapasiteler bu kayıtta ayrılmaz)</label>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font-size:13px;font-weight:600">Fotoğraf</span>
+              <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+                <div style="position:relative;width:160px;height:110px;border-radius:10px;border:1px dashed #CDD2D9;background:#F5F6F8;display:flex;align-items:center;justify-content:center;font-size:12px;color:#747B85;overflow:hidden;text-align:center;padding:6px">Klima görseli eklenmedi<sc-if value="{{ mf.v.img }}"><img sc-camel-src="{{ mf.v.img }}" alt="Önizleme" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#FFFFFF"></sc-if></div>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <label style="display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 14px;border-radius:8px;border:1px solid #B1001A;color:#B1001A;font-weight:600;font-size:14px;cursor:pointer">{{ mf.pickL }}<input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ onFile }}" style="position:absolute;width:1px;height:1px;opacity:0"></label>
+                  <sc-if value="{{ mf.v.img }}"><button onClick="{{ removeImg }}" style="height:36px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px">Kaldır</button></sc-if>
+                  <sc-if value="{{ mf.parentImg }}"><button onClick="{{ useParentImg }}" style="height:36px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px">Seri görselini kullan</button></sc-if>
+                  <span style="font-size:12px;color:#747B85">JPG, PNG veya WEBP · en fazla 5 MB</span>
+                </div>
+              </div>
+              <sc-if value="{{ photoErr }}"><span role="alert" style="font-size:13px;color:#A3001A;font-weight:600">{{ photoErr }}</span></sc-if>
+              <span style="font-size:12px;color:#747B85">Demo fotoğrafı yalnız bu tarayıcıda saklanır. Başka modelin görseli varsayılan seçilmez.</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Kaynak bağlantısı<input value="{{ mf.v.src }}" onChange="{{ mf.on.src }}" placeholder="https://" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Kapasite (isteğe bağlı)<input value="{{ mf.v.capacity }}" onChange="{{ mf.on.capacity }}" placeholder="Doğrulanmadıysa boş bırakın" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Teknik not (isteğe bağlı)<textarea value="{{ mf.v.tech }}" onChange="{{ mf.on.tech }}" rows="2" style="padding:10px 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></textarea></label>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid #E7E9ED"><button onClick="{{ closeMf }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer">Vazgeç</button><button onClick="{{ saveModel }}" disabled="{{ saving }}" style="height:44px;padding:0 20px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">{{ saveLabel }}</button></div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>/*precompiled:EkranAyarlar.dc.html*/</script>
+</body>
+</html>

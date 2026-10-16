@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="max-width:1360px;margin:0 auto;display:flex;flex-direction:column;gap:16px" data-screen-label="Satış">
+  <sc-if value="{{ isList }}">
+    <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+      <div style="flex:1 1 240px"><h1 style="margin:0;font-size:26px;font-weight:600">Satış</h1><div style="font-size:14px;color:#747B85;margin-top:4px">Satış, montaj ve tahsilat takibi. Tutarlar kaydettiğiniz fiyatlardan hesaplanır.</div></div>
+      <sc-if value="{{ notMobile }}"><button onClick="{{ newSale }}" style="height:44px;padding:0 18px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;white-space:nowrap">Yeni satış</button></sc-if>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ chips }}" as="c"><button onClick="{{ c.pick }}" aria-pressed="{{ c.sel }}" style="height:40px;padding:0 12px;border-radius:999px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap">{{ c.l }} · {{ c.n }}</button></sc-for></div>
+    <sc-if value="{{ listEmpty }}"><div style="padding:28px;border:1px dashed #CDD2D9;border-radius:12px;text-align:center;color:#4B525B">Bu durumda satış yok.</div></sc-if>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+        <button onClick="{{ r.open }}" style="display:grid;grid-template-columns:{{ rowCols }};gap:12px;align-items:center;padding:14px 18px;border:1px solid #E7E9ED;border-radius:12px;background:#FFFFFF;cursor:pointer;text-align:left;font-size:14px" style-hover="border-color:#B9BFC7">
+          <span style="display:flex;flex-direction:column"><span style="font-weight:600;font-family:'IBM Plex Mono',monospace">{{ r.no }}</span><span style="font-size:12px;color:#747B85">{{ r.date }}</span></span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="font-weight:600">{{ r.cName }}</span><span style="font-size:13px;color:#4B525B">{{ r.items }}</span></span>
+          <span style="font-size:13px">Montaj {{ r.inst }}</span>
+          <span style="display:flex;flex-direction:column;font-size:13px"><span>Toplam <strong>{{ r.total }}</strong></span><span style="color:#4B525B">Tahsil {{ r.paid }} · Kalan {{ r.balance }}</span></span>
+          <span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;justify-self:start;color:{{ r.st.fg }};background:{{ r.st.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.st.dot }}"></span>{{ r.st.label }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDetail }}">
+    <button onClick="{{ back }}" style="align-self:flex-start;height:40px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">← Satışlar</button>
+    <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:20px;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+      <div style="flex:1 1 260px;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h1 style="margin:0;font-size:24px;font-weight:600;font-family:'IBM Plex Mono',monospace">{{ x.no }}</h1><span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;color:{{ x.st.fg }};background:{{ x.st.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ x.st.dot }}"></span>{{ x.st.label }}</span></div>
+        <button onClick="{{ x.openCustomer }}" style="align-self:flex-start;border:none;background:none;padding:0;font-size:16px;font-weight:600;color:#B1001A;cursor:pointer">{{ x.cName }}</button>
+        <span style="font-size:14px;color:#4B525B">Montaj adresi: {{ x.addr }}</span>
+        <span style="font-size:14px;color:#4B525B">Satış tarihi: {{ x.date }}</span>
+        <sc-if value="{{ x.note }}"><span style="font-size:14px;color:#4B525B">Not: {{ x.note }}</span></sc-if>
+        <sc-if value="{{ x.cancelNote }}"><span style="font-size:14px;color:#4B525B">İptal notu: {{ x.cancelNote }}</span></sc-if>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <sc-if value="{{ x.isDraft }}"><button onClick="{{ x.editDraft }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Taslağı düzenle</button><button onClick="{{ x.confirm }}" disabled="{{ saving }}" style="height:44px;padding:0 16px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">{{ x.confirmLabel }}</button></sc-if>
+        <sc-if value="{{ x.canPay }}"><button onClick="{{ x.pay }}" style="height:44px;padding:0 16px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">Tahsilat ekle</button></sc-if>
+        <sc-if value="{{ x.canCancel }}"><button onClick="{{ x.askCancel }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500;color:#4B525B">{{ x.cancelLabel }}</button></sc-if>
+      </div>
+    </section>
+
+    <sc-if value="{{ stockErr }}">
+      <div role="alert" style="padding:16px;border-radius:12px;background:#FDECEE;border:1px solid #F3C2C9;display:flex;flex-direction:column;gap:8px">
+        <span style="font-weight:700;color:#A3001A">Satış onaylanamadı: yetersiz stok</span>
+        <sc-for list="{{ stockErr }}" as="e"><span style="font-size:14px">{{ e.text }}</span></sc-for>
+        <span style="font-size:13px;color:#4B525B">Onaylamak için adedi azaltın, başka depo seçin veya stok girişi yapın. Taslak stok ayırmaz; satış taslak olarak korunuyor.</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button onClick="{{ x.editDraft }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Taslağı düzenle</button><button onClick="{{ toStock }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">Stok girişi ekle</button></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ cancelAsk }}">
+      <div style="padding:16px;border-radius:12px;background:#FFFFFF;border:1px solid #E7E9ED;display:flex;flex-direction:column;gap:10px">
+        <sc-if value="{{ x.refundNeeded }}">
+          <span style="font-weight:700">Bu satış basit iptal edilemez</span>
+          <span style="font-size:14px;color:#4B525B;line-height:1.5">{{ x.refundText }} Kontrollü iade için gereken adımlar: takılı cihazın sökülmesi ve cihaz kaydının pasife alınması, depoya iade girişi, tahsilat iadesinin ayrıca kaydı. Tahsilat veya montaj içeren satışlar basit iptal edilemez. İade için mali kayıt ve cihaz hareketi birlikte kontrol edilmelidir.</span>
+          <button onClick="{{ closeCancel }}" style="align-self:flex-start;height:40px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer">Kapat</button>
+        </sc-if>
+        <sc-if value="{{ x.simpleCancel }}">
+          <span style="font-weight:700">Satışı iptal et</span>
+          <span style="font-size:14px;color:#4B525B">{{ x.cancelSummary }}</span>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">İptal nedeni *<input value="{{ cancelNote }}" onChange="{{ onCancelNote }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+          <sc-if value="{{ cancelErr }}"><span style="font-size:13px;color:#A3001A;font-weight:600">{{ cancelErr }}</span></sc-if>
+          <div style="display:flex;gap:8px"><button onClick="{{ closeCancel }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer">Vazgeç</button><button onClick="{{ doCancel }}" disabled="{{ saving }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #A3001A;background:#FFFFFF;color:#A3001A;cursor:pointer;font-weight:600">Satışı iptal et</button></div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <div style="display:grid;grid-template-columns:{{ detailCols }};gap:16px;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+          <div style="padding:14px 18px;border-bottom:1px solid #EEF0F3;font-weight:600">Satış kalemleri</div>
+          <sc-for list="{{ x.lines }}" as="l">
+            <div style="display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:14px 18px;border-bottom:1px solid #EEF0F3">
+              <div style="position:relative;width:64px;height:48px;background:#F5F6F8;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:9px;color:#747B85;text-align:center">Görsel yok<sc-if value="{{ l.img }}"><img sc-camel-src="{{ l.img }}" alt="" onError="{{ hideImg }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#FFFFFF"></sc-if></div>
+              <div style="display:flex;flex-direction:column;gap:4px;font-size:14px">
+                <span style="font-weight:600;font-family:'IBM Plex Mono',monospace">{{ l.title }}</span>
+                <span style="font-size:13px;color:#4B525B">{{ l.depot }} · {{ l.qty }} adet · {{ l.inst }}</span>
+                <span style="font-size:13px">Birim satış {{ l.price }} · Satır indirimi {{ l.disc }} · Satır toplamı <strong>{{ l.total }}</strong></span>
+                <span style="font-size:13px;color:#4B525B">Birim alış maliyeti: {{ l.cost }}</span>
+                <sc-for list="{{ l.pending }}" as="u"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px;padding:10px 12px;border-radius:8px;background:#FFF1D1"><span style="flex:1 1 200px;font-size:13px;color:#5C3800;font-weight:600">{{ u.text }}</span><button onClick="{{ u.install }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600;font-size:13px">Montaj kaydı ekle</button></div></sc-for>
+                <sc-for list="{{ l.devices }}" as="d"><button onClick="{{ d.open }}" style="align-self:flex-start;margin-top:4px;border:none;background:#E5F3EB;color:#1B6B3F;padding:6px 10px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">Takıldı: {{ d.text }}</button></sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </section>
+        <sc-if value="{{ x.woText }}"><div style="padding:12px 16px;border-radius:12px;background:#E8F0FB;color:#1D4F91;font-size:14px">{{ x.woText }}</div></sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;font-size:15px"><span>Toplam satış</span><strong>{{ x.total }}</strong></div>
+          <span style="font-size:12px;color:#747B85;margin-top:-4px">{{ x.totalFx }}</span>
+          <div style="display:flex;justify-content:space-between;font-size:15px"><span>Tahsil edilen</span><strong>{{ x.paid }}</strong></div>
+          <div style="height:1px;background:#E7E9ED"></div>
+          <div style="display:flex;justify-content:space-between;font-size:17px"><span style="font-weight:600">Kalan bakiye</span><strong style="color:{{ x.balFg }}">{{ x.balance }}</strong></div>
+          <sc-if value="{{ x.fxDiff }}"><span style="font-size:13px;padding:8px 10px;border-radius:8px;background:#F5F6F8;color:#252B32">{{ x.fxDiff }}</span></sc-if>
+          <span style="font-size:12px;color:#747B85">KDV dahil/hariç tercihi işletmece netleşmedi; vergi ve fatura hesabı yapılmaz. Döviz karşılıkları bilgi amaçlıdır; işlem günü kuruyla saklanır.</span>
+        </section>
+        <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+          <div style="padding:14px 18px;border-bottom:1px solid #EEF0F3;font-weight:600">Tahsilatlar</div>
+          <sc-if value="{{ x.noPay }}"><div style="padding:14px 18px;font-size:14px;color:#747B85">Tahsilat yok.</div></sc-if>
+          <sc-for list="{{ x.pays }}" as="y"><div style="display:flex;gap:10px;padding:12px 18px;border-bottom:1px solid #EEF0F3;font-size:14px"><span style="flex:1;display:flex;flex-direction:column"><span style="font-weight:600">{{ y.amount }}</span><span style="font-size:13px;color:#4B525B">{{ y.date }} · {{ y.method }}{{ y.note }}</span><span style="font-size:12px;color:#747B85">{{ y.fx }}</span></span></div></sc-for>
+        </section>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ payOpen }}">
+    <div style="position:fixed;inset:0;background:rgba(20,24,28,.45);z-index:2000"></div>
+    <div style="position:fixed;inset:0;z-index:2001;display:flex;align-items:{{ mAlign }};justify-content:center;padding:{{ mPad }}">
+      <div role="dialog" aria-modal="true" aria-label="Tahsilat ekle" style="animation:gkPop .24s cubic-bezier(.2,.8,.2,1);width:100%;max-width:520px;background:#FFFFFF;border-radius:{{ mRadius }};display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #E7E9ED"><span style="flex:1;font-size:18px;font-weight:600">Tahsilat ekle</span><button onClick="{{ closePay }}" aria-label="Kapat" style="width:44px;height:44px;border:none;background:none;font-size:22px;cursor:pointer">×</button></div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:13px"><div style="padding:10px;border-radius:8px;background:#F5F6F8">Toplam<br><strong>{{ x.total }}</strong></div><div style="padding:10px;border-radius:8px;background:#F5F6F8">Ödenen<br><strong>{{ x.paid }}</strong></div><div style="padding:10px;border-radius:8px;background:#F5F6F8">Kalan<br><strong>{{ x.balance }}</strong></div></div>
+          <sc-if value="{{ payError }}"><div role="alert" style="padding:10px 12px;border-radius:8px;background:#FDECEE;color:#A3001A;font-size:14px;font-weight:600">{{ payError }}</div></sc-if>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Tarih *<input type="date" max="{{ todayIso }}" value="{{ pf.date }}" onChange="{{ pfOn.date }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Tutar (₺) *<input inputmode="decimal" value="{{ pf.amount }}" onChange="{{ pfOn.amount }}" placeholder="Örn. 12.000,00" style="height:44px;padding:0 12px;border:1px solid {{ pfAmountBd }};border-radius:8px;font-size:15px;font-weight:400"></label>
+          </div>
+          <sc-if value="{{ pfe.amount }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ pfe.amount }}</span></sc-if>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Ödeme yöntemi *<select value="{{ pf.method }}" data-v="{{ pf.method }}" onChange="{{ pfOn.method }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><option>Nakit</option><option>Havale / EFT</option><option>Kredi kartı</option><option>Çek</option><option>Diğer</option></select></label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Not<input value="{{ pf.note }}" onChange="{{ pfOn.note }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid #E7E9ED"><button onClick="{{ closePay }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer">Vazgeç</button><button onClick="{{ savePay }}" disabled="{{ saving }}" style="height:44px;padding:0 20px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">{{ saveLabel }}</button></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ wizOpen }}">
+    <div style="position:fixed;inset:0;background:rgba(20,24,28,.45);z-index:1900"></div>
+    <div style="position:fixed;inset:0;z-index:1901;display:flex;align-items:{{ mAlign }};justify-content:center;padding:{{ mPad }}">
+      <div role="dialog" aria-modal="true" aria-label="Yeni satış" style="animation:gkPop .24s cubic-bezier(.2,.8,.2,1);width:100%;max-width:880px;max-height:94%;background:#FFFFFF;border-radius:{{ mRadius }};display:flex;flex-direction:column;overflow:hidden">
+        <div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #E7E9ED;gap:12px"><span style="flex:1;font-size:18px;font-weight:600">{{ wz.title }}</span><button onClick="{{ closeWiz }}" aria-label="Kapat" style="width:44px;height:44px;border:none;background:none;font-size:22px;cursor:pointer">×</button></div>
+        <div style="display:flex;gap:4px;padding:10px 20px;border-bottom:1px solid #EEF0F3;overflow-x:auto"><sc-for list="{{ wz.steps }}" as="t"><button onClick="{{ t.pick }}" disabled="{{ t.dis }}" style="flex:none;display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border:none;border-radius:8px;background:{{ t.bg }};color:{{ t.fg }};font-size:13px;font-weight:600;cursor:pointer"><span style="width:22px;height:22px;border-radius:50%;background:{{ t.nbg }};color:#FFFFFF;display:inline-flex;align-items:center;justify-content:center;font-size:12px">{{ t.n }}</span>{{ t.l }}</button></sc-for></div>
+        <div style="flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:14px">
+          <sc-if value="{{ wz.error }}"><div role="alert" style="padding:10px 12px;border-radius:8px;background:#FDECEE;color:#A3001A;font-size:14px;font-weight:600">{{ wz.error }}</div></sc-if>
+          <sc-if value="{{ wz.s1 }}">
+            <input value="{{ wz.cq }}" onChange="{{ wz.onCq }}" aria-label="Müşteri ara" placeholder="Müşteri adı veya telefon" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px"><sc-for list="{{ wz.customers }}" as="o"><button onClick="{{ o.pick }}" style="display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:10px;border:1px solid {{ o.bd }};background:{{ o.bg }};cursor:pointer;text-align:left"><span style="font-weight:600">{{ o.name }}</span><span style="font-size:13px;color:#4B525B">{{ o.sub }}</span></button></sc-for></div>
+            <button onClick="{{ wz.newCustomer }}" style="align-self:flex-start;height:44px;padding:0 14px;border-radius:8px;border:1px dashed #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">+ Yeni müşteri oluştur</button>
+          </sc-if>
+          <sc-if value="{{ wz.s2 }}">
+            <span style="font-size:14px;color:#4B525B">{{ wz.cName }} için montaj adresini seçin.</span>
+            <sc-for list="{{ wz.addrs }}" as="o"><button onClick="{{ o.pick }}" style="display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:10px;border:1px solid {{ o.bd }};background:{{ o.bg }};cursor:pointer;text-align:left"><span style="font-weight:600">{{ o.label }}</span><span style="font-size:13px;color:#4B525B">{{ o.line }}</span></button></sc-for>
+            <sc-if value="{{ wz.noAddr }}"><span style="font-size:14px;color:#7A4A00">Bu müşterinin adresi yok.</span></sc-if>
+            <button onClick="{{ wz.newAddr }}" style="align-self:flex-start;height:44px;padding:0 14px;border-radius:8px;border:1px dashed #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">+ Yeni adres ekle</button>
+          </sc-if>
+          <sc-if value="{{ wz.s3 }}">
+            <input value="{{ wz.pq }}" onChange="{{ wz.onPq }}" aria-label="Model ara" placeholder="Model kodu veya seri ara" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;max-height:300px;overflow:auto;padding:2px">
+              <sc-for list="{{ wz.products }}" as="o">
+                <button onClick="{{ o.add }}" style="display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:10px;border:1px solid #E7E9ED;background:#FFFFFF;cursor:pointer;text-align:left" style-hover="border-color:#B1001A">
+                  <div style="position:relative;height:70px;background:#F5F6F8;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:11px;color:#747B85">{{ o.noImg }}<sc-if value="{{ o.img }}"><img sc-camel-src="{{ o.img }}" alt="" onError="{{ hideImg }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#FFFFFF"></sc-if></div>
+                  <span style="font-weight:600;font-size:13px;font-family:'IBM Plex Mono',monospace">{{ o.title }}</span><span style="font-size:12px;color:#4B525B">{{ o.series }}</span><span style="font-size:12px;color:{{ o.availFg }};font-weight:600">{{ o.avail }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ wz.noLines }}"><span style="font-size:14px;color:#747B85">Henüz kalem eklenmedi. Yukarıdan model seçin.</span></sc-if>
+            <sc-for list="{{ wz.lines }}" as="l">
+              <div style="padding:12px;border:1px solid #E7E9ED;border-radius:10px;display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;gap:8px;align-items:center"><span style="flex:1;font-weight:600;font-family:'IBM Plex Mono',monospace">{{ l.title }}</span><button onClick="{{ l.remove }}" style="height:36px;padding:0 10px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px">Kaldır</button></div>
+                <sc-if value="{{ l.seriesWarn }}"><span style="font-size:12px;color:#7A4A00;background:#FFF1D1;padding:6px 8px;border-radius:6px">Seri düzeyinde kayıt: kapasite / model kodu belirtilmemiş. Farklı kapasiteler bu kalemde birlikte sayılır.</span></sc-if>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">
+                  <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600">Depo<select value="{{ l.depotId }}" data-v="{{ l.depotId }}" onChange="{{ l.on.depotId }}" style="height:42px;padding:0 8px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400;background:#FFFFFF"><sc-for list="{{ l.depots }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label>
+                  <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600">Adet<input inputmode="numeric" autocomplete="off" value="{{ l.qty }}" onChange="{{ l.on.qty }}" style="height:42px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+                  <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600">Birim satış fiyatı (₺)<input inputmode="decimal" value="{{ l.price }}" onChange="{{ l.on.price }}" style="height:42px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+                  <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600">Birim alış maliyeti (₺)<input inputmode="decimal" value="{{ l.cost }}" onChange="{{ l.on.cost }}" placeholder="Bilinmiyor" style="height:42px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+                  <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600">Satır indirimi (₺)<input inputmode="decimal" value="{{ l.disc }}" onChange="{{ l.on.disc }}" placeholder="0" style="height:42px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+                </div>
+                <span style="font-size:13px;color:{{ l.stockFg }};font-weight:600">{{ l.stockText }}</span>
+                <span style="font-size:13px">Satır toplamı: <strong>{{ l.total }}</strong></span>
+              </div>
+            </sc-for>
+          </sc-if>
+          <sc-if value="{{ wz.s4 }}">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;max-width:260px">Satış tarihi *<input type="date" value="{{ wz.date }}" onChange="{{ wz.onDate }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+            <span style="font-size:12px;color:#747B85">Satış tarihi; montaj tarihi ve bakım tarihlerinden ayrıdır.</span>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Not<textarea value="{{ wz.note }}" onChange="{{ wz.onNote }}" rows="3" style="padding:10px 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></textarea></label>
+          </sc-if>
+          <sc-if value="{{ wz.s5 }}">
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px"><span style="color:#747B85">Müşteri</span><span>{{ wz.cName }}</span><span style="color:#747B85">Montaj adresi</span><span>{{ wz.addrText }}</span><span style="color:#747B85">Satış tarihi</span><span>{{ wz.dateText }}</span></div>
+            <sc-for list="{{ wz.lines }}" as="l"><div style="display:flex;gap:10px;padding:10px 12px;border:1px solid #E7E9ED;border-radius:8px;font-size:14px;flex-wrap:wrap"><span style="flex:1 1 200px;font-family:'IBM Plex Mono',monospace;font-weight:600">{{ l.qty }} × {{ l.title }}</span><span>{{ l.total }}</span><span style="width:100%;font-size:12px;color:{{ l.stockFg }}">{{ l.stockText }} · Alış maliyeti: {{ l.costText }}</span></div></sc-for>
+            <div style="display:flex;justify-content:space-between;font-size:17px;padding:10px 0"><span style="font-weight:600">Toplam satış</span><strong>{{ wz.total }}</strong></div>
+            <span style="font-size:12px;color:#747B85">Taslak stok ayırmaz. Onaylı satış adetleri rezerve eder; montaj kaydı girildiğinde ürün depodan düşer. Vergi ve fatura hesabı yapılmaz.</span>
+            <sc-if value="{{ wz.stockBlock }}"><div role="alert" style="padding:10px 12px;border-radius:8px;background:#FDECEE;color:#A3001A;font-size:13px;font-weight:600">{{ wz.stockBlock }}</div></sc-if>
+          </sc-if>
+        </div>
+        <div style="display:flex;gap:8px;padding:14px 20px;border-top:1px solid #E7E9ED;flex-wrap:wrap;justify-content:flex-end">
+          <sc-if value="{{ wz.canBack }}"><button onClick="{{ wz.back }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer">Geri</button></sc-if>
+          <div style="flex:1"></div>
+          <sc-if value="{{ wz.notLast }}"><button onClick="{{ wz.next }}" disabled="{{ wz.nextDis }}" style="height:44px;padding:0 20px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;opacity:{{ wz.nextOp }}">Devam</button></sc-if>
+          <sc-if value="{{ wz.last }}"><button onClick="{{ wz.saveDraft }}" disabled="{{ saving }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:600">Taslak olarak kaydet</button><button onClick="{{ wz.saveConfirm }}" disabled="{{ wz.confirmDis }}" style="height:44px;padding:0 18px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;opacity:{{ wz.confirmOp }}">Onayla ve stok ayır</button></sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>/*precompiled:EkranSatis.dc.html*/</script>
+</body>
+</html>

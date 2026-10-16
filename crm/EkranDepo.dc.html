@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="animation:gkIn .3s cubic-bezier(.2,.8,.2,1);max-width:1360px;margin:0 auto;display:flex;flex-direction:column;gap:16px" data-screen-label="Depo">
+  <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+    <div style="flex:1 1 240px"><h1 style="margin:0;font-size:26px;font-weight:600">Depo</h1><div style="font-size:14px;color:#747B85;margin-top:4px">Sayılar elle düzeltilmez; her değişiklik bir stok hareketidir.</div></div>
+    <sc-if value="{{ notMobile }}"><button onClick="{{ openMove }}" style="height:44px;padding:0 18px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;white-space:nowrap">Stok hareketi ekle</button></sc-if>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+    <div style="padding:12px 14px;border-radius:10px;background:#FFFFFF;border:1px solid #E7E9ED;font-size:13px;line-height:1.5"><strong style="font-size:14px">Fiziksel stok</strong><br>Depoda duran ürün. Müşteriye takılmış cihazlar sayılmaz.</div>
+    <div style="padding:12px 14px;border-radius:10px;background:#FFFFFF;border:1px solid #E7E9ED;font-size:13px;line-height:1.5"><strong style="font-size:14px">Rezerve</strong><br>Onaylı satış için ayrılmış, henüz takılmamış adet. Taslak satış ayırmaz.</div>
+    <div style="padding:12px 14px;border-radius:10px;background:#FFFFFF;border:1px solid #E7E9ED;font-size:13px;line-height:1.5"><strong style="font-size:14px">Satılabilir</strong><br>Fiziksel stok − Rezerve. Yeni satış ve çıkış yalnız bu adetten yapılabilir.</div>
+    <div style="padding:12px 14px;border-radius:10px;background:#FFFFFF;border:1px solid #E7E9ED;font-size:13px;line-height:1.5"><strong style="font-size:14px">Depo değeri</strong><br>{{ value.text }}<br><span style="color:#7A4A00">{{ value.missing }}</span></div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <input value="{{ q }}" onChange="{{ onQ }}" aria-label="Model ara" placeholder="Model kodu veya seri ara" style="flex:1 1 220px;max-width:320px;height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;background:#FFFFFF">
+    <sc-for list="{{ depChips }}" as="c"><button onClick="{{ c.pick }}" aria-pressed="{{ c.sel }}" style="height:40px;padding:0 12px;border-radius:999px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-weight:600;font-size:13px;cursor:pointer">{{ c.l }}</button></sc-for>
+    <button onClick="{{ toggleCrit }}" aria-pressed="{{ critical }}" style="height:40px;padding:0 12px;border-radius:999px;border:1px solid {{ critChip.bd }};background:{{ critChip.bg }};color:{{ critChip.fg }};font-weight:600;font-size:13px;cursor:pointer">Yalnız kritik · {{ critN }}</button>
+    <div style="flex:1"></div>
+    <div style="display:flex;gap:2px;padding:3px;background:#E7E9ED;border-radius:8px"><sc-for list="{{ viewModes }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:34px;padding:0 12px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;background:{{ o.bg }};color:{{ o.fg }}">{{ o.l }}</button></sc-for></div>
+  </div>
+  <sc-if value="{{ empty }}"><div style="padding:28px;border:1px dashed #CDD2D9;border-radius:12px;text-align:center;color:#4B525B">Bu filtrelerle stok kaydı yok.</div></sc-if>
+  <sc-if value="{{ cards }}">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px">
+      <sc-for list="{{ items }}" as="p" hint-placeholder-count="6">
+        <article style="background:#FFFFFF;border:1px solid {{ p.bd }};border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .22s,transform .22s" style-hover="box-shadow:0 12px 28px rgba(37,43,50,.09);transform:translateY(-2px)">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="position:relative;width:84px;height:62px;flex:none;background:#F5F6F8;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10px;color:#747B85;text-align:center;padding:4px">{{ p.noImg }}<sc-if value="{{ p.img }}"><img sc-camel-src="{{ p.img }}" alt="" onError="{{ hideImg }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#FFFFFF"></sc-if></div>
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-weight:600;font-family:'IBM Plex Mono',monospace">{{ p.title }}</span><span style="font-size:12px;color:#4B525B">{{ p.sub }}</span><sc-if value="{{ p.crit }}"><span style="align-self:flex-start;display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;background:#FFF1D1;color:#7A4A00">Kritik · eşik {{ p.th }}</span></sc-if></div>
+          </div>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 64px 64px 72px;gap:4px 8px;font-size:13px;align-items:center">
+            <span style="font-size:11px;font-weight:700;color:#747B85">DEPO</span><span style="font-size:11px;font-weight:700;color:#747B85;text-align:right">FİZİKSEL</span><span style="font-size:11px;font-weight:700;color:#747B85;text-align:right">REZERVE</span><span style="font-size:11px;font-weight:700;color:#747B85;text-align:right">SATILABİLİR</span>
+            <sc-for list="{{ p.rows }}" as="r"><span>{{ r.name }}</span><span style="text-align:right">{{ r.ph }}</span><span style="text-align:right">{{ r.rs }}</span><strong style="text-align:right;font-size:15px">{{ r.av }}</strong></sc-for>
+          </div>
+          <span style="font-size:12px;color:#747B85">{{ p.costText }}</span>
+          <div style="display:flex;gap:6px"><button onClick="{{ p.move }}" style="flex:1;height:40px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600;font-size:13px">Hareket ekle</button><button onClick="{{ p.thr }}" style="flex:1;height:40px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px">Kritik eşik: {{ p.thText }}</button></div>
+          <sc-if value="{{ p.thEdit }}"><div style="display:flex;gap:6px;align-items:center"><input inputmode="numeric" value="{{ thVal }}" onChange="{{ onThVal }}" aria-label="Kritik eşik" style="width:90px;height:40px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px"><button onClick="{{ saveThr }}" style="height:40px;padding:0 12px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;font-weight:600;cursor:pointer">Kaydet</button><span style="font-size:12px;color:#747B85">Boş = eşik yok</span></div></sc-if>
+        </article>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{ table }}">
+    <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:auto">
+      <div style="min-width:760px">
+        <div style="display:grid;grid-template-columns:minmax(200px,1.5fr) 140px 90px 90px 100px 80px 120px;gap:10px;padding:12px 18px;border-bottom:1px solid #E7E9ED;font-size:12px;font-weight:700;color:#747B85"><span>MODEL</span><span>DEPO</span><span style="text-align:right">FİZİKSEL</span><span style="text-align:right">REZERVE</span><span style="text-align:right">SATILABİLİR</span><span style="text-align:right">EŞİK</span><span>DURUM</span></div>
+        <sc-for list="{{ tableRows }}" as="r"><div style="display:grid;grid-template-columns:minmax(200px,1.5fr) 140px 90px 90px 100px 80px 120px;gap:10px;padding:12px 18px;border-bottom:1px solid #EEF0F3;font-size:14px;align-items:center"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600">{{ r.title }}</span><span>{{ r.depot }}</span><span style="text-align:right">{{ r.ph }}</span><span style="text-align:right">{{ r.rs }}</span><strong style="text-align:right">{{ r.av }}</strong><span style="text-align:right">{{ r.th }}</span><span style="font-size:12px;font-weight:700;color:{{ r.stFg }}">{{ r.st }}</span></div></sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid #EEF0F3;display:flex;gap:8px;align-items:center"><h2 style="margin:0;font-size:17px;font-weight:600;flex:1">Stok hareketleri</h2><span style="font-size:12px;color:#747B85">Kaydedilen bütün stok hareketleri</span></div>
+    <sc-for list="{{ moves }}" as="v" hint-placeholder-count="6">
+      <div style="display:grid;grid-template-columns:{{ moveCols }};gap:10px;padding:12px 18px;border-bottom:1px solid #EEF0F3;font-size:14px;align-items:center">
+        <span style="font-size:13px;color:#4B525B">{{ v.date }}</span>
+        <span style="display:inline-flex;justify-content:center;align-items:center;height:24px;border-radius:6px;font-size:12px;font-weight:700;color:{{ v.fg }};background:{{ v.bg }}">{{ v.kind }}</span>
+        <span style="display:flex;flex-direction:column;min-width:0"><span style="font-weight:600;font-family:'IBM Plex Mono',monospace">{{ v.title }} <span style="font-family:'IBM Plex Sans';color:{{ v.qFg }}">{{ v.qty }}</span></span><span style="font-size:13px;color:#4B525B">{{ v.depot }} · {{ v.reason }}</span></span>
+        <sc-if value="{{ v.link }}"><button onClick="{{ v.open }}" style="justify-self:start;border:none;background:#F5F6F8;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;color:#252B32">{{ v.link }}</button></sc-if>
+      </div>
+    </sc-for>
+  </section>
+
+  <sc-if value="{{ moveOpen }}">
+    <div style="position:fixed;inset:0;background:rgba(20,24,28,.45);z-index:2000;animation:gkFadeBg .2s ease"></div>
+    <div style="position:fixed;inset:0;z-index:2001;display:flex;align-items:{{ mAlign }};justify-content:center;padding:{{ mPad }}">
+      <div role="dialog" aria-modal="true" aria-label="Stok hareketi ekle" style="animation:gkPop .24s cubic-bezier(.2,.8,.2,1);width:100%;max-width:620px;max-height:92%;overflow:auto;background:#FFFFFF;border-radius:{{ mRadius }};display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #E7E9ED"><span style="flex:1;font-size:18px;font-weight:600">Stok hareketi ekle</span><button onClick="{{ closeMove }}" aria-label="Kapat" style="width:44px;height:44px;border:none;background:none;font-size:22px;cursor:pointer">×</button></div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+          <sc-if value="{{ mvError }}"><div role="alert" style="padding:10px 12px;border-radius:8px;background:#FDECEE;color:#A3001A;font-size:14px;font-weight:600">{{ mvError }}</div></sc-if>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><sc-for list="{{ kinds }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:44px;border-radius:8px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:600;font-size:13px;cursor:pointer">{{ o.l }}</button></sc-for></div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Model *<select value="{{ mv.productId }}" data-v="{{ mv.productId }}" onChange="{{ mvOn.productId }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><sc-for list="{{ products }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600"><span>{{ depLabel }} *</span><select value="{{ mv.depotId }}" data-v="{{ mv.depotId }}" onChange="{{ mvOn.depotId }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><sc-for list="{{ depots }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label>
+            <sc-if value="{{ isTransfer }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Hedef depo *<select value="{{ mv.toDepotId }}" data-v="{{ mv.toDepotId }}" onChange="{{ mvOn.toDepotId }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><sc-for list="{{ depots }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label></sc-if>
+            <sc-if value="{{ isFix }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Sayım sonucu<select value="{{ mv.dir }}" data-v="{{ mv.dir }}" onChange="{{ mvOn.dir }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="eksik">Eksik bulundu (−)</option><option value="fazla">Fazla bulundu (+)</option></select></label></sc-if>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Adet *<input inputmode="numeric" autocomplete="off" value="{{ mv.qty }}" onChange="{{ mvOn.qty }}" style="height:44px;padding:0 12px;border:1px solid {{ qtyBd }};border-radius:8px;font-size:15px;font-weight:400"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Tarih *<input type="date" max="{{ todayIso }}" value="{{ mv.date }}" onChange="{{ mvOn.date }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+            <sc-if value="{{ isIn }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Birim alış maliyeti (₺)<input inputmode="decimal" value="{{ mv.cost }}" onChange="{{ mvOn.cost }}" placeholder="Bilinmiyor" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"><span style="font-size:12px;color:#747B85;font-weight:400">{{ costFx }}</span></label></sc-if>
+          </div>
+          <sc-if value="{{ mve.qty }}"><span style="font-size:13px;color:#A3001A;font-weight:600">{{ mve.qty }}</span></sc-if>
+          <sc-if value="{{ stockNow }}"><div style="font-size:13px;padding:10px 12px;border-radius:8px;background:#F5F6F8">{{ stockNow }}</div></sc-if>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600"><span>{{ reasonLabel }}</span><input value="{{ mv.reason }}" onChange="{{ mvOn.reason }}" style="height:44px;padding:0 12px;border:1px solid {{ reasonBd }};border-radius:8px;font-size:15px;font-weight:400"></label>
+          <span style="font-size:12px;color:#747B85">Montaj çıkışları bu formdan değil, satıştaki montaj kaydından otomatik oluşur ve müşteriyle ilişkilenir.</span>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid #E7E9ED"><button onClick="{{ closeMove }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer">Vazgeç</button><button onClick="{{ saveMove }}" disabled="{{ saving }}" style="height:44px;padding:0 20px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">{{ saveLabel }}</button></div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>/*precompiled:EkranDepo.dc.html*/</script>
+</body>
+</html>

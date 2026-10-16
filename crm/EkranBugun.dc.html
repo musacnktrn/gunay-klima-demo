@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:24px;max-width:1360px;margin:0 auto" data-screen-label="Bugün">
+  <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+    <div style="flex:1 1 240px"><h1 style="margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em">Bugün</h1><div style="font-size:15px;color:#747B85;margin-top:4px">{{ dateText }}</div></div>
+    <sc-if value="{{ notMobile }}">
+      <button onClick="{{ newCustomer }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Yeni müşteri</button>
+      <button onClick="{{ planNew }}" style="height:44px;padding:0 18px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;white-space:nowrap" style-hover="background:#8F0015">Bakım planla</button>
+    </sc-if>
+  </div>
+
+  <div style="display:grid;grid-template-columns:{{ cardCols }};gap:12px">
+    <sc-for list="{{ cards }}" as="c" hint-placeholder-count="4">
+      <button onClick="{{ c.go }}" style="text-align:left;padding:16px;border-radius:12px;border:1px solid #E7E9ED;background:#FFFFFF;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:128px" style-hover="border-color:#B9BFC7;box-shadow:0 10px 24px rgba(37,43,50,.08);transform:translateY(-2px)">
+        <span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:{{ c.dot }}"></span><span style="font-size:14px;font-weight:600;color:#252B32">{{ c.label }}</span></span>
+        <span style="font-size:34px;font-weight:600;line-height:1.1;color:#252B32">{{ c.n }}</span>
+        <span style="font-size:13px;color:#4B525B;line-height:1.4">{{ c.sub }}</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="display:grid;grid-template-columns:{{ mainCols }};gap:16px;align-items:start">
+    <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #EEF0F3">
+        <h2 style="margin:0;font-size:17px;font-weight:600;flex:1 1 160px">{{ progTitle }}</h2>
+        <div role="group" aria-label="Görünüm" style="display:flex;gap:2px;padding:3px;background:#EEF0F3;border-radius:8px"><sc-for list="{{ pvModes }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:32px;padding:0 10px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;background:{{ o.bg }};color:{{ o.fg }}">{{ o.l }}</button></sc-for></div>
+        <button onClick="{{ toCalendar }}" style="height:36px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap">Takvimde gör</button>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid #EEF0F3;background:#FAFBFC;overflow-x:auto">
+        <div role="tablist" aria-label="Gün seç" style="display:grid;grid-template-columns:repeat(7,minmax(72px,1fr));gap:6px;min-width:540px">
+          <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+            <button role="tab" aria-selected="{{ d.sel }}" onClick="{{ d.pick }}" style="position:relative;display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:10px 10px 9px;border-radius:12px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.fg }};cursor:pointer;text-align:left;box-shadow:{{ d.sh }};overflow:hidden" style-hover="border-color:#B1001A;transform:translateY(-1px)">
+              <span style="display:flex;align-items:baseline;justify-content:space-between;gap:6px"><span style="font-size:11px;font-weight:700;letter-spacing:.06em;opacity:{{ d.op }}">{{ d.l1 }}</span><sc-if value="{{ d.today }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ d.dotC }}"></span></sc-if></span>
+              <span style="display:flex;align-items:baseline;gap:4px"><span style="font-size:24px;font-weight:700;line-height:1">{{ d.num }}</span><span style="font-size:12px;font-weight:600;opacity:{{ d.op }}">{{ d.mon }}</span></span>
+              <span style="display:flex;gap:3px;height:4px"><sc-for list="{{ d.bars }}" as="x"><span style="flex:1;border-radius:2px;background:{{ x.c }}"></span></sc-for></span>
+              <span style="font-size:11px;font-weight:600;opacity:{{ d.op }}">{{ d.n }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ noProgram }}"><div style="padding:24px 20px;color:#747B85;font-size:14px">Bu gün için planlanmış iş yok.</div></sc-if>
+      <sc-if value="{{ pvSaat }}">
+        <div style="overflow-x:auto;padding:14px 20px 18px">
+          <div style="min-width:680px;display:flex;flex-direction:column;gap:10px">
+            <div style="position:relative;height:16px;margin-left:112px"><sc-for list="{{ ticks }}" as="k"><span style="position:absolute;left:{{ k.left }};transform:translateX(-50%);font-size:11px;color:#747B85">{{ k.l }}</span></sc-for></div>
+            <sc-for list="{{ tlRows }}" as="r">
+              <div style="display:flex;align-items:stretch;gap:12px">
+                <span style="width:100px;flex:none;display:flex;flex-direction:column;justify-content:center"><span style="font-size:13px;font-weight:600">{{ r.name }}</span><span style="font-size:11px;color:#747B85">{{ r.hours }}</span></span>
+                <div style="position:relative;flex:1;height:68px;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:8px;overflow:hidden">
+                  <sc-for list="{{ ticks }}" as="k"><span style="position:absolute;top:0;bottom:0;left:{{ k.left }};border-left:1px solid #F0F1F3"></span></sc-for>
+                  <sc-for list="{{ r.segs }}" as="g"><button onClick="{{ g.open }}" disabled="{{ g.static }}" title="{{ g.title }}" style="position:absolute;top:6px;bottom:6px;left:{{ g.left }};width:{{ g.width }};border-radius:6px;border:1px solid {{ g.bd }};background:{{ g.bg }};color:{{ g.fg }};padding:3px 6px;text-align:left;overflow:hidden;font-size:11px;line-height:1.35;cursor:{{ g.cur }}"><span style="display:block;font-weight:700;white-space:nowrap">{{ g.l }}</span><span style="display:block;white-space:nowrap">{{ g.l2 }}</span></button></sc-for>
+                </div>
+              </div>
+            </sc-for>
+            <span style="font-size:12px;color:#747B85">Gün kartlarındaki çizgiler iş türünü gösterir: yeşil bakım, kırmızı arıza, sarı kontrol, mavi montaj. Taralı alan kullanıcı tanımlı yol/hazırlık boşluğudur; trafikten hesaplanmaz. Gri alanlar mola ve mesai dışıdır.</span>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ pvListe }}">
+      <sc-for list="{{ program }}" as="p" hint-placeholder-count="4">
+        <button onClick="{{ p.open }}" style="width:100%;display:grid;grid-template-columns:{{ progCols }};gap:12px;align-items:center;padding:14px 20px;border:none;border-bottom:1px solid #EEF0F3;background:#FFFFFF;cursor:pointer;text-align:left" style-hover="background:#FAFBFC">
+          <span style="display:flex;flex-direction:column"><span style="font-size:17px;font-weight:600">{{ p.time }}</span><span style="font-size:12px;color:#747B85">{{ p.end }}’e kadar</span></span>
+          <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-weight:600;font-size:15px">{{ p.cName }}</span><span style="font-size:13px;color:#4B525B">{{ p.addr }}</span><span style="font-size:13px;color:#747B85">{{ p.devText }} · {{ p.tech }}</span></span>
+          <span style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+            <span style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:6px;font-size:12px;font-weight:600;background:#F0F1F3">{{ p.type }}</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ p.b.fg }};background:{{ p.b.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ p.b.dot }}"></span>{{ p.b.label }}</span>
+          </span>
+        </button>
+      </sc-for>
+      </sc-if>
+    </section>
+
+    <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+      <h2 style="margin:0;font-size:17px;font-weight:600">Yakındaki bakım fırsatları</h2>
+      <div style="resize:vertical;overflow:hidden;height:340px;min-height:220px;max-height:760px;border-radius:12px"><dc-import name="HaritaBileseni" pins="{{ near.pins }}" center="{{ near.center }}" radius-km="{{ near.km }}" height="100%" zoom="{{ near.zoom }}" hint-size="100%,100%"></dc-import></div>
+      <div style="font-size:12px;color:#747B85;margin-top:-6px">Fare tekerleğiyle yakınlaştırın · sağ alt köşeden sürükleyerek haritayı büyütün</div>
+      <div style="font-size:14px;line-height:1.5"><strong>{{ near.area }}</strong> · merkeze {{ near.kmText }} içinde</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        <div style="padding:10px;border-radius:8px;background:#F5F6F8"><div style="font-size:22px;font-weight:600">{{ near.customers }}</div><div style="font-size:12px;color:#4B525B">müşteri</div></div>
+        <div style="padding:10px;border-radius:8px;background:#F5F6F8"><div style="font-size:22px;font-weight:600">{{ near.addresses }}</div><div style="font-size:12px;color:#4B525B">adres</div></div>
+        <div style="padding:10px;border-radius:8px;background:#F5F6F8"><div style="font-size:22px;font-weight:600">{{ near.devices }}</div><div style="font-size:12px;color:#4B525B">bakımı gelen cihaz</div></div>
+      </div>
+      <sc-if value="{{ near.excluded }}"><div style="font-size:13px;color:#4B525B">{{ near.excludedText }}</div></sc-if>
+      <button onClick="{{ near.open }}" style="height:44px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">Grubu incele</button>
+    </section>
+  </div>
+
+  <div style="display:grid;grid-template-columns:{{ mainCols }};gap:16px;align-items:start">
+    <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #EEF0F3;flex-wrap:wrap">
+        <h2 style="margin:0;font-size:17px;font-weight:600;flex:1">Bakım için aranacaklar</h2>
+        <span style="font-size:13px;color:#747B85">Gecikmiş veya 30 gün içinde, bakım randevusu olmayan</span>
+      </div>
+      <sc-for list="{{ calls }}" as="r" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:{{ callCols }};gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid #EEF0F3;opacity:{{ r.op }}">
+          <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+            <button onClick="{{ r.open }}" style="border:none;background:none;padding:0;text-align:left;font-weight:600;font-size:15px;color:#252B32;cursor:pointer" style-hover="color:#B1001A">{{ r.cName }}</button>
+            <span style="font-size:13px;color:#4B525B">{{ r.addr }} · {{ r.devText }}</span>
+            <span style="font-size:13px;color:#747B85">Son bakım {{ r.last }} · Sonraki {{ r.next }}</span>
+            <sc-if value="{{ r.note }}"><span style="font-size:12px;color:#747B85">{{ r.note }}</span></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:{{ badgeAlign }}">
+            <span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ r.st.fg }};background:{{ r.st.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.st.dot }}"></span>{{ r.st.label }}</span>
+            <sc-if value="{{ r.showCt }}"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ r.ct.fg }};background:{{ r.ct.bg }}">{{ r.ct.label }}</span></sc-if>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+            <sc-if value="{{ r.canCall }}"><button onClick="{{ r.call }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:14px;font-weight:500">Arama kaydı</button></sc-if>
+            <button onClick="{{ r.plan }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-size:14px;font-weight:600">Randevu planla</button>
+          </div>
+        </div>
+      </sc-for>
+    </section>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+        <h2 style="margin:0;font-size:17px;font-weight:600">Tekrar aranacaklar</h2>
+        <sc-if value="{{ noCallbacks }}"><span style="font-size:14px;color:#747B85">Bekleyen tekrar arama yok.</span></sc-if>
+        <sc-for list="{{ callbacks }}" as="k" hint-placeholder-count="2">
+          <div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid #EEF0F3">
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-weight:600;font-size:14px">{{ k.cName }}</span><span style="font-size:13px;color:#4B525B">{{ k.when }}</span><span style="font-size:13px;color:#747B85">{{ k.note }}</span></div>
+            <button onClick="{{ k.call }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:14px;font-weight:500;flex:none">Görüşme gir</button>
+          </div>
+        </sc-for>
+      </section>
+      <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+        <h2 style="margin:0;font-size:17px;font-weight:600">Stok uyarıları</h2>
+        <sc-for list="{{ stock }}" as="x" hint-placeholder-count="2">
+          <button onClick="{{ x.go }}" style="display:flex;gap:12px;align-items:center;padding:10px 0;border:none;border-top:1px solid #EEF0F3;background:none;cursor:pointer;text-align:left;width:100%">
+            <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:14px;font-family:'IBM Plex Mono',monospace">{{ x.title }}</span><span style="font-size:13px;color:#4B525B">Satılabilir {{ x.avail }} · Kritik eşik {{ x.th }}</span><sc-if value="{{ x.demand }}"><span style="font-size:13px;color:#7A4A00">{{ x.demand }}</span></sc-if></span>
+            <span style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:#7A4A00;background:#FFF1D1">Kritik</span>
+          </button>
+        </sc-for>
+      </section>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>/*precompiled:EkranBugun.dc.html*/</script>
+</body>
+</html>

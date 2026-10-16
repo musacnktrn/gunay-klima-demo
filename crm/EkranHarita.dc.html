@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:16px;max-width:1480px;margin:0 auto" data-screen-label="Harita">
+  <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+    <div style="flex:1 1 260px"><h1 style="margin:0;font-size:26px;font-weight:600">Harita</h1><div style="font-size:14px;color:#747B85;margin-top:4px">Pinler müşteri adreslerini gösterir; aynı adresteki klimalar tek pindir.</div></div>
+    <button onClick="{{ showAll }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500;white-space:nowrap">Tümünü göster</button>
+    <button onClick="{{ showGroup }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500;white-space:nowrap">Seçili grubu göster</button>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <span style="font-size:13px;font-weight:600;color:#4B525B">Durum:</span>
+    <sc-for list="{{ legend }}" as="l" hint-placeholder-count="5">
+      <button onClick="{{ l.toggle }}" aria-pressed="{{ l.on }}" style="display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:999px;border:1px solid {{ l.bd }};background:{{ l.bg }};cursor:pointer;font-size:13px;font-weight:600;color:#252B32;opacity:{{ l.op }}"><span style="width:12px;height:12px;border-radius:50%;background:{{ l.color }};border:2px solid #FFFFFF;box-shadow:0 0 0 1px {{ l.color }}"></span>{{ l.label }} · {{ l.n }}</button>
+    </sc-for>
+    <span style="font-size:12px;color:#747B85">Planlandı = randevu var; bakımın yapıldığı anlamına gelmez.</span>
+  </div>
+
+  <sc-if value="{{ mobile }}">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:#E7E9ED;border-radius:10px">
+      <sc-for list="{{ modes }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:44px;border:none;border-radius:8px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.l }}</button></sc-for>
+    </div>
+  </sc-if>
+
+  <div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:stretch">
+    <sc-if value="{{ showPanel }}">
+      <aside style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;display:flex;flex-direction:column;height:{{ panelH }};min-height:0;overflow:hidden">
+        <div role="tablist" style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #E7E9ED;flex:none">
+          <sc-for list="{{ tabs }}" as="t"><button role="tab" aria-selected="{{ t.sel }}" onClick="{{ t.pick }}" style="height:48px;border:none;border-bottom:2px solid {{ t.bd }};background:#FFFFFF;cursor:pointer;font-size:13px;font-weight:600;color:{{ t.fg }}">{{ t.l }}</button></sc-for>
+        </div>
+        <div ref="{{ listRef }}" style="flex:1;overflow-y:auto;position:relative;overscroll-behavior:contain">
+
+          <sc-if value="{{ isGrup }}">
+            <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid #EEF0F3">
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Merkez<select value="{{ centerId }}" data-v="{{ centerId }}" onChange="{{ onCenter }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400;background:#FFFFFF"><sc-for list="{{ centers }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                <sc-for list="{{ radii }}" as="r"><button onClick="{{ r.pick }}" aria-pressed="{{ r.sel }}" style="height:36px;padding:0 12px;border-radius:999px;border:1px solid {{ r.bd }};background:{{ r.bg }};color:{{ r.fg }};font-weight:600;font-size:13px;cursor:pointer">{{ r.l }}</button></sc-for>
+                <input aria-label="Özel yarıçap (km)" inputmode="decimal" value="{{ customKm }}" onChange="{{ onCustomKm }}" placeholder="Özel km" style="width:84px;height:36px;padding:0 10px;border:1px solid #CDD2D9;border-radius:999px;font-size:13px">
+              </div>
+              <div style="font-size:12px;color:#747B85">Merkeze kuş uçuşu uzaklık. Araç rotası, trafik süresi veya yol tasarrufu değildir.</div>
+              <div style="font-size:15px;font-weight:600">{{ g.summary }}</div>
+              <sc-if value="{{ g.exText }}"><div style="font-size:12px;color:#4B525B">{{ g.exText }}</div></sc-if>
+            </div>
+            <sc-if value="{{ g.empty }}"><div style="padding:20px 16px;font-size:14px;color:#747B85">Bu yarıçap ve filtrelerle bakımı gelen adres yok. Yarıçapı büyütün veya durum filtresini açın.</div></sc-if>
+            <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="5">
+              <div data-aid="{{ r.aid }}" onClick="{{ r.select }}" style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:12px 16px;border-bottom:1px solid #EEF0F3;cursor:pointer;background:{{ r.bg }};border-left:3px solid {{ r.bl }}">
+                <input type="checkbox" checked="{{ r.checked }}" disabled="{{ r.excluded }}" onChange="{{ r.toggle }}" onClick="{{ r.stop }}" aria-label="Arama planına seç" style="width:20px;height:20px;margin-top:2px;accent-color:#B1001A">
+                <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                  <div style="display:flex;gap:8px;align-items:baseline"><span style="font-weight:600;font-size:14px;flex:1">{{ r.name }}</span><span style="font-size:12px;color:#747B85;white-space:nowrap">{{ r.dist }}</span></div>
+                  <span style="font-size:13px;color:#4B525B">{{ r.addr }}</span>
+                  <span style="font-size:13px;color:#252B32">{{ r.devText }}</span>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <span style="display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ r.st.fg }};background:{{ r.st.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.st.dot }}"></span>{{ r.st.label }}</span>
+                    <sc-if value="{{ r.showCt }}"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ r.ct.fg }};background:{{ r.ct.bg }}">{{ r.ct.label }}</span></sc-if>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+            <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+              <button onClick="{{ toStops }}" disabled="{{ noChecked }}" style="height:44px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;opacity:{{ checkOp }}">Ziyaret planına al ({{ checkedN }} adres)</button>
+            </div>
+
+            <sc-if value="{{ hasStops }}">
+              <div style="padding:14px 16px;border-top:1px solid #E7E9ED;display:flex;flex-direction:column;gap:10px;background:#FAFBFC">
+                <div style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:600;flex:1">Arama planı · {{ stopsN }} durak</span><button onClick="{{ clearStops }}" style="height:36px;padding:0 10px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px">Temizle</button></div>
+                <div style="font-size:12px;color:#747B85;line-height:1.45">Adreslerin yakın olması müşterilerin aynı gün müsait olduğu anlamına gelmez. Önce arayın; kabul edenler aşağıdaki günlük plana geçer.</div>
+                <sc-if value="{{ orderWarn }}"><div role="alert" style="padding:10px 12px;border-radius:8px;background:#FFF1D1;color:#5C3800;font-size:13px">{{ orderWarn }}</div></sc-if>
+                <sc-for list="{{ stops }}" as="s" hint-placeholder-count="4">
+                  <div onClick="{{ s.select }}" style="display:grid;grid-template-columns:32px minmax(0,1fr) 44px;gap:10px;padding:10px;border:1px solid {{ s.bd }};border-radius:10px;background:#FFFFFF;cursor:pointer">
+                    <span style="width:32px;height:32px;border-radius:8px;background:#252B32;color:#FFFFFF;font-weight:700;display:flex;align-items:center;justify-content:center">{{ s.n }}</span>
+                    <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                      <span style="font-weight:600;font-size:14px">{{ s.name }}</span>
+                      <span style="font-size:12px;color:#4B525B">{{ s.mah }} · {{ s.line }}</span>
+                      <span style="font-size:13px">{{ s.devText }}</span>
+                      <span style="font-size:12px;color:#4B525B">Görüşme: <strong>{{ s.call }}</strong></span>
+                      <sc-if value="{{ s.appt }}"><span style="font-size:12px;color:#1D4F91;font-weight:600">{{ s.appt }}</span></sc-if>
+                      <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+                        <sc-if value="{{ s.tel }}"><a href="{{ s.tel }}" onClick="{{ s.stop }}" style="display:inline-flex;align-items:center;height:36px;padding:0 10px;border-radius:8px;border:1px solid #D5D9DF;color:#252B32;font-size:13px;font-weight:600;text-decoration:none">Ara</a></sc-if>
+                        <button onClick="{{ s.logCall }}" style="height:36px;padding:0 10px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px;font-weight:600">Görüşme gir</button>
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px">
+                      <button onClick="{{ s.up }}" disabled="{{ s.first }}" aria-label="Yukarı taşı" style="height:36px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:16px">↑</button>
+                      <button onClick="{{ s.down }}" disabled="{{ s.last }}" aria-label="Aşağı taşı" style="height:36px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:16px">↓</button>
+                    </div>
+                  </div>
+                </sc-for>
+                <button onClick="{{ suggestOrder }}" style="height:40px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500;font-size:14px">Kuş uçuşu yakınlığa göre öneri</button>
+                <sc-if value="{{ sug }}"><div style="padding:10px 12px;border-radius:8px;background:#E8F0FB;font-size:13px;display:flex;flex-direction:column;gap:8px"><span>Öneri (kuş uçuşu yakınlık): <strong>{{ sug.text }}</strong></span><sc-if value="{{ sug.warn }}"><span style="color:#5C3800">{{ sug.warn }}</span></sc-if><div style="display:flex;gap:8px"><button onClick="{{ sug.apply }}" style="height:36px;padding:0 12px;border-radius:8px;border:none;background:#1D4F91;color:#FFFFFF;cursor:pointer;font-weight:600;font-size:13px">Öneriyi uygula</button><button onClick="{{ sug.dismiss }}" style="height:36px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px">Vazgeç</button></div></div></sc-if>
+                <div style="font-size:12px;color:#747B85">Haritadaki kesik çizgi yalnız sıra bağlantısıdır; gerçek yol güzergâhı değildir. Yol, trafik ve park süreleri ölçülmedi.</div>
+                <sc-for list="{{ dirParts }}" as="d"><a href="{{ d.url }}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;height:44px;border-radius:8px;border:1px solid #252B32;color:#252B32;font-weight:600;font-size:14px;text-decoration:none">{{ d.l }}</a></sc-for>
+                <div style="font-size:12px;color:#747B85">Google Maps dış uygulamada açılır; trafik bilgisi orada görünür. Mobil tarayıcıda en fazla 3 ara durak desteklenir; fazlası bölümlere ayrılır.</div>
+
+                <sc-if value="{{ noCamp }}">
+                  <sc-if value="{{ campForm }}">
+                    <div style="display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid #E7E9ED;border-radius:10px;background:#FFFFFF">
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Plan adı *<input value="{{ cf.name }}" onChange="{{ cfOn.name }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Önerilen ziyaret günü *<input type="date" value="{{ cf.day }}" onChange="{{ cfOn.day }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Teklif / indirim (isteğe bağlı)<input value="{{ cf.offer }}" onChange="{{ cfOn.offer }}" placeholder="Örn. 200,00 ₺ grup indirimi" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"><span style="font-size:12px;color:#747B85;font-weight:400">Tutarı siz girin. Sistem yol maliyeti bilmeden tasarruf hesaplamaz.</span></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Açıklama<textarea value="{{ cf.desc }}" onChange="{{ cfOn.desc }}" rows="2" style="padding:8px 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></textarea></label>
+                      <sc-if value="{{ cfErr }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ cfErr }}</span></sc-if>
+                      <button onClick="{{ saveCamp }}" disabled="{{ saving }}" style="height:44px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">{{ campSaveLabel }}</button>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ noCampForm }}"><button onClick="{{ openCamp }}" style="height:44px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">Kampanya planı olarak kaydet</button></sc-if>
+                </sc-if>
+                <sc-if value="{{ camp }}"><div style="padding:10px 12px;border-radius:8px;background:#E5F3EB;color:#1B6B3F;font-size:13px;font-weight:600">Kayıtlı plan: {{ camp.name }} · {{ camp.day }}{{ camp.offer }}</div></sc-if>
+                <div style="font-size:12px;color:#747B85">Bu sürüm SMS veya WhatsApp göndermez, kendiliğinden arama yapmaz. Yalnız arama listesi oluşturur ve yaptığınız görüşmeyi kaydeder.</div>
+              </div>
+              <div style="padding:14px 16px;border-top:1px solid #E7E9ED;display:flex;flex-direction:column;gap:8px">
+                <span style="font-size:15px;font-weight:600">Kabul edilen günlük plan · {{ acceptedN }}</span>
+                <sc-if value="{{ noAccepted }}"><span style="font-size:13px;color:#747B85">Henüz “Kabul etti” sonucu yok.</span></sc-if>
+                <sc-for list="{{ accepted }}" as="s"><div style="display:flex;gap:10px;align-items:center;padding:10px;border:1px solid #E7E9ED;border-radius:10px"><span style="width:28px;height:28px;border-radius:8px;background:#252B32;color:#FFFFFF;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">{{ s.n }}</span><span style="flex:1;display:flex;flex-direction:column;min-width:0"><span style="font-weight:600;font-size:14px">{{ s.name }}</span><span style="font-size:12px;color:#4B525B">{{ s.apptText }}</span></span><sc-if value="{{ s.needAppt }}"><button onClick="{{ s.plan }}" style="height:40px;padding:0 10px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600;font-size:13px;flex:none">Randevu saati seç</button></sc-if></div></sc-for>
+              </div>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{ isGunluk }}">
+            <div style="padding:14px 16px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid #EEF0F3"><sc-for list="{{ techChips }}" as="r"><button onClick="{{ r.pick }}" aria-pressed="{{ r.sel }}" style="height:36px;padding:0 12px;border-radius:999px;border:1px solid {{ r.bd }};background:{{ r.bg }};color:{{ r.fg }};font-weight:600;font-size:13px;cursor:pointer">{{ r.l }}</button></sc-for></div>
+            <div style="padding:10px 16px;font-size:12px;color:#747B85">Bugünün işleri saat sırasıyla. Teknisyen seçince sıra bağlantısı çizilir.</div>
+            <sc-for list="{{ daily }}" as="r" hint-placeholder-count="4">
+              <div data-aid="{{ r.aid }}" onClick="{{ r.select }}" style="display:grid;grid-template-columns:32px minmax(0,1fr);gap:10px;padding:12px 16px;border-bottom:1px solid #EEF0F3;cursor:pointer;background:{{ r.bg }};border-left:3px solid {{ r.bl }}">
+                <span style="width:32px;height:32px;border-radius:8px;background:{{ r.nbg }};color:#FFFFFF;font-weight:700;display:flex;align-items:center;justify-content:center">{{ r.n }}</span>
+                <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:14px">{{ r.time }} · {{ r.name }}</span><span style="font-size:13px;color:#4B525B">{{ r.mah }} · {{ r.type }} · {{ r.tech }}</span><span style="font-size:12px;color:#747B85">{{ r.extra }}</span><span style="display:inline-flex;align-self:flex-start;align-items:center;gap:6px;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ r.b.fg }};background:{{ r.b.bg }}">{{ r.b.label }}</span></div>
+              </div>
+            </sc-for>
+          </sc-if>
+
+          <sc-if value="{{ isEksik }}">
+            <div style="padding:12px 16px;font-size:13px;color:#4B525B;line-height:1.5;border-bottom:1px solid #EEF0F3">Bu adresler kesin pin olarak gösterilmez ve yakın bakım gruplarına alınmaz. Sistem adresten konum tahmini yapmaz; mahalle merkezini bina adresi gibi göstermez.</div>
+            <sc-for list="{{ missing }}" as="r" hint-placeholder-count="2">
+              <div data-aid="{{ r.aid }}" style="display:flex;flex-direction:column;gap:6px;padding:12px 16px;border-bottom:1px solid #EEF0F3;background:{{ r.bg }}">
+                <span style="font-weight:600;font-size:14px">{{ r.name }}</span>
+                <span style="font-size:13px;color:#4B525B">{{ r.label }} · {{ r.line }}</span>
+                <div style="display:flex;gap:6px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ r.loc.fg }};background:{{ r.loc.bg }}">{{ r.loc.label }}</span><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;background:#F0F1F3;color:#4B525B">Kaynak: {{ r.src }}</span></div>
+                <span style="font-size:13px">{{ r.devText }}</span>
+                <button onClick="{{ r.fix }}" style="align-self:flex-start;height:40px;padding:0 12px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600;font-size:13px">{{ r.fixLabel }}</button>
+              </div>
+            </sc-for>
+          </sc-if>
+        </div>
+      </aside>
+    </sc-if>
+
+    <sc-if value="{{ showMap }}">
+      <div style="position:relative;height:{{ mapH }};min-height:0">
+        <dc-import name="HaritaBileseni" pins="{{ pins }}" route="{{ route }}" center="{{ center }}" radius-km="{{ radiusKm }}" selected-id="{{ sel }}" on-select="{{ onPin }}" business="{{ business }}" view="{{ view }}" on-view="{{ onView }}" focus="{{ focus }}" zoom="{{ 15 }}" height="100%" hint-size="100%,100%"></dc-import>
+        <sc-if value="{{ cardOnMap }}">
+          <div style="position:absolute;top:12px;right:12px;width:min(320px,calc(100% - 24px));z-index:700;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;box-shadow:0 10px 28px rgba(37,43,50,.16);padding:14px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;gap:8px;align-items:flex-start"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:16px">{{ card.name }}</span><span style="font-size:13px;color:#4B525B">{{ card.addr }}</span></div><button onClick="{{ closeCard }}" aria-label="Kartı kapat" style="width:36px;height:36px;border:none;background:#F5F6F8;border-radius:8px;cursor:pointer;font-size:18px;flex:none">×</button></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ card.st.fg }};background:{{ card.st.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ card.st.dot }}"></span>{{ card.st.label }}</span><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;color:{{ card.loc.fg }};background:{{ card.loc.bg }}">{{ card.loc.label }}</span></div>
+            <div style="font-size:13px;line-height:1.6;color:#252B32">{{ card.devText }}<br>Telefon: {{ card.phone }}<br>Son görüşme: {{ card.call }}<br>Randevu: {{ card.appt }}</div>
+            <sc-if value="{{ card.locWho }}"><div style="font-size:12px;color:#747B85">{{ card.locWho }}</div></sc-if>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <a href="{{ card.dir }}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;height:40px;border-radius:8px;background:#252B32;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;grid-column:1 / -1">Google Maps’te yol tarifi</a>
+              <sc-if value="{{ card.tel }}"><a href="{{ card.tel }}" style="display:flex;align-items:center;justify-content:center;height:40px;border-radius:8px;border:1px solid #D5D9DF;color:#252B32;font-size:13px;font-weight:600;text-decoration:none">Ara</a></sc-if>
+              <button onClick="{{ card.logCall }}" style="height:40px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px;font-weight:600">Görüşme gir</button>
+              <button onClick="{{ card.plan }}" style="height:40px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-size:13px;font-weight:600">Randevu planla</button>
+              <button onClick="{{ card.open }}" style="height:40px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px;font-weight:600">Müşteri dosyası</button>
+            </div>
+            <sc-if value="{{ card.dirNote }}"><div style="font-size:12px;color:#7A4A00">{{ card.dirNote }}</div></sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ drawer }}">
+    <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:16px 16px 12px 12px;box-shadow:0 -6px 20px rgba(37,43,50,.08);padding:16px;display:flex;flex-direction:column;gap:10px">
+      <div style="width:40px;height:4px;border-radius:2px;background:#D5D9DF;align-self:center"></div>
+      <div style="display:flex;gap:8px;align-items:flex-start"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:17px">{{ card.name }}</span><span style="font-size:14px;color:#4B525B">{{ card.addr }}</span></div><button onClick="{{ closeCard }}" aria-label="Kapat" style="width:44px;height:44px;border:none;background:#F5F6F8;border-radius:10px;cursor:pointer;font-size:20px;flex:none">×</button></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ card.st.fg }};background:{{ card.st.bg }}">{{ card.st.label }}</span><span style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ card.loc.fg }};background:{{ card.loc.bg }}">{{ card.loc.label }}</span></div>
+      <div style="font-size:14px;line-height:1.6">{{ card.devText }}<br>Son görüşme: {{ card.call }}<br>Randevu: {{ card.appt }}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <a href="{{ card.dir }}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;height:48px;border-radius:10px;background:#252B32;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none">Yol tarifi</a>
+        <a href="{{ card.telOrHash }}" style="display:flex;align-items:center;justify-content:center;height:48px;border-radius:10px;border:1px solid #D5D9DF;color:#252B32;font-size:14px;font-weight:600;text-decoration:none">{{ card.telLabel }}</a>
+        <button onClick="{{ card.openWo }}" style="height:48px;border-radius:10px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-size:14px;font-weight:600">{{ card.woLabel }}</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>/*precompiled:EkranHarita.dc.html*/</script>
+</body>
+</html>

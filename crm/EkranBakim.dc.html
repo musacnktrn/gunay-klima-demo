@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:16px" data-screen-label="Bakım">
+  <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+    <div style="flex:1 1 240px"><h1 style="margin:0;font-size:26px;font-weight:600">Bakım ve servis</h1><div style="font-size:14px;color:#747B85;margin-top:4px">Planlanan tarih ile gerçek tamamlanma tarihi ayrı tutulur.</div></div>
+    <sc-if value="{{ notMobile }}"><button onClick="{{ planNew }}" style="height:44px;padding:0 18px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;white-space:nowrap">Bakım planla</button></sc-if>
+  </div>
+  <div role="tablist" style="display:flex;gap:4px;border-bottom:1px solid #E7E9ED;overflow-x:auto">
+    <sc-for list="{{ views }}" as="t"><button role="tab" aria-selected="{{ t.sel }}" onClick="{{ t.pick }}" style="flex:none;height:46px;padding:0 16px;border:none;border-bottom:2px solid {{ t.bd }};background:none;cursor:pointer;font-size:15px;font-weight:600;color:{{ t.fg }}">{{ t.l }}</button></sc-for>
+  </div>
+
+  <sc-if value="{{ v.gelen }}">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <sc-for list="{{ chips }}" as="c"><button onClick="{{ c.pick }}" aria-pressed="{{ c.sel }}" style="height:40px;padding:0 14px;border-radius:999px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap">{{ c.l }} · {{ c.n }}</button></sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:#4B525B">Mahalle / ilçe<select value="{{ fMah }}" data-v="{{ fMah }}" onChange="{{ onMah }}" style="height:42px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;background:#FFFFFF;color:#252B32;font-weight:400"><option value="">Tümü</option><sc-for list="{{ mahs }}" as="o"><option value="{{ o }}">{{ o }}</option></sc-for></select></label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:#4B525B">Model<select value="{{ fModel }}" data-v="{{ fModel }}" onChange="{{ onModel }}" style="height:42px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;background:#FFFFFF;color:#252B32;font-weight:400"><option value="">Tümü</option><sc-for list="{{ models }}" as="o"><option value="{{ o }}">{{ o }}</option></sc-for></select></label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:#4B525B">Son bakımı yapan<select value="{{ fTech }}" data-v="{{ fTech }}" onChange="{{ onTech }}" style="height:42px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;background:#FFFFFF;color:#252B32;font-weight:400"><option value="">Tümü</option><sc-for list="{{ staff }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:#4B525B">Sonraki bakım (başlangıç)<input type="date" value="{{ fFrom }}" onChange="{{ onFrom }}" style="height:42px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:#4B525B">Sonraki bakım (bitiş)<input type="date" value="{{ fTo }}" onChange="{{ onTo }}" style="height:42px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+    </div>
+    <sc-if value="{{ dueEmpty }}"><div style="padding:28px;border:1px dashed #CDD2D9;border-radius:12px;text-align:center;color:#4B525B">Bu filtrelerle cihaz yok.</div></sc-if>
+    <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+      <sc-if value="{{ wide }}"><div style="display:grid;grid-template-columns:minmax(160px,1.2fr) minmax(170px,1.2fr) 120px 150px 160px minmax(200px,auto);gap:12px;padding:12px 20px;border-bottom:1px solid #E7E9ED;font-size:12px;font-weight:700;color:#747B85"><span>MÜŞTERİ / ADRES</span><span>CİHAZ</span><span>SON BAKIM</span><span>SONRAKİ BAKIM</span><span>DURUM</span><span></span></div></sc-if>
+      <sc-for list="{{ due }}" as="r" hint-placeholder-count="8">
+        <div style="display:grid;grid-template-columns:{{ dueCols }};gap:12px;align-items:center;padding:12px 20px;border-bottom:1px solid #EEF0F3">
+          <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><button onClick="{{ r.open }}" style="border:none;background:none;padding:0;text-align:left;font-weight:600;font-size:15px;color:#252B32;cursor:pointer">{{ r.cName }}</button><span style="font-size:13px;color:#4B525B">{{ r.addr }}</span></span>
+          <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:500">{{ r.room }}</span><span style="font-size:13px;color:#4B525B;font-family:'IBM Plex Mono',monospace">{{ r.model }}</span></span>
+          <span style="font-size:13px">{{ r.last }}</span>
+          <span style="display:flex;flex-direction:column;font-size:13px"><span>{{ r.next }}</span><span style="font-size:12px;color:#747B85">{{ r.basis }}</span></span>
+          <span style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ r.st.fg }};background:{{ r.st.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.st.dot }}"></span>{{ r.st.label }}</span><sc-if value="{{ r.planned }}"><span style="font-size:12px;color:#1D4F91;font-weight:600">{{ r.planned }}</span></sc-if></span>
+          <span style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
+            <sc-if value="{{ r.canCall }}"><button onClick="{{ r.call }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:13px;font-weight:500">Arama kaydı</button></sc-if>
+            <sc-if value="{{ r.isPlan }}"><button onClick="{{ r.edit }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-size:13px;font-weight:600">Aralık belirle</button></sc-if>
+            <sc-if value="{{ r.canPlan }}"><button onClick="{{ r.plan }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-size:13px;font-weight:600">Randevu planla</button></sc-if>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ v.randevu }}">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;gap:4px;padding:4px;background:#E7E9ED;border-radius:10px"><sc-for list="{{ calModes }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:36px;padding:0 14px;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.l }}</button></sc-for></div>
+      <div style="display:flex;gap:4px;align-items:center"><button onClick="{{ prev }}" aria-label="Önceki" style="width:40px;height:40px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:16px">‹</button><button onClick="{{ toToday }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Bugün</button><button onClick="{{ next }}" aria-label="Sonraki" style="width:40px;height:40px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-size:16px">›</button></div>
+      <span style="font-size:16px;font-weight:600">{{ rangeText }}</span>
+    </div>
+
+    <sc-if value="{{ cal.day }}">
+      <div style="padding:10px 14px;border-radius:10px;background:#E8F0FB;color:#1D4F91;font-size:13px;line-height:1.5">Çalışma saati, mola ve kullanıcı tanımlı yol/hazırlık boşluğu tasarım önerisidir; mevcut çekirdekte yalnız iş saati çakışma kontrolü var. Boşluk süreleri haritadan veya trafikten hesaplanmaz.</div>
+      <sc-if value="{{ dayGrid }}">
+        <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:auto">
+          <div style="display:grid;grid-template-columns:56px repeat({{ techN }}, minmax(220px,1fr));min-width:{{ gridMin }}px">
+            <div style="border-right:1px solid #EEF0F3"></div>
+            <sc-for list="{{ dayTechs }}" as="t"><div style="padding:12px;border-right:1px solid #EEF0F3;border-bottom:1px solid #E7E9ED;display:flex;flex-direction:column;gap:2px"><span style="font-weight:600">{{ t.name }}</span><span style="font-size:12px;color:#4B525B">{{ t.hours }}</span><span style="font-size:12px;color:#1B6B3F">Boş: {{ t.free }}</span></div></sc-for>
+            <div style="position:relative;height:{{ gridH }}px;border-right:1px solid #EEF0F3"><sc-for list="{{ hours }}" as="h"><span style="position:absolute;top:{{ h.top }}px;right:8px;font-size:12px;color:#747B85;transform:translateY(-50%)">{{ h.l }}</span></sc-for></div>
+            <sc-for list="{{ dayTechs }}" as="t">
+              <div style="position:relative;height:{{ gridH }}px;border-right:1px solid #EEF0F3;background:#FFFFFF">
+                <sc-for list="{{ hours }}" as="h"><div style="position:absolute;left:0;right:0;top:{{ h.top }}px;border-top:1px solid #F0F1F3"></div></sc-for>
+                <sc-for list="{{ t.blocks }}" as="b">
+                  <button onClick="{{ b.open }}" disabled="{{ b.static }}" title="{{ b.title }}" style="position:absolute;left:6px;right:6px;top:{{ b.top }}px;height:{{ b.h }}px;border-radius:8px;border:1px solid {{ b.bd }};background:{{ b.bg }};color:{{ b.fg }};padding:4px 8px;text-align:left;cursor:{{ b.cur }};overflow:hidden;display:flex;flex-direction:column;gap:1px;font-size:12px;line-height:1.3">
+                    <span style="font-weight:700">{{ b.l1 }}</span><span>{{ b.l2 }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ dayList }}">
+        <sc-for list="{{ dayTechs }}" as="t">
+          <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+            <div style="padding:12px 16px;border-bottom:1px solid #EEF0F3;display:flex;flex-direction:column;gap:2px"><span style="font-weight:600">{{ t.name }}</span><span style="font-size:12px;color:#4B525B">{{ t.hours }}</span><span style="font-size:12px;color:#1B6B3F">Boş: {{ t.free }}</span></div>
+            <sc-for list="{{ t.blocks }}" as="b"><button onClick="{{ b.open }}" disabled="{{ b.static }}" style="width:100%;display:flex;gap:10px;align-items:center;padding:12px 16px;border:none;border-bottom:1px solid #EEF0F3;background:{{ b.bg }};color:{{ b.fg }};text-align:left;cursor:{{ b.cur }}"><span style="font-weight:700;font-size:14px;min-width:96px">{{ b.range }}</span><span style="font-size:14px">{{ b.l1 }} · {{ b.l2 }}</span></button></sc-for>
+          </section>
+        </sc-for>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ cal.week }}">
+      <div style="display:grid;grid-template-columns:{{ weekCols }};gap:8px">
+        <sc-for list="{{ week }}" as="d">
+          <div style="background:{{ d.bg }};border:1px solid {{ d.bd }};border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-height:120px">
+            <span style="font-size:13px;font-weight:700;color:{{ d.fg }}">{{ d.label }}</span>
+            <sc-if value="{{ d.empty }}"><span style="font-size:12px;color:#A0A6AE">İş yok</span></sc-if>
+            <sc-for list="{{ d.items }}" as="w"><button onClick="{{ w.open }}" style="display:flex;flex-direction:column;gap:2px;padding:8px;border-radius:8px;border:1px solid {{ w.bd }};background:#FFFFFF;cursor:pointer;text-align:left;font-size:12px"><span style="font-weight:700">{{ w.time }} · {{ w.type }}</span><span>{{ w.cName }}</span><span style="color:#4B525B">{{ w.tech }}</span><span style="display:inline-flex;align-self:flex-start;height:20px;padding:0 6px;border-radius:999px;align-items:center;font-weight:600;color:{{ w.b.fg }};background:{{ w.b.bg }}">{{ w.b.label }}</span></button></sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ cal.list }}">
+      <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+        <sc-for list="{{ upcoming }}" as="w"><button onClick="{{ w.open }}" style="width:100%;display:grid;grid-template-columns:{{ listCols }};gap:12px;align-items:center;padding:12px 20px;border:none;border-bottom:1px solid #EEF0F3;background:#FFFFFF;cursor:pointer;text-align:left;font-size:14px"><span style="font-weight:600">{{ w.when }}</span><span style="display:flex;flex-direction:column"><span style="font-weight:600">{{ w.cName }}</span><span style="font-size:13px;color:#4B525B">{{ w.addr }} · {{ w.devText }}</span></span><span>{{ w.type }} · {{ w.tech }}</span><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;justify-self:start;color:{{ w.b.fg }};background:{{ w.b.bg }}">{{ w.b.label }}</span></button></sc-for>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <sc-if value="{{ v.gecmis }}">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="flex:1 1 240px;font-size:14px;color:#4B525B">Tamamlanan ve iptal edilen iş emirleri ile sonradan girilen geçmiş kayıtlar.</span><button onClick="{{ openHist }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">+ Geçmiş kayıt ekle</button></div>
+    <sc-if value="{{ histForm }}">
+      <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px">
+        <span style="font-weight:600">Geçmiş bakım / arıza kaydı</span>
+        <span style="font-size:13px;color:#4B525B">Gerçek tarih ve yapan kişiyle girin. Kişi bilinmiyorsa “Belirtilmedi” bırakın; sistem çalışanlardan rastgele seçmez.</span>
+        <sc-if value="{{ hfErr }}"><span role="alert" style="font-size:13px;color:#A3001A;font-weight:600">{{ hfErr }}</span></sc-if>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Cihaz *<select value="{{ hf.deviceId }}" data-v="{{ hf.deviceId }}" onChange="{{ hfOn.deviceId }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><sc-for list="{{ allDevs }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Tarih *<input type="date" value="{{ hf.date }}" onChange="{{ hfOn.date }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">İşlem türü<select value="{{ hf.type }}" data-v="{{ hf.type }}" onChange="{{ hfOn.type }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400;background:#FFFFFF"><option value="bakim">Bakım</option><option value="ariza">Arıza</option><option value="kontrol">Kontrol</option></select></label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Yapan kişi<select value="{{ hf.by }}" data-v="{{ hf.by }}" onChange="{{ hfOn.by }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400;background:#FFFFFF"><option value="">Belirtilmedi</option><sc-for list="{{ staffAll }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Yapılan işlem<input value="{{ hf.action }}" onChange="{{ hfOn.action }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Ücret (varsa)<input inputmode="decimal" value="{{ hf.fee }}" onChange="{{ hfOn.fee }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:14px;font-weight:400"></label>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end"><button onClick="{{ closeHist }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer">Vazgeç</button><button onClick="{{ saveHist }}" disabled="{{ saving }}" style="height:44px;padding:0 18px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">{{ saveLabel }}</button></div>
+      </div>
+    </sc-if>
+    <div style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
+      <sc-for list="{{ past }}" as="e" hint-placeholder-count="6">
+        <button onClick="{{ e.open }}" disabled="{{ e.noOpen }}" style="width:100%;display:grid;grid-template-columns:{{ pastCols }};gap:12px;align-items:start;padding:12px 20px;border:none;border-bottom:1px solid #EEF0F3;background:#FFFFFF;cursor:pointer;text-align:left">
+          <span style="font-size:13px;color:#4B525B">{{ e.date }}</span>
+          <span style="display:inline-flex;justify-content:center;align-items:center;height:24px;border-radius:6px;font-size:12px;font-weight:700;color:{{ e.fg }};background:{{ e.bg }}">{{ e.kind }}</span>
+          <span style="display:flex;flex-direction:column;gap:2px;font-size:14px"><span style="font-weight:600">{{ e.title }}</span><span style="font-size:13px;color:#4B525B">{{ e.sub }}</span></span>
+        </button>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>/*precompiled:EkranBakim.dc.html*/</script>
+</body>
+</html>

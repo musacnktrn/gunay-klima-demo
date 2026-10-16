@@ -1,0 +1,1679 @@
+{
+  "today": "2026-10-16",
+  "img": {
+    "logo": "/assets/gunay-logo.png",
+    "ap": "/assets/enviro.jpg",
+    "ln": "/assets/legendera.jpg",
+    "ef": "/assets/zen.jpg",
+    "kj": "/assets/catalog-1461de9fc440.jpg"
+  },
+  "business": {
+    "name": "Günay Klima",
+    "desc": "Mitsubishi Electric Klima Sistemleri Bayii ve Servisi",
+    "address": "Barbaros Mahallesi, Burak Reis Cd. 112/A, 35090 Bornova / İzmir",
+    "phone": "0232 461 74 25",
+    "web": "https://www.gunayklima.com/",
+    "instagram": "https://www.instagram.com/gunayklima/",
+    "lat": 38.4545,
+    "lng": 27.201,
+    "approx": true
+  },
+  "staff": [
+    {
+      "id": "t1",
+      "name": "Emre Yalçın",
+      "phone": "0500 000 20 01",
+      "active": true,
+      "hours": {
+        "start": "08:30",
+        "end": "18:00",
+        "brk": [
+          "12:30",
+          "13:30"
+        ]
+      }
+    },
+    {
+      "id": "t2",
+      "name": "Serkan Aydın",
+      "phone": "0500 000 20 02",
+      "active": true,
+      "hours": {
+        "start": "08:00",
+        "end": "17:30",
+        "brk": [
+          "12:00",
+          "13:00"
+        ]
+      }
+    },
+    {
+      "id": "t3",
+      "name": "Kemal Öztürk",
+      "phone": null,
+      "active": false
+    }
+  ],
+  "users": [
+    {
+      "id": "u1",
+      "name": "Ayşe Demir",
+      "role": "Yönetici"
+    },
+    {
+      "id": "u2",
+      "name": "Ofis kullanıcısı",
+      "role": "Ofis"
+    }
+  ],
+  "depots": [
+    {
+      "id": "w1",
+      "name": "Merkez depo",
+      "note": "Demo depo"
+    },
+    {
+      "id": "w2",
+      "name": "Yedek depo",
+      "note": "Demo depo"
+    }
+  ],
+  "categories": [
+    {
+      "id": "ev",
+      "name": "Ev ve ofis",
+      "count": 6
+    },
+    {
+      "id": "ticari",
+      "name": "Ticari tip",
+      "count": 7
+    },
+    {
+      "id": "vrf",
+      "name": "VRF merkezi sistem",
+      "count": 23
+    },
+    {
+      "id": "multi",
+      "name": "Multi sistem",
+      "count": 14
+    },
+    {
+      "id": "el",
+      "name": "El kurutma",
+      "count": 4
+    },
+    {
+      "id": "hav",
+      "name": "Havalandırma",
+      "count": 4
+    }
+  ],
+  "products": [
+    {
+      "id": "p1",
+      "brand": "Mitsubishi Electric",
+      "series": "MSZ-AP ENVIRO",
+      "type": "Duvar tipi",
+      "code": "MSZ-AP25VGK",
+      "level": "model",
+      "cat": "ev",
+      "img": "/assets/catalog-82fe33a5c124.jpg",
+      "src": "https://www.gunayklima.com/yeni-msz-ap-enviro-duvar-tipi-split-klima-serisi",
+      "threshold": 2,
+      "price": 32500
+    },
+    {
+      "id": "p2",
+      "brand": "Mitsubishi Electric",
+      "series": "MSZ-AP ENVIRO",
+      "type": "Duvar tipi",
+      "code": "MSZ-AP35VGK",
+      "level": "model",
+      "cat": "ev",
+      "img": "/assets/catalog-82fe33a5c124.jpg",
+      "src": "https://www.gunayklima.com/yeni-msz-ap-enviro-duvar-tipi-split-klima-serisi",
+      "threshold": 2,
+      "price": 38900
+    },
+    {
+      "id": "p3",
+      "brand": "Mitsubishi Electric",
+      "series": "MSZ-AP ENVIRO",
+      "type": "Duvar tipi",
+      "code": "MSZ-AP42VGK",
+      "level": "model",
+      "cat": "ev",
+      "img": "/assets/catalog-82fe33a5c124.jpg",
+      "src": "https://www.gunayklima.com/yeni-msz-ap-enviro-duvar-tipi-split-klima-serisi",
+      "threshold": 2,
+      "price": 45000
+    },
+    {
+      "id": "p4",
+      "brand": "Mitsubishi Electric",
+      "series": "MSZ-AP ENVIRO",
+      "type": "Duvar tipi",
+      "code": "MSZ-AP50VGK",
+      "level": "model",
+      "cat": "ev",
+      "img": "/assets/catalog-82fe33a5c124.jpg",
+      "src": "https://www.gunayklima.com/yeni-msz-ap-enviro-duvar-tipi-split-klima-serisi",
+      "threshold": 1,
+      "price": 52400
+    },
+    {
+      "id": "p5",
+      "brand": "Mitsubishi Electric",
+      "series": "MSZ-LN Legendera",
+      "type": "Duvar tipi",
+      "code": null,
+      "level": "seri",
+      "cat": "ev",
+      "img": "/assets/catalog-38938df1a054.png",
+      "src": "https://www.gunayklima.com/yeni-msz-ln-legendera-duvar-tipi-klima-serisi",
+      "threshold": 1,
+      "price": null
+    },
+    {
+      "id": "p6",
+      "brand": "Mitsubishi Electric",
+      "series": "MSZ-EF Kirigamine Zen",
+      "type": "Duvar tipi",
+      "code": null,
+      "level": "seri",
+      "cat": "ev",
+      "img": "/assets/catalog-649746e5d87e.jpg",
+      "src": "https://www.gunayklima.com/msz-ef-kirigamine-zen-duvar-tipi-split-klima-serisi",
+      "threshold": null,
+      "price": null
+    },
+    {
+      "id": "p7",
+      "brand": "Mitsubishi Electric",
+      "series": "MFZ-KJ",
+      "type": "Döşeme tipi",
+      "code": null,
+      "level": "seri",
+      "cat": "ev",
+      "img": "/assets/catalog-1461de9fc440.jpg",
+      "src": "https://www.gunayklima.com/mfz-kj-doseme-tipi-split-klima-serisi",
+      "threshold": null,
+      "price": null
+    },
+    {
+      "id": "p8",
+      "brand": "Mitsubishi Electric",
+      "series": "SLZ-KF",
+      "type": "Kompakt kaset tipi",
+      "code": null,
+      "level": "seri",
+      "cat": "ev",
+      "img": "/assets/catalog-4c1398629247.jpg",
+      "src": "https://www.gunayklima.com/slz-kf-kompakt-kaset-tipi-split-klima-serisi",
+      "threshold": null,
+      "price": null
+    },
+    {
+      "id": "p9",
+      "brand": "Mitsubishi Electric",
+      "series": "SEZ-KD",
+      "type": "Inverter gizli tavan tipi",
+      "code": null,
+      "level": "seri",
+      "cat": "ev",
+      "img": "/assets/catalog-4d23d34e9aa0.jpg",
+      "src": "https://www.gunayklima.com/sez-kd-inverter-gizli-tavan-tipi-split-klima-serisi",
+      "threshold": null,
+      "price": null
+    },
+    {
+      "id": "p10",
+      "brand": "Mitsubishi Electric",
+      "series": "PKA-RP KAL",
+      "type": "Duvar tipi",
+      "code": null,
+      "level": "seri",
+      "cat": "ticari",
+      "img": "/assets/catalog-4276162a9253.jpg",
+      "src": "https://www.gunayklima.com/pka-rp-kal-duvar-tipi",
+      "threshold": null,
+      "price": null
+    },
+    {
+      "id": "p11",
+      "brand": "Mitsubishi Electric",
+      "series": "PLA-RP BA",
+      "type": "4 yön üflemeli kasetli tavan tipi",
+      "code": null,
+      "level": "seri",
+      "cat": "ticari",
+      "img": "/assets/catalog-584208588c11.jpg",
+      "src": "https://www.gunayklima.com/pla-rp-ba-4-yon-uflemeli-kasetli-tavan-tipi",
+      "threshold": null,
+      "price": null
+    },
+    {
+      "id": "p12",
+      "brand": "Mitsubishi Electric",
+      "series": "PCA-RP HA",
+      "type": "Asılı tavan tipi (profesyonel mutfak)",
+      "code": null,
+      "level": "seri",
+      "cat": "ticari",
+      "img": "/assets/catalog-e75d14e03d54.jpg",
+      "src": "https://www.gunayklima.com/pca-rp-ha-asili-tavan-tipi-profesyonel-mutfak-kullanicilari-icin",
+      "threshold": null,
+      "price": null
+    },
+    {
+      "id": "p13",
+      "brand": "Mitsubishi Electric",
+      "series": "PSA-RP GA",
+      "type": "Salon tipi",
+      "code": null,
+      "level": "seri",
+      "cat": "ticari",
+      "img": "/assets/catalog-d9aa62b1ee70.jpg",
+      "src": "https://www.gunayklima.com/psa-rp-ga-salon-tipi",
+      "threshold": null,
+      "price": null
+    },
+    {
+      "id": "p14",
+      "brand": "Mitsubishi Electric",
+      "series": "PEAD-RP JA",
+      "type": "Kanallı gömme tavan tipi",
+      "code": null,
+      "level": "seri",
+      "cat": "ticari",
+      "img": "/assets/catalog-bcb213505adc.jpg",
+      "src": "https://www.gunayklima.com/pead-rp-ja-kanalli-gomme-tavan-tipi",
+      "threshold": null,
+      "price": null
+    },
+    {
+      "id": "p15",
+      "brand": "Mitsubishi Electric",
+      "series": "PEA-RP GA",
+      "type": "Kanallı gömme tavan tipi (yüksek statik basınçlı)",
+      "code": null,
+      "level": "seri",
+      "cat": "ticari",
+      "img": "/assets/catalog-b69890a3dd1c.jpg",
+      "src": "https://www.gunayklima.com/pea-rp-ga-kanalli-gomme-tavan-tipi-yuksek-statik-basincli",
+      "threshold": null,
+      "price": null
+    },
+    {
+      "id": "p16",
+      "brand": "Mitsubishi Electric",
+      "series": "PCA-RP KA",
+      "type": "Asılı tavan tipi",
+      "code": null,
+      "level": "seri",
+      "cat": "ticari",
+      "img": "/assets/catalog-a0a68beb1180.jpg",
+      "src": "https://www.gunayklima.com/pca-rp-ka-asili-tavan-tipi",
+      "threshold": null,
+      "price": null
+    }
+  ],
+  "customers": [
+    {
+      "id": "c1",
+      "name": "Selin Arıkan",
+      "type": "Kişi",
+      "phone": "0500 000 11 01",
+      "contact": "izinli",
+      "note": "Hafta içi 18:00 sonrası aranmayı tercih ediyor.",
+      "active": true
+    },
+    {
+      "id": "c2",
+      "name": "Hakan Er",
+      "type": "Kişi",
+      "phone": "0500 000 11 02",
+      "contact": "izinli",
+      "note": "Ev ve iş yeri ayrı adreslerde.",
+      "active": true
+    },
+    {
+      "id": "c3",
+      "name": "Nur Pastanesi",
+      "type": "Firma",
+      "person": "Nurten Yılmaz",
+      "phone": "0500 000 11 03",
+      "contact": "izinli",
+      "note": "Montajlar dükkân kapalıyken yapılmalı.",
+      "active": true
+    },
+    {
+      "id": "c4",
+      "name": "Levent Bozkurt",
+      "type": "Kişi",
+      "phone": "0500 000 11 04",
+      "contact": "izinli",
+      "note": "",
+      "active": true
+    },
+    {
+      "id": "c5",
+      "name": "Gülay Tunç",
+      "type": "Kişi",
+      "phone": "0500 000 11 05",
+      "contact": "bilinmiyor",
+      "note": "Multi sistem: iki iç ünite tek dış üniteye bağlı.",
+      "active": true
+    },
+    {
+      "id": "c6",
+      "name": "Kardeşler Kırtasiye",
+      "type": "Firma",
+      "person": "Ali Kardeş",
+      "phone": "0500 000 11 06",
+      "contact": "izinli",
+      "note": "",
+      "active": true,
+      "flag": {
+        "type": "sikayet",
+        "note": "Dış ünite ses şikâyeti tekrarladı; müşteri memnun değil.",
+        "date": "2026-10-15"
+      },
+      "flagLog": [
+        {
+          "date": "2026-10-15",
+          "action": "isaret",
+          "type": "sikayet",
+          "note": "Dış ünite ses şikâyeti tekrarladı; müşteri memnun değil."
+        }
+      ]
+    },
+    {
+      "id": "c7",
+      "name": "Orhan Yıldız",
+      "type": "Kişi",
+      "phone": "0500 000 11 07",
+      "contact": "istemiyor",
+      "note": "Aranmak istemediğini belirtti (14 Ekim 2026).",
+      "active": true
+    },
+    {
+      "id": "c8",
+      "name": "Deniz Aksoy",
+      "type": "Kişi",
+      "phone": "0500 000 11 08",
+      "contact": "bilinmiyor",
+      "note": "Adres tarifi telefonla alındı.",
+      "active": true
+    },
+    {
+      "id": "c9",
+      "name": "Fatma Şen",
+      "type": "Kişi",
+      "phone": "0500 000 11 09",
+      "contact": "izinli",
+      "note": "Klimayı başka firmadan almış; bakım müşterisi.",
+      "active": true
+    },
+    {
+      "id": "c10",
+      "name": "Mavi Ofis Mimarlık",
+      "type": "Firma",
+      "person": "Burcu Mavi",
+      "phone": null,
+      "contact": "izinli",
+      "note": "Telefon numarası henüz alınmadı.",
+      "active": true
+    },
+    {
+      "id": "c11",
+      "name": "Ahmet Yurt",
+      "type": "Kişi",
+      "phone": "0500 000 11 11",
+      "contact": "izinli",
+      "note": "",
+      "active": true
+    },
+    {
+      "id": "c12",
+      "name": "Ayla Güneş",
+      "type": "Kişi",
+      "phone": "0500 000 11 12",
+      "contact": "izinli",
+      "note": "",
+      "active": true
+    }
+  ],
+  "addresses": [
+    {
+      "id": "a1",
+      "customerId": "c1",
+      "label": "Ev",
+      "line": "Kazımdirik Mah., Örnek Sk. No:4 D:3",
+      "mah": "Kazımdirik",
+      "ilce": "Bornova",
+      "lat": 38.4592,
+      "lng": 27.2108,
+      "verified": true,
+      "src": "harita",
+      "vBy": "Ayşe Demir",
+      "vAt": "2024-09-10",
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a2",
+      "customerId": "c2",
+      "label": "Ev",
+      "line": "Erzene Mah., Örnek Sk. No:7",
+      "mah": "Erzene",
+      "ilce": "Bornova",
+      "lat": 38.4627,
+      "lng": 27.229,
+      "verified": true,
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a3",
+      "customerId": "c2",
+      "label": "İş yeri",
+      "line": "Mansuroğlu Mah., Örnek Sk. No:12 K:4",
+      "mah": "Mansuroğlu",
+      "ilce": "Bayraklı",
+      "lat": 38.4485,
+      "lng": 27.1825,
+      "verified": true,
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a4",
+      "customerId": "c3",
+      "label": "İş yeri",
+      "line": "Özkanlar Mah., Örnek Sk. No:3",
+      "mah": "Özkanlar",
+      "ilce": "Bornova",
+      "lat": 38.442,
+      "lng": 27.214,
+      "verified": true,
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a5",
+      "customerId": "c4",
+      "label": "Ev",
+      "line": "Kazımdirik Mah., Örnek Sk. No:15 D:2",
+      "mah": "Kazımdirik",
+      "ilce": "Bornova",
+      "lat": 38.4578,
+      "lng": 27.2131,
+      "verified": true,
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a6",
+      "customerId": "c5",
+      "label": "Ev",
+      "line": "Kazımdirik Mah., Örnek Sk. No:9",
+      "mah": "Kazımdirik",
+      "ilce": "Bornova",
+      "lat": 38.4569,
+      "lng": 27.2097,
+      "verified": true,
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a7",
+      "customerId": "c6",
+      "label": "İş yeri",
+      "line": "Kazımdirik Mah., Örnek Cd. No:41",
+      "mah": "Kazımdirik",
+      "ilce": "Bornova",
+      "lat": 38.4601,
+      "lng": 27.214,
+      "verified": true,
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a8",
+      "customerId": "c7",
+      "label": "Ev",
+      "line": "Kazımdirik Mah., Örnek Sk. No:2",
+      "mah": "Kazımdirik",
+      "ilce": "Bornova",
+      "lat": 38.456,
+      "lng": 27.2122,
+      "verified": true,
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a9",
+      "customerId": "c8",
+      "label": "Ev",
+      "line": "Atatürk Mah. (sokak ve kapı no belirtilmedi)",
+      "mah": "Atatürk",
+      "ilce": "Bornova",
+      "lat": null,
+      "lng": null,
+      "verified": false,
+      "src": "mahalle",
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a10",
+      "customerId": "c9",
+      "label": "Ev",
+      "line": "Doğanlar Mah., Örnek Sk. No:6",
+      "mah": "Doğanlar",
+      "ilce": "Bornova",
+      "lat": 38.476,
+      "lng": 27.233,
+      "verified": true,
+      "src": "cihaz",
+      "vBy": "Emre Yalçın",
+      "vAt": "2026-10-02",
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a11",
+      "customerId": "c10",
+      "label": "Ofis",
+      "line": "Mevlana Mah., Örnek Sk. No:20 K:1",
+      "mah": "Mevlana",
+      "ilce": "Bornova",
+      "lat": 38.451,
+      "lng": 27.205,
+      "verified": false,
+      "src": "adres",
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a12",
+      "customerId": "c11",
+      "label": "Ev",
+      "line": "Manavkuyu Mah., Örnek Sk. No:3",
+      "mah": "Manavkuyu",
+      "ilce": "Bayraklı",
+      "lat": 38.459,
+      "lng": 27.188,
+      "verified": true,
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    },
+    {
+      "id": "a13",
+      "customerId": "c12",
+      "label": "Ev",
+      "line": "Bostanlı Mah., Örnek Sk. No:10 D:5",
+      "mah": "Bostanlı",
+      "ilce": "Karşıyaka",
+      "lat": 38.456,
+      "lng": 27.098,
+      "verified": true,
+      "city": "İzmir",
+      "buildingNo": "1",
+      "doorNo": "1"
+    }
+  ],
+  "devices": [
+    {
+      "id": "d1",
+      "customerId": "c1",
+      "addressId": "a1",
+      "productId": "p2",
+      "room": "Salon",
+      "serialIn": "24A0412",
+      "serialOut": "24D0412",
+      "system": null,
+      "installDate": "2024-09-12",
+      "installBy": "t1",
+      "fromGunay": true,
+      "saleId": "s1",
+      "lineId": "l1",
+      "interval": 12,
+      "intervalDemo": true,
+      "note": ""
+    },
+    {
+      "id": "d2",
+      "customerId": "c1",
+      "addressId": "a1",
+      "productId": "p1",
+      "room": "Yatak odası",
+      "serialIn": "24A0413",
+      "serialOut": "24D0413",
+      "system": null,
+      "installDate": "2024-09-12",
+      "installBy": "t1",
+      "fromGunay": true,
+      "saleId": "s1",
+      "lineId": "l2",
+      "interval": 12,
+      "intervalDemo": true,
+      "note": ""
+    },
+    {
+      "id": "d3",
+      "customerId": "c1",
+      "addressId": "a1",
+      "productId": "p1",
+      "room": "Çocuk odası",
+      "serialIn": "24A0414",
+      "serialOut": "24D0414",
+      "system": null,
+      "installDate": "2024-09-12",
+      "installBy": "t1",
+      "fromGunay": true,
+      "saleId": "s1",
+      "lineId": "l2",
+      "interval": 12,
+      "intervalDemo": true,
+      "note": ""
+    },
+    {
+      "id": "d4",
+      "customerId": "c2",
+      "addressId": "a2",
+      "productId": "p6",
+      "room": "Salon",
+      "serialIn": "19K2231",
+      "serialOut": null,
+      "system": null,
+      "installDate": "2019-06-20",
+      "installBy": null,
+      "fromGunay": true,
+      "saleId": null,
+      "lineId": null,
+      "interval": 12,
+      "intervalDemo": true,
+      "note": "Eski satış kaydı bu sisteme aktarılmadı."
+    },
+    {
+      "id": "d5",
+      "customerId": "c2",
+      "addressId": "a3",
+      "productId": "p4",
+      "room": "Toplantı odası",
+      "serialIn": "25B0870",
+      "serialOut": "25E0870",
+      "system": null,
+      "installDate": "2025-03-14",
+      "installBy": "t2",
+      "fromGunay": true,
+      "saleId": "s6",
+      "lineId": "l6a",
+      "interval": 12,
+      "intervalDemo": true,
+      "baseRule": "install",
+      "note": ""
+    },
+    {
+      "id": "d6",
+      "customerId": "c2",
+      "addressId": "a3",
+      "productId": "p3",
+      "room": "Yönetici odası",
+      "serialIn": "25B0871",
+      "serialOut": "25E0871",
+      "system": null,
+      "installDate": "2025-03-14",
+      "installBy": "t2",
+      "fromGunay": true,
+      "saleId": "s6",
+      "lineId": "l6b",
+      "interval": 12,
+      "intervalDemo": true,
+      "baseRule": "install",
+      "note": ""
+    },
+    {
+      "id": "d7",
+      "customerId": "c3",
+      "addressId": "a4",
+      "productId": "p2",
+      "room": "Satış alanı",
+      "serialIn": "26A1102",
+      "serialOut": "26D1102",
+      "system": null,
+      "installDate": "2026-10-09",
+      "installBy": "t2",
+      "fromGunay": true,
+      "saleId": "s2",
+      "lineId": "l2a",
+      "interval": 12,
+      "intervalDemo": true,
+      "baseRule": "install",
+      "note": ""
+    },
+    {
+      "id": "d8",
+      "customerId": "c4",
+      "addressId": "a5",
+      "productId": "p1",
+      "room": "Salon",
+      "serialIn": "22A0310",
+      "serialOut": "22D0310",
+      "system": null,
+      "installDate": "2022-05-18",
+      "installBy": "t3",
+      "fromGunay": true,
+      "saleId": null,
+      "lineId": null,
+      "interval": 12,
+      "intervalDemo": true,
+      "note": "Eski satış kaydı bu sisteme aktarılmadı."
+    },
+    {
+      "id": "d9",
+      "customerId": "c5",
+      "addressId": "a6",
+      "productId": "p2",
+      "room": "Salon",
+      "serialIn": "23A0751",
+      "serialOut": "MX230091",
+      "system": "Multi sistem 1",
+      "installDate": "2023-07-02",
+      "installBy": "t1",
+      "fromGunay": true,
+      "saleId": null,
+      "lineId": null,
+      "interval": 12,
+      "intervalDemo": true,
+      "note": ""
+    },
+    {
+      "id": "d10",
+      "customerId": "c5",
+      "addressId": "a6",
+      "productId": "p1",
+      "room": "Yatak odası",
+      "serialIn": "23A0752",
+      "serialOut": "MX230091",
+      "system": "Multi sistem 1",
+      "installDate": "2023-07-02",
+      "installBy": "t1",
+      "fromGunay": true,
+      "saleId": null,
+      "lineId": null,
+      "interval": 12,
+      "intervalDemo": true,
+      "note": ""
+    },
+    {
+      "id": "d11",
+      "customerId": "c6",
+      "addressId": "a7",
+      "productId": "p6",
+      "room": "Dükkân",
+      "serialIn": "20K4410",
+      "serialOut": null,
+      "system": null,
+      "installDate": "2020-04-11",
+      "installBy": null,
+      "fromGunay": true,
+      "saleId": null,
+      "lineId": null,
+      "interval": 12,
+      "intervalDemo": true,
+      "note": ""
+    },
+    {
+      "id": "d12",
+      "customerId": "c7",
+      "addressId": "a8",
+      "productId": "p8",
+      "room": "Salon (tavan)",
+      "serialIn": "21C0063",
+      "serialOut": "21F0063",
+      "system": null,
+      "installDate": "2021-08-30",
+      "installBy": "t3",
+      "fromGunay": true,
+      "saleId": null,
+      "lineId": null,
+      "interval": 12,
+      "intervalDemo": true,
+      "note": ""
+    },
+    {
+      "id": "d13",
+      "customerId": "c8",
+      "addressId": "a9",
+      "productId": "p1",
+      "room": "Yatak odası",
+      "serialIn": "23A0190",
+      "serialOut": "23D0190",
+      "system": null,
+      "installDate": "2023-05-11",
+      "installBy": "t1",
+      "fromGunay": true,
+      "saleId": null,
+      "lineId": null,
+      "interval": 12,
+      "intervalDemo": true,
+      "note": ""
+    },
+    {
+      "id": "d14",
+      "customerId": "c9",
+      "addressId": "a10",
+      "productId": null,
+      "externalModel": "Diğer marka duvar tipi (müşteri beyanı)",
+      "room": "Salon",
+      "serialIn": null,
+      "serialOut": null,
+      "system": null,
+      "installDate": null,
+      "installBy": null,
+      "installByText": "Başka firma",
+      "fromGunay": false,
+      "saleId": null,
+      "lineId": null,
+      "interval": 12,
+      "intervalDemo": true,
+      "note": "Model etiketi okunamadı."
+    },
+    {
+      "id": "d15",
+      "customerId": "c10",
+      "addressId": "a11",
+      "productId": "p5",
+      "room": "Toplantı odası",
+      "serialIn": "24L0055",
+      "serialOut": "24M0055",
+      "system": null,
+      "installDate": "2024-06-03",
+      "installBy": null,
+      "fromGunay": true,
+      "saleId": null,
+      "lineId": null,
+      "interval": null,
+      "note": "Bakım aralığı müşteriyle konuşulmadı."
+    }
+  ],
+  "history": [
+    {
+      "id": "h1",
+      "deviceId": "d1",
+      "date": "2025-09-12",
+      "type": "bakim",
+      "by": "t1",
+      "action": "Filtre ve iç ünite temizliği",
+      "fee": 1000,
+      "done": true
+    },
+    {
+      "id": "h2",
+      "deviceId": "d2",
+      "date": "2025-09-12",
+      "type": "bakim",
+      "by": "t1",
+      "action": "Filtre ve iç ünite temizliği",
+      "fee": 1000,
+      "done": true
+    },
+    {
+      "id": "h3",
+      "deviceId": "d3",
+      "date": "2025-09-12",
+      "type": "bakim",
+      "by": "t1",
+      "action": "Filtre ve iç ünite temizliği",
+      "fee": 1000,
+      "done": true
+    },
+    {
+      "id": "h4",
+      "deviceId": "d1",
+      "date": "2026-10-08",
+      "type": "bakim",
+      "by": "t1",
+      "action": "Filtre, iç ünite ve drenaj temizliği",
+      "fee": 1200,
+      "done": true,
+      "woId": "wo1"
+    },
+    {
+      "id": "h5",
+      "deviceId": "d2",
+      "date": "2026-10-08",
+      "type": "bakim",
+      "by": "t1",
+      "action": "",
+      "done": false,
+      "reason": "Müşteri talebiyle ertelendi",
+      "woId": "wo1"
+    },
+    {
+      "id": "h6",
+      "deviceId": "d3",
+      "date": "2026-10-08",
+      "type": "bakim",
+      "by": "t1",
+      "action": "",
+      "done": false,
+      "reason": "Müşteri talebiyle ertelendi",
+      "woId": "wo1"
+    },
+    {
+      "id": "h7",
+      "deviceId": "d4",
+      "date": "2025-11-05",
+      "type": "bakim",
+      "by": "t1",
+      "action": "Genel bakım",
+      "fee": 1000,
+      "done": true
+    },
+    {
+      "id": "h8",
+      "deviceId": "d8",
+      "date": "2025-10-01",
+      "type": "bakim",
+      "by": "t2",
+      "action": "Genel bakım",
+      "fee": 1000,
+      "done": true
+    },
+    {
+      "id": "h9",
+      "deviceId": "d8",
+      "date": "2026-02-14",
+      "type": "ariza",
+      "by": "t1",
+      "action": "Drenaj tıkanıklığı açıldı",
+      "fee": 750,
+      "done": true
+    },
+    {
+      "id": "h10",
+      "deviceId": "d9",
+      "date": "2025-10-28",
+      "type": "bakim",
+      "by": "t1",
+      "action": "Genel bakım",
+      "fee": 900,
+      "done": true
+    },
+    {
+      "id": "h11",
+      "deviceId": "d10",
+      "date": "2025-10-28",
+      "type": "bakim",
+      "by": "t1",
+      "action": "Genel bakım",
+      "fee": 900,
+      "done": true
+    },
+    {
+      "id": "h12",
+      "deviceId": "d11",
+      "date": "2025-08-20",
+      "type": "bakim",
+      "by": "t2",
+      "action": "Genel bakım",
+      "fee": 1000,
+      "done": true
+    },
+    {
+      "id": "h13",
+      "deviceId": "d12",
+      "date": "2025-09-05",
+      "type": "bakim",
+      "by": null,
+      "action": "Bakım (eski kayıttan aktarıldı)",
+      "fee": null,
+      "done": true
+    },
+    {
+      "id": "h14",
+      "deviceId": "d13",
+      "date": "2025-09-10",
+      "type": "bakim",
+      "by": "t1",
+      "action": "Genel bakım",
+      "fee": 1000,
+      "done": true
+    },
+    {
+      "id": "h15",
+      "deviceId": "d14",
+      "date": "2026-10-02",
+      "type": "bakim",
+      "by": "t1",
+      "action": "Genel bakım ve gaz basıncı kontrolü",
+      "fee": 1500,
+      "done": true,
+      "woId": "wo6"
+    }
+  ],
+  "workOrders": [
+    {
+      "id": "wo1",
+      "customerId": "c1",
+      "addressId": "a1",
+      "type": "bakim",
+      "date": "2026-10-08",
+      "start": "10:00",
+      "dur": 90,
+      "techId": "t1",
+      "status": "tamamlandi",
+      "deviceIds": [
+        "d1",
+        "d2",
+        "d3"
+      ],
+      "completedAt": "2026-10-08",
+      "completedBy": "t1",
+      "fee": 1200,
+      "feePaid": true,
+      "feeMethod": "Nakit",
+      "note": "Yalnız salondaki cihaza işlem yapıldı."
+    },
+    {
+      "id": "wo2",
+      "customerId": "c2",
+      "addressId": "a3",
+      "type": "bakim",
+      "date": "2026-10-16",
+      "start": "09:30",
+      "dur": 90,
+      "techId": "t1",
+      "status": "islemde",
+      "deviceIds": [
+        "d5",
+        "d6"
+      ],
+      "note": "İlk bakım; montaj tarihi başlangıç kabul edildi."
+    },
+    {
+      "id": "wo3",
+      "customerId": "c6",
+      "addressId": "a7",
+      "type": "ariza",
+      "date": "2026-10-16",
+      "start": "10:00",
+      "dur": 60,
+      "techId": "t2",
+      "status": "planlandi",
+      "deviceIds": [
+        "d11"
+      ],
+      "buffer": 20,
+      "note": "Dış ünite ses yapıyor (müşteri beyanı). Sonrasında 20 dk yol/hazırlık boşluğu (demo, kullanıcı tanımlı)."
+    },
+    {
+      "id": "wo4",
+      "customerId": "c12",
+      "addressId": "a13",
+      "type": "montaj",
+      "date": "2026-10-16",
+      "start": "14:00",
+      "dur": 120,
+      "techId": "t2",
+      "status": "planlandi",
+      "deviceIds": [],
+      "saleId": "s3",
+      "lineId": "l3a",
+      "qty": 1,
+      "note": ""
+    },
+    {
+      "id": "wo5",
+      "customerId": "c10",
+      "addressId": "a11",
+      "type": "kontrol",
+      "date": "2026-10-16",
+      "start": "15:30",
+      "dur": 60,
+      "techId": "t1",
+      "status": "planlandi",
+      "deviceIds": [
+        "d15"
+      ],
+      "note": "Bakım aralığı da konuşulacak."
+    },
+    {
+      "id": "wo6",
+      "customerId": "c9",
+      "addressId": "a10",
+      "type": "bakim",
+      "date": "2026-10-02",
+      "start": "11:00",
+      "dur": 60,
+      "techId": "t1",
+      "status": "tamamlandi",
+      "deviceIds": [
+        "d14"
+      ],
+      "completedAt": "2026-10-02",
+      "completedBy": "t1",
+      "fee": 1500,
+      "feePaid": false,
+      "note": "Ücret müşteri ile ay sonunda tahsil edilecek."
+    },
+    {
+      "id": "wo7",
+      "customerId": "c8",
+      "addressId": "a9",
+      "type": "bakim",
+      "date": "2026-10-19",
+      "start": "10:00",
+      "dur": 60,
+      "techId": "t2",
+      "status": "planlandi",
+      "deviceIds": [
+        "d13"
+      ],
+      "note": "Adres tarifini telefonda teyit et."
+    },
+    {
+      "id": "wo8",
+      "customerId": "c2",
+      "addressId": "a2",
+      "type": "bakim",
+      "date": "2026-10-22",
+      "start": "13:00",
+      "dur": 60,
+      "techId": "t1",
+      "status": "planlandi",
+      "deviceIds": [
+        "d4"
+      ],
+      "note": ""
+    },
+    {
+      "id": "wo9",
+      "customerId": "c7",
+      "addressId": "a8",
+      "type": "bakim",
+      "date": "2026-10-14",
+      "start": "11:00",
+      "dur": 60,
+      "techId": "t2",
+      "status": "iptal",
+      "deviceIds": [
+        "d12"
+      ],
+      "cancelNote": "Müşteri iletişim istemediğini belirtti.",
+      "note": ""
+    },
+    {
+      "id": "wo10",
+      "customerId": "c3",
+      "addressId": "a4",
+      "type": "montaj",
+      "date": "2026-10-09",
+      "start": "08:30",
+      "dur": 120,
+      "techId": "t2",
+      "status": "tamamlandi",
+      "deviceIds": [
+        "d7"
+      ],
+      "saleId": "s2",
+      "lineId": "l2a",
+      "qty": 1,
+      "completedAt": "2026-10-09",
+      "completedBy": "t2",
+      "note": "İkinci cihaz için müşteri onayı bekleniyor."
+    }
+  ],
+  "sales": [
+    {
+      "id": "s1",
+      "no": "S-2024-031",
+      "customerId": "c1",
+      "addressId": "a1",
+      "date": "2024-09-10",
+      "status": "onayli",
+      "note": "",
+      "lines": [
+        {
+          "id": "l1",
+          "productId": "p2",
+          "depotId": "w1",
+          "qty": 1,
+          "installed": 1,
+          "price": 36000,
+          "disc": 0,
+          "cost": 27900
+        },
+        {
+          "id": "l2",
+          "productId": "p1",
+          "depotId": "w1",
+          "qty": 2,
+          "installed": 2,
+          "price": 30000,
+          "disc": 0,
+          "cost": 23500
+        }
+      ]
+    },
+    {
+      "id": "s6",
+      "no": "S-2025-008",
+      "customerId": "c2",
+      "addressId": "a3",
+      "date": "2025-03-10",
+      "status": "onayli",
+      "note": "",
+      "lines": [
+        {
+          "id": "l6a",
+          "productId": "p4",
+          "depotId": "w1",
+          "qty": 1,
+          "installed": 1,
+          "price": 48000,
+          "disc": 0,
+          "cost": null
+        },
+        {
+          "id": "l6b",
+          "productId": "p3",
+          "depotId": "w1",
+          "qty": 1,
+          "installed": 1,
+          "price": 42000,
+          "disc": 2000,
+          "cost": 32000
+        }
+      ]
+    },
+    {
+      "id": "s5",
+      "no": "S-2026-009",
+      "customerId": "c7",
+      "addressId": "a8",
+      "date": "2026-09-01",
+      "status": "iptal",
+      "cancelNote": "Müşteri vazgeçti. Montaj ve tahsilat yoktu.",
+      "note": "",
+      "lines": [
+        {
+          "id": "l5a",
+          "productId": "p3",
+          "depotId": "w1",
+          "qty": 1,
+          "installed": 0,
+          "price": 45000,
+          "disc": 0,
+          "cost": null
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "no": "S-2026-011",
+      "customerId": "c3",
+      "addressId": "a4",
+      "date": "2026-10-02",
+      "status": "onayli",
+      "note": "İkinci cihaz mutfak tarafına takılacak; tarih müşteriyle netleşecek.",
+      "lines": [
+        {
+          "id": "l2a",
+          "productId": "p2",
+          "depotId": "w1",
+          "qty": 2,
+          "installed": 1,
+          "price": 38900,
+          "disc": 1800,
+          "cost": 29600
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "no": "S-2026-014",
+      "customerId": "c12",
+      "addressId": "a13",
+      "date": "2026-10-13",
+      "status": "onayli",
+      "note": "",
+      "lines": [
+        {
+          "id": "l3a",
+          "productId": "p1",
+          "depotId": "w1",
+          "qty": 1,
+          "installed": 0,
+          "price": 32500,
+          "disc": 0,
+          "cost": 24800
+        }
+      ]
+    },
+    {
+      "id": "s4",
+      "no": "S-2026-015",
+      "customerId": "c11",
+      "addressId": "a12",
+      "date": "2026-10-15",
+      "status": "taslak",
+      "note": "Üç oda için teklif.",
+      "lines": [
+        {
+          "id": "l4a",
+          "productId": "p4",
+          "depotId": "w1",
+          "qty": 3,
+          "installed": 0,
+          "price": 52400,
+          "disc": 0,
+          "cost": null
+        }
+      ]
+    }
+  ],
+  "payments": [
+    {
+      "id": "y1",
+      "saleId": "s1",
+      "date": "2024-09-10",
+      "amount": 50000,
+      "method": "Havale / EFT",
+      "note": ""
+    },
+    {
+      "id": "y2",
+      "saleId": "s1",
+      "date": "2024-09-20",
+      "amount": 46000,
+      "method": "Nakit",
+      "note": ""
+    },
+    {
+      "id": "y3",
+      "saleId": "s6",
+      "date": "2025-03-10",
+      "amount": 88000,
+      "method": "Kredi kartı",
+      "note": ""
+    },
+    {
+      "id": "y4",
+      "saleId": "s2",
+      "date": "2026-10-02",
+      "amount": 40000,
+      "method": "Havale / EFT",
+      "note": "Peşinat"
+    },
+    {
+      "id": "y5",
+      "saleId": "s3",
+      "date": "2026-10-13",
+      "amount": 10000,
+      "method": "Kredi kartı",
+      "note": "Kapora"
+    }
+  ],
+  "movements": [
+    {
+      "id": "m1",
+      "date": "2026-09-01",
+      "kind": "giris",
+      "productId": "p1",
+      "depotId": "w1",
+      "qty": 6,
+      "cost": 24800,
+      "reason": "Açılış sayımı"
+    },
+    {
+      "id": "m2",
+      "date": "2026-09-01",
+      "kind": "giris",
+      "productId": "p3",
+      "depotId": "w1",
+      "qty": 4,
+      "cost": 34200,
+      "reason": "Açılış sayımı"
+    },
+    {
+      "id": "m3",
+      "date": "2026-09-01",
+      "kind": "giris",
+      "productId": "p4",
+      "depotId": "w1",
+      "qty": 2,
+      "cost": null,
+      "reason": "Açılış sayımı"
+    },
+    {
+      "id": "m4",
+      "date": "2026-09-10",
+      "kind": "giris",
+      "productId": "p5",
+      "depotId": "w1",
+      "qty": 2,
+      "cost": null,
+      "reason": "Tedarikçi girişi (seri düzeyinde, kapasite belirtilmedi)"
+    },
+    {
+      "id": "m5",
+      "date": "2026-09-10",
+      "kind": "giris",
+      "productId": "p8",
+      "depotId": "w2",
+      "qty": 1,
+      "cost": null,
+      "reason": "Tedarikçi girişi (seri düzeyinde)"
+    },
+    {
+      "id": "m6",
+      "date": "2026-09-20",
+      "kind": "transfer",
+      "productId": "p1",
+      "depotId": "w1",
+      "toDepotId": "w2",
+      "qty": 2,
+      "reason": "Yedek depoya aktarım"
+    },
+    {
+      "id": "m7",
+      "date": "2026-09-20",
+      "kind": "transfer",
+      "productId": "p3",
+      "depotId": "w1",
+      "toDepotId": "w2",
+      "qty": 1,
+      "reason": "Yedek depoya aktarım"
+    },
+    {
+      "id": "m8",
+      "date": "2026-09-25",
+      "kind": "giris",
+      "productId": "p2",
+      "depotId": "w1",
+      "qty": 3,
+      "cost": 29600,
+      "reason": "Tedarikçi girişi"
+    },
+    {
+      "id": "m9",
+      "date": "2026-10-05",
+      "kind": "duzeltme",
+      "productId": "p4",
+      "depotId": "w1",
+      "qty": -1,
+      "reason": "Sayım farkı: kutu hasarlı, tedarikçiye iade için ayrıldı"
+    },
+    {
+      "id": "m10",
+      "date": "2026-10-09",
+      "kind": "cikis",
+      "productId": "p2",
+      "depotId": "w1",
+      "qty": 1,
+      "reason": "Montaj",
+      "saleId": "s2",
+      "deviceId": "d7",
+      "customerId": "c3"
+    }
+  ],
+  "calls": [
+    {
+      "id": "k1",
+      "customerId": "c1",
+      "date": "2026-10-08",
+      "result": "tekrar_ara",
+      "callback": "2026-10-17",
+      "note": "Yatak ve çocuk odası için hafta sonu uygun olabilir.",
+      "by": "u1"
+    },
+    {
+      "id": "k2",
+      "customerId": "c4",
+      "date": "2026-09-30",
+      "result": "ulasilamadi",
+      "note": "",
+      "by": "u1"
+    },
+    {
+      "id": "k3",
+      "customerId": "c8",
+      "date": "2026-10-12",
+      "result": "bilgi",
+      "note": "Adres tarifi telefonla alındı; konum doğrulanmadı.",
+      "by": "u1"
+    },
+    {
+      "id": "k4",
+      "customerId": "c10",
+      "date": "2026-10-14",
+      "result": "kabul",
+      "note": "Kontrol için 16 Ekim 15:30 randevusu ayrıca planlandı.",
+      "by": "u1"
+    },
+    {
+      "id": "k5",
+      "customerId": "c7",
+      "date": "2026-10-14",
+      "result": "istemiyor",
+      "note": "Aranmak istemediğini belirtti; iletişim tercihi güncellendi.",
+      "by": "u1"
+    },
+    {
+      "id": "k7",
+      "customerId": "c6",
+      "date": "2026-10-15",
+      "result": "bilgi",
+      "dir": "gelen",
+      "topic": "Şikâyet",
+      "note": "Müşteri aradı: dış ünite yine ses yapıyor. Arıza randevusu 16 Ekim 10:00.",
+      "by": "u1"
+    },
+    {
+      "id": "k6",
+      "customerId": "c11",
+      "date": "2026-10-15",
+      "result": "tekrar_ara",
+      "callback": "2026-10-20",
+      "note": "MSZ-AP50VGK stoğu gelince bilgi verilecek.",
+      "by": "u1"
+    }
+  ],
+  "campaigns": [],
+  "fx": [
+    {
+      "date": "2024-09-10",
+      "usd": 33.9,
+      "eur": 37.55,
+      "src": "demo"
+    },
+    {
+      "date": "2024-09-20",
+      "usd": 34.05,
+      "eur": 37.8,
+      "src": "demo"
+    },
+    {
+      "date": "2025-03-10",
+      "usd": 36.55,
+      "eur": 39.7,
+      "src": "demo"
+    },
+    {
+      "date": "2025-08-20",
+      "usd": 40.9,
+      "eur": 47.6,
+      "src": "demo"
+    },
+    {
+      "date": "2025-09-12",
+      "usd": 41.3,
+      "eur": 48.4,
+      "src": "demo"
+    },
+    {
+      "date": "2025-10-28",
+      "usd": 41.95,
+      "eur": 48.7,
+      "src": "demo"
+    },
+    {
+      "date": "2026-09-01",
+      "usd": 44.6,
+      "eur": 51.8,
+      "src": "demo"
+    },
+    {
+      "date": "2026-10-02",
+      "usd": 44.95,
+      "eur": 52.1,
+      "src": "demo"
+    },
+    {
+      "date": "2026-10-08",
+      "usd": 45.02,
+      "eur": 52.2,
+      "src": "demo"
+    },
+    {
+      "date": "2026-10-13",
+      "usd": 45.08,
+      "eur": 52.3,
+      "src": "demo"
+    },
+    {
+      "date": "2026-10-15",
+      "usd": 45.1,
+      "eur": 52.35,
+      "src": "demo"
+    },
+    {
+      "date": "2026-10-16",
+      "usd": 45.12,
+      "eur": 52.38,
+      "src": "demo"
+    }
+  ],
+  "settings": {
+    "standardInterval": null
+  }
+}

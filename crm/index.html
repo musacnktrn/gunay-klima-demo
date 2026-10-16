@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html><head><title>Günay Klima CRM</title><link rel="icon" href="/gunay-klima-demo/assets/favicon.png"><link rel="stylesheet" href="./app.css"><script src="./react.production.min.js"></script><script src="./react-dom.production.min.js"></script><script src="./rules.js"></script><script src="./api.js"></script><script src="./compiled-components.js"></script><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://*.arcgisonline.com https://*.tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"><meta name="referrer" content="no-referrer">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+
+
+
+
+
+
+
+
+<style>/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	background-image: url("7023ac51-3023-43d5-beca-e3ad48c733d5.bin");
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: url("845e932f-8747-425b-8b09-286fe4b00b98.bin");
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	background-image: url("6a76498c-88bd-4a91-a51b-ad7a3d28e941.bin");
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+</style>
+<script src="e18ce9ea-f869-42df-9c61-8f9cb1d6e341.js"></script>
+<script src="49f19444-270f-4dda-a440-f7401df2be43.js"></script>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("cd5a8a08-8ffc-479e-878d-ed69b71f9e8b.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("e75bbe16-288b-440d-8982-f63c528afa3f.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("852d851e-e314-4de5-8d53-c113c921dd2c.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("c9dd98dd-7ba4-404f-b02d-2026d0d47879.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("2ca2dd17-fc37-4a7f-9093-29edec814721.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("a6825465-705e-449f-8c76-1d08aeb37857.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("4a9efb28-0d99-4212-a5fe-c1169cad808f.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("608ed6ac-9713-491d-a129-23030eba52b8.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("315c742d-a5e8-4712-80f0-1a82cacde585.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("380d5c52-f4b0-41b1-b369-a0b49b6599b3.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("b749fb2c-8888-40ab-9327-80ffd8af981c.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("b85870e7-9e81-461c-b93d-5952e17ded7e.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("41b95e44-9dd8-45e1-9b00-df767be90cb0.woff2") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("06881ef5-3e0b-4654-aa0d-4d884e4b793a.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("3683ee67-21bd-4fcc-b58a-4d2eacd9931c.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("33b120ef-6e46-4ebc-b11b-1fbc433ef3d6.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("b749fb2c-8888-40ab-9327-80ffd8af981c.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("b85870e7-9e81-461c-b93d-5952e17ded7e.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("41b95e44-9dd8-45e1-9b00-df767be90cb0.woff2") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("06881ef5-3e0b-4654-aa0d-4d884e4b793a.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("3683ee67-21bd-4fcc-b58a-4d2eacd9931c.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("33b120ef-6e46-4ebc-b11b-1fbc433ef3d6.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("b749fb2c-8888-40ab-9327-80ffd8af981c.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("b85870e7-9e81-461c-b93d-5952e17ded7e.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("41b95e44-9dd8-45e1-9b00-df767be90cb0.woff2") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("06881ef5-3e0b-4654-aa0d-4d884e4b793a.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("3683ee67-21bd-4fcc-b58a-4d2eacd9931c.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("33b120ef-6e46-4ebc-b11b-1fbc433ef3d6.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("b749fb2c-8888-40ab-9327-80ffd8af981c.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("b85870e7-9e81-461c-b93d-5952e17ded7e.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("41b95e44-9dd8-45e1-9b00-df767be90cb0.woff2") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("06881ef5-3e0b-4654-aa0d-4d884e4b793a.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("3683ee67-21bd-4fcc-b58a-4d2eacd9931c.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("33b120ef-6e46-4ebc-b11b-1fbc433ef3d6.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+
+
+<style>
+html,body{margin:0;background:#DDE0E5;color:#252B32;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:15px;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+*{box-sizing:border-box}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid #B1001A;outline-offset:2px}
+a{color:#B1001A;text-decoration:none}
+a:hover{color:#8F0015;text-decoration:underline}
+.leaflet-container{font-family:'IBM Plex Sans',sans-serif;background:#EEF0F3}
+.leaflet-tile-pane{filter:brightness(1.02)}
+header :focus-visible{outline-color:#FFFFFF}
+@keyframes gkfade{from{opacity:.4}to{opacity:1}}
+button,a,input,select,textarea{transition:background-color .18s cubic-bezier(.4,0,.2,1),border-color .18s cubic-bezier(.4,0,.2,1),color .18s,box-shadow .22s cubic-bezier(.4,0,.2,1),transform .16s cubic-bezier(.4,0,.2,1),opacity .18s}
+button:not(:disabled):active{transform:scale(.98)}
+button:disabled{cursor:not-allowed}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#B1001A!important;box-shadow:0 0 0 3px rgba(177,0,26,.14)}
+::selection{background:#F6D3D8}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:#D5D9DF;border-radius:8px;border:2px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-thumb:hover{background:#B9BFC7;background-clip:content-box}
+@keyframes gkIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes gkPop{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes gkSheet{from{transform:translateY(100%)}to{transform:none}}
+@keyframes gkFadeBg{from{opacity:0}to{opacity:1}}
+@keyframes gkSlideR{from{transform:translateX(32px);opacity:0}to{transform:none;opacity:1}}
+@keyframes gkPulse{0%{transform:scale(.85);opacity:.75}100%{transform:scale(1.9);opacity:0}}
+.leaflet-tooltip{border:none;border-radius:8px;box-shadow:0 8px 22px rgba(37,43,50,.18);font:600 12px 'IBM Plex Sans',sans-serif;color:#252B32;padding:6px 10px}
+.leaflet-control-zoom a{transition:background-color .15s}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column">
+  <div id="workspace-bar" style="height:44px;box-sizing:border-box;background:#252B32;color:#fff;display:flex;align-items:center;gap:10px;padding:6px 12px;font-size:13px;flex:none">
+    <strong style="white-space:nowrap">{{ workspaceLabel }}</strong><span class="workspace-note" style="flex:1;color:#D5D9DF">{{ workspaceNote }}</span>
+    <button sc-camel-on-click="{{ switchSpace }}" style="height:32px;white-space:nowrap;margin-left:auto;border:1px solid #77818D;border-radius:7px;color:#fff;background:transparent;padding:0 9px;cursor:pointer">{{ switchLabel }}</button>
+  </div>
+
+  <div style="flex:1;display:flex;justify-content:center;align-items:flex-start;padding:{{ outerPad }}">
+    <div style="width:{{ boxW }}px;height:{{ boxH }}px;overflow:hidden;border-radius:{{ frameRadius }};box-shadow:{{ frameShadow }};flex:none">
+      <div style="width:{{ fw }}px;height:{{ fh }}px;transform:scale({{ fs }}) translateZ(0);transform-origin:top left;background:#F5F6F8;display:flex;flex-direction:column;position:relative;overflow:hidden">
+
+        <sc-if value="{{ notReady }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#747B85">
+            <img src="/gunay-klima-demo/assets/gunay-logo.png" alt="Günay Klima" style="height:40px;width:auto">
+            <span style="font-size:14px;animation:gkfade 1s ease-in-out infinite alternate">Kayıtlar yükleniyor…</span><sc-if value="{{ loadError }}"><p role="alert">{{ loadError }}</p><button sc-camel-on-click="{{ retryLoad }}">Yeniden dene</button></sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+          <header style="height:{{ topH }}px;flex:none;background:#B1001A;color:#FFFFFF;display:flex;align-items:center;gap:12px;padding:0 {{ padX }}px;position:relative;z-index:30">
+              <div style="width:{{ logoW }};flex:none;display:flex;align-items:center;gap:10px">
+                <span style="flex:none;display:flex;align-items:center;height:{{ logoChipH }}px"><sc-if value="{{ logoOk }}"><img src="/gunay-klima-demo/assets/gunay-logo.png" alt="Günay Klima" sc-camel-on-error="{{ logoErr }}" style="height:{{ logoImgH }}px;width:auto;display:block"></sc-if><sc-if value="{{ logoFail }}"><span style="font-weight:700;font-size:18px;color:#FFFFFF;letter-spacing:.02em">GÜNAY KLİMA</span></sc-if></span>
+              </div>
+              <div style="flex:1;max-width:560px;position:relative">
+                <label style="position:relative;display:block">
+                  <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Ara</span>
+                  <svg width="18" height="18" sc-camel-view-box="0 0 24 24" fill="none" stroke="#747B85" stroke-width="2" stroke-linecap="round" style="position:absolute;left:12px;top:13px" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4"></path></svg>
+                  <input value="{{ q }}" sc-camel-on-change="{{ onQ }}" sc-camel-on-focus="{{ onQFocus }}" sc-camel-on-key-down="{{ onQKey }}" role="combobox" aria-expanded="{{ sOpen }}" aria-autocomplete="list" autocomplete="off" placeholder="{{ searchPh }}" style="width:100%;height:44px;padding:0 12px 0 40px;border:1px solid #FFFFFF;border-radius:10px;background:#FFFFFF;color:#252B32;font-size:15px" style-focus="box-shadow:0 0 0 3px rgba(255,255,255,.45)">
+                </label>
+                <sc-if value="{{ sOpen }}">
+                  <div class="gk-search-results" style="animation:gkIn .16s cubic-bezier(.2,.8,.2,1);position:absolute;left:0;right:0;top:50px;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;box-shadow:0 12px 32px rgba(37,43,50,.14);max-height:440px;overflow:auto;padding:8px;z-index:40;color:#252B32;min-width:{{ srMin }}">
+                    <sc-if value="{{ sr.none }}"><div style="padding:16px;font-size:14px;color:#4B525B">“{{ q }}” için sonuç bulunamadı. Ad, telefon, seri numarası, model veya mahalle deneyin.</div></sc-if>
+                    <sc-if value="{{ sr.hasSug }}">
+                      <div style="font-size:12px;font-weight:700;color:#747B85;padding:8px 8px 4px">BUGÜN VE SON İŞLEMLER</div>
+                      <sc-for list="{{ sr.sug }}" as="r"><button sc-camel-on-click="{{ r.go }}" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:8px;border:none;background:{{ r.bg }};color:#252B32;border-radius:8px;cursor:pointer;text-align:left" style-hover="background:#F5F6F8"><span style="font-weight:600">{{ r.title }}</span><span style="font-size:13px;color:#747B85">{{ r.sub }}</span></button></sc-for>
+                      <div style="font-size:12px;color:#A0A6AE;padding:6px 8px">Yazmaya başlayın: ilk harfle öneriler gelir · ↑ ↓ ile seçin, Enter ile açın</div>
+                    </sc-if>
+                    <sc-if value="{{ sr.hasC }}">
+                      <div style="font-size:12px;font-weight:700;color:#747B85;padding:8px 8px 4px">MÜŞTERİLER</div>
+                      <sc-for list="{{ sr.customers }}" as="r"><button sc-camel-on-click="{{ r.go }}" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:8px;border:none;background:{{ r.bg }};color:#252B32;border-radius:8px;cursor:pointer;text-align:left" style-hover="background:#F5F6F8"><span style="font-weight:600">{{ r.title }}</span><span style="font-size:13px;color:#747B85">{{ r.sub }}</span></button></sc-for>
+                    </sc-if>
+                    <sc-if value="{{ sr.hasD }}">
+                      <div style="font-size:12px;font-weight:700;color:#747B85;padding:8px 8px 4px">CİHAZLAR</div>
+                      <sc-for list="{{ sr.devices }}" as="r"><button sc-camel-on-click="{{ r.go }}" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:8px;border:none;background:{{ r.bg }};color:#252B32;border-radius:8px;cursor:pointer;text-align:left" style-hover="background:#F5F6F8"><span style="font-weight:600">{{ r.title }}</span><span style="font-size:13px;color:#747B85">{{ r.sub }}</span></button></sc-for>
+                    </sc-if>
+                    <sc-if value="{{ sr.hasS }}">
+                      <div style="font-size:12px;font-weight:700;color:#747B85;padding:8px 8px 4px">SATIŞLAR</div>
+                      <sc-for list="{{ sr.sales }}" as="r"><button sc-camel-on-click="{{ r.go }}" style="display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:8px;border:none;background:{{ r.bg }};color:#252B32;border-radius:8px;cursor:pointer;text-align:left" style-hover="background:#F5F6F8"><span style="font-weight:600">{{ r.title }}</span><span style="font-size:13px;color:#747B85">{{ r.sub }}</span></button></sc-for>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ notMobile }}"><div style="flex:1"></div></sc-if>
+              <sc-if value="{{ offline }}"><span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:#FFFFFF;color:#A3001A;font-size:12px;font-weight:700">Bağlantı yok</span></sc-if>
+              <sc-if value="{{ notMobile }}">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:36px;height:36px;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#B1001A">GK</div>
+                  <div style="display:flex;flex-direction:column;line-height:1.25"><span style="font-size:14px;font-weight:600;color:#FFFFFF">Günay Klima</span><span style="font-size:12px;color:#F6D3D8">Yetkili kullanıcı</span></div>
+                </div>
+              </sc-if>
+            </header>
+          <div style="flex:1;display:flex;min-height:0">
+          <sc-if value="{{ notMobile }}" hint-placeholder-val="{{ true }}">
+            <nav aria-label="Ana menü" style="width:{{ sideW }}px;flex:none;background:#FFFFFF;border-right:1px solid #E7E9ED;display:flex;flex-direction:column;padding:16px 12px;gap:4px;overflow-y:auto">
+              <div style="padding:4px 12px 10px;font-size:12px;font-weight:600;color:#747B85;letter-spacing:.04em">MENÜ</div>
+              <sc-for list="{{ nav }}" as="n" hint-placeholder-count="6">
+                <button sc-camel-on-click="{{ n.go }}" aria-current="{{ n.cur }}" style="display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:8px;border:none;cursor:pointer;text-align:left;font-size:15px;font-weight:{{ n.fw }};background:{{ n.bg }};color:{{ n.fg }}" style-hover="background:#F5F6F8">
+                  <svg width="20" height="20" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path sc-camel-d="{{ n.icon }}"></path></svg>
+                  <span style="flex:1">{{ n.label }}</span>
+                  <sc-if value="{{ n.count }}"><span style="min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:#FDECEE;color:#A3001A;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">{{ n.count }}</span></sc-if>
+                </button>
+              </sc-for>
+              <div style="height:1px;background:#E7E9ED;margin:12px 8px"></div>
+              <sc-for list="{{ nav2 }}" as="n" hint-placeholder-count="2">
+                <button sc-camel-on-click="{{ n.go }}" aria-current="{{ n.cur }}" style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:8px;border:none;cursor:pointer;text-align:left;font-size:14px;font-weight:{{ n.fw }};background:{{ n.bg }};color:{{ n.fg }}" style-hover="background:#F5F6F8">
+                  <svg width="18" height="18" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path sc-camel-d="{{ n.icon }}"></path></svg>
+                  <span>{{ n.label }}</span>
+                </button>
+              </sc-for>
+              <div style="flex:1"></div>
+              <div style="padding:12px 8px 0;border-top:1px solid #E7E9ED;font-size:12px;color:#747B85;line-height:1.5">Günay Klima · Bornova<br>0232 461 74 25</div>
+            </nav>
+          </sc-if>
+
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+            
+
+            <main ref="{{ mainRef }}" style="flex:1;overflow-y:auto;overflow-x:hidden;padding:{{ mainPad }}" sc-camel-on-click="{{ closeSearch }}">
+              <sc-if value="{{ is.bugun }}"><dc-import name="EkranBugun" db="{{ db }}" act="{{ act }}" bp="{{ bp }}" params="{{ params }}" saving="{{ saving }}" hint-size="100%,900px"></dc-import></sc-if>
+              <sc-if value="{{ is.musteriler }}"><dc-import name="EkranMusteriler" db="{{ db }}" act="{{ act }}" bp="{{ bp }}" params="{{ params }}" saving="{{ saving }}" hint-size="100%,900px"></dc-import></sc-if>
+              <sc-if value="{{ is.satis }}"><dc-import name="EkranSatis" db="{{ db }}" act="{{ act }}" bp="{{ bp }}" params="{{ params }}" saving="{{ saving }}" hint-size="100%,900px"></dc-import></sc-if>
+              <sc-if value="{{ is.bakim }}"><dc-import name="EkranBakim" db="{{ db }}" act="{{ act }}" bp="{{ bp }}" params="{{ params }}" saving="{{ saving }}" hint-size="100%,900px"></dc-import></sc-if>
+              <sc-if value="{{ is.harita }}"><dc-import name="EkranHarita" db="{{ db }}" act="{{ act }}" bp="{{ bp }}" params="{{ params }}" saving="{{ saving }}" hint-size="100%,900px"></dc-import></sc-if>
+              <sc-if value="{{ is.depo }}"><dc-import name="EkranDepo" db="{{ db }}" act="{{ act }}" bp="{{ bp }}" params="{{ params }}" saving="{{ saving }}" hint-size="100%,900px"></dc-import></sc-if>
+              <sc-if value="{{ is.raporlar }}"><dc-import name="EkranRaporlar" db="{{ db }}" act="{{ act }}" bp="{{ bp }}" params="{{ params }}" saving="{{ saving }}" hint-size="100%,900px"></dc-import></sc-if>
+              <sc-if value="{{ is.ayarlar }}"><dc-import name="EkranAyarlar" db="{{ db }}" act="{{ act }}" bp="{{ bp }}" params="{{ params }}" saving="{{ saving }}" hint-size="100%,900px"></dc-import></sc-if>
+            </main>
+
+            <sc-if value="{{ mobile }}">
+              <sc-if value="{{ fab.show }}">
+                <button sc-camel-on-click="{{ fab.run }}" style="position:absolute;right:16px;bottom:84px;z-index:35;height:52px;padding:0 20px;border-radius:999px;border:none;background:#B1001A;color:#FFFFFF;font-size:15px;font-weight:600;box-shadow:0 6px 18px rgba(177,0,26,.35);cursor:pointer">+ {{ fab.label }}</button>
+              </sc-if>
+              <nav aria-label="Ana menü" style="height:68px;flex:none;background:#FFFFFF;border-top:1px solid #E7E9ED;display:grid;grid-template-columns:repeat(5,1fr);position:relative;z-index:36">
+                <sc-for list="{{ mnav }}" as="n" hint-placeholder-count="5">
+                  <button sc-camel-on-click="{{ n.go }}" aria-current="{{ n.cur }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:{{ n.fw }};color:{{ n.fg }}">
+                    <svg width="22" height="22" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path sc-camel-d="{{ n.icon }}"></path></svg>
+                    <span>{{ n.label }}</span>
+                  </button>
+                </sc-for>
+              </nav>
+              <sc-if value="{{ more }}">
+                <div sc-camel-on-click="{{ closeMore }}" style="position:absolute;inset:0;background:rgba(20,24,28,.4);z-index:37"></div>
+                <div style="position:absolute;left:0;right:0;bottom:68px;background:#FFFFFF;border-radius:16px 16px 0 0;padding:12px;z-index:38;display:flex;flex-direction:column;gap:4px">
+                  <sc-for list="{{ moreItems }}" as="n"><button sc-camel-on-click="{{ n.go }}" style="display:flex;align-items:center;gap:12px;height:52px;padding:0 12px;border:none;background:none;border-radius:8px;font-size:16px;font-weight:500;cursor:pointer;text-align:left"><svg width="20" height="20" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path sc-camel-d="{{ n.icon }}"></path></svg>{{ n.label }}</button></sc-for>
+                </div>
+              </sc-if>
+            </sc-if>
+          </div>
+
+          </div>
+          <sc-if value="{{ toast }}">
+            <div role="status" style="animation:gkIn .24s cubic-bezier(.2,.8,.2,1);position:absolute;left:50%;transform:translateX(-50%);bottom:{{ toastBottom }}px;z-index:3000;max-width:calc(100% - 32px);display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:#252B32;color:#FFFFFF;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.25)">
+              <span style="width:8px;height:8px;border-radius:50%;flex:none;background:{{ toastDot }}"></span><span>{{ toast.text }}</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ scen }}">
+            <div sc-camel-on-click="{{ closeScen }}" style="position:absolute;inset:0;background:rgba(20,24,28,.4);z-index:2500;animation:gkFadeBg .2s ease"></div>
+            <aside aria-label="Senaryolar" style="animation:gkSlideR .28s cubic-bezier(.2,.8,.2,1);position:absolute;top:0;right:0;bottom:0;width:{{ scenW }};background:#FFFFFF;z-index:2501;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.15)">
+              <div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #E7E9ED">
+                <div style="flex:1"><div style="font-size:18px;font-weight:600">Gösterilecek senaryolar</div><div style="font-size:13px;color:#747B85">Her senaryo ilgili ekranı ve kaydı açar.</div></div>
+                <button sc-camel-on-click="{{ closeScen }}" aria-label="Kapat" style="width:44px;height:44px;border:none;background:none;font-size:22px;cursor:pointer;border-radius:8px">×</button>
+              </div>
+              <div style="flex:1;overflow:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ scenarios }}" as="x" hint-placeholder-count="10">
+                  <button sc-camel-on-click="{{ x.go }}" style="display:grid;grid-template-columns:36px 1fr;gap:12px;text-align:left;padding:12px;border:1px solid #E7E9ED;border-radius:12px;background:#FFFFFF;cursor:pointer" style-hover="border-color:#B1001A;box-shadow:0 6px 18px rgba(177,0,26,.10);transform:translateY(-1px)">
+                    <span style="width:36px;height:36px;border-radius:8px;background:#FBEFF1;color:#B1001A;font-weight:700;display:flex;align-items:center;justify-content:center">{{ x.k }}</span>
+                    <span style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:15px">{{ x.t }}</span><span style="font-size:13px;color:#4B525B;line-height:1.45">{{ x.d }}</span></span>
+                  </button>
+                </sc-for>
+                <div style="font-size:12px;font-weight:700;color:#747B85;padding:12px 4px 0">DURUM ÖRNEKLERİ</div>
+                <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #E7E9ED;border-radius:12px;font-size:14px;cursor:pointer"><input type="checkbox" checked="{{ offline }}" sc-camel-on-change="{{ toggleOffline }}" style="width:20px;height:20px;accent-color:#B1001A">Bağlantı kopmasını dene (kayıtlar başarısız olur, form verisi korunur)</label>
+                <button sc-camel-on-click="{{ showLoading }}" style="height:44px;border:1px solid #D5D9DF;border-radius:10px;background:#FFFFFF;cursor:pointer;font-weight:500">Yükleniyor durumunu göster</button>
+              </div>
+            </aside>
+          </sc-if>
+
+          <sc-if value="{{ anyModal }}">
+            <div sc-camel-on-click="{{ tryClose }}" style="position:absolute;inset:0;background:rgba(20,24,28,.45);z-index:2000;animation:gkFadeBg .2s ease;backdrop-filter:blur(2px)"></div>
+            <div style="position:absolute;inset:0;z-index:2001;display:flex;align-items:{{ mAlign }};justify-content:center;padding:{{ mPad }};pointer-events:none">
+              <div ref="{{ panelRef }}" tabindex="-1" role="dialog" aria-modal="true" aria-label="{{ modalTitle }}" style="animation:{{ mAnim }};pointer-events:auto;width:100%;max-width:{{ mMax }};max-height:{{ mMaxH }};overflow:auto;background:#FFFFFF;border-radius:{{ mRadius }};box-shadow:0 20px 48px rgba(0,0,0,.2);display:flex;flex-direction:column">
+                <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #E7E9ED;position:sticky;top:0;background:#FFFFFF;z-index:2">
+                  <div style="flex:1;font-size:18px;font-weight:600">{{ modalTitle }}</div>
+                  <button sc-camel-on-click="{{ tryClose }}" aria-label="Kapat" style="width:44px;height:44px;border:none;background:none;font-size:22px;cursor:pointer;border-radius:8px">×</button>
+                </div>
+                <sc-if value="{{ askClose }}">
+                  <div style="margin:16px 20px 0;padding:12px 14px;border-radius:10px;background:#FFF1D1;color:#5C3800;font-size:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+                    <span style="flex:1 1 200px;font-weight:600">Kaydedilmemiş değişiklikler var. Çıkarsanız girdiğiniz bilgiler kaybolur.</span>
+                    <button sc-camel-on-click="{{ keepEditing }}" style="height:40px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:600">Forma dön</button>
+                    <button sc-camel-on-click="{{ closeNow }}" style="height:40px;padding:0 14px;border-radius:8px;border:1px solid #A3001A;background:#FFFFFF;color:#A3001A;cursor:pointer;font-weight:600">Kaydetmeden çık</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ formError }}">
+                  <div role="alert" style="margin:16px 20px 0;padding:12px 14px;border-radius:10px;background:#FDECEE;color:#A3001A;font-size:14px;font-weight:600">{{ formError }}</div>
+                </sc-if>
+
+                <sc-if value="{{ mo.customer }}">
+                  <sc-if value="{{ cu.form }}">
+                    <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+                      <div style="font-size:14px;color:#4B525B">Müşteri ve tam adresi birlikte kaydedin. İsterseniz ilk klimayı da aynı formda ekleyin.</div>
+                      <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Müşteri türü *</span>
+                        <div style="display:flex;gap:8px"><sc-for list="{{ cu.types }}" as="o"><button sc-camel-on-click="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="flex:1;height:44px;border-radius:8px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:600;cursor:pointer">{{ o.l }}</button></sc-for></div>
+                      </div>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600"><span>{{ cu.nameLabel }} *</span><input value="{{ fv.name }}" sc-camel-on-change="{{ on.name }}" style="height:44px;padding:0 12px;border:1px solid {{ eb.name }};border-radius:8px;font-size:15px;font-weight:400"><sc-if value="{{ err.name }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.name }}</span></sc-if></label>
+                      <sc-if value="{{ cu.isFirm }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Yetkili kişi<input value="{{ fv.person }}" sc-camel-on-change="{{ on.person }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label></sc-if>
+                      <div style="display:flex;flex-direction:column;gap:6px">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;flex:1">Telefon *</span><div role="group" aria-label="Numara türü" style="display:flex;gap:2px;padding:3px;background:#EEF0F3;border-radius:8px"><sc-for list="{{ cu.phoneModes }}" as="o"><button sc-camel-on-click="{{ o.pick }}" aria-pressed="{{ o.sel }}" disabled="{{ fc.phoneUnknown }}" style="height:30px;padding:0 10px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.l }}</button></sc-for></div></div>
+                        <input type="tel" inputmode="tel" autocomplete="tel" aria-label="Telefon" aria-invalid="{{ cu.phInvalid }}" value="{{ fv.phone }}" sc-camel-on-change="{{ on.phone }}" sc-camel-on-focus="{{ cu.phoneFocus }}" disabled="{{ fc.phoneUnknown }}" placeholder="{{ cu.phonePh }}" style="height:46px;padding:0 12px;border:1px solid {{ cu.phoneBd }};border-radius:8px;font-size:17px;font-weight:500;letter-spacing:.04em;font-family:'IBM Plex Mono',monospace;background:{{ cu.phoneBg }}">
+                        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px"><span style="color:{{ cu.phStFg }};font-weight:600">{{ cu.phSt }}</span><span style="color:#747B85">{{ cu.phHint }}</span></div>
+                        <sc-if value="{{ err.phone }}"><span role="alert" style="font-size:13px;color:#A3001A;font-weight:500">{{ err.phone }}</span></sc-if>
+                      </div>
+                      <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;min-height:32px"><input type="checkbox" checked="{{ fc.phoneUnknown }}" sc-camel-on-change="{{ on.phoneUnknown }}" style="width:20px;height:20px;accent-color:#B1001A">Telefon bilinmiyor — “Belirtilmedi” olarak kaydet</label>
+                      <sc-if value="{{ cu.hasMatch }}">
+                        <div role="status" style="border:1px solid {{ cu.mBd }};border-radius:12px;overflow:hidden;animation:gkIn .22s cubic-bezier(.2,.8,.2,1)">
+                          <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:{{ cu.mBg }};color:{{ cu.mFg }};font-size:13px;font-weight:700"><span style="width:8px;height:8px;border-radius:50%;background:{{ cu.mFg }}"></span>{{ cu.mTitle }}</div>
+                          <sc-for list="{{ cu.matches }}" as="x">
+                            <div style="padding:12px 14px;border-top:1px solid #EEF0F3;display:flex;flex-direction:column;gap:8px;background:#FFFFFF">
+                              <div style="display:flex;gap:10px;align-items:flex-start">
+                                <div style="width:38px;height:38px;border-radius:50%;background:#F5F6F8;border:1px solid #E7E9ED;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#4B525B;flex:none">{{ x.ini }}</div>
+                                <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-weight:600;font-size:15px">{{ x.name }}</span><span style="font-size:13px;color:#4B525B">{{ x.phone }} · {{ x.addr }}</span><span style="font-size:12px;color:#747B85">{{ x.meta }}</span></div>
+                                <span style="font-size:12px;font-weight:700;color:{{ x.lvFg }};white-space:nowrap">{{ x.level }}</span>
+                              </div>
+                              <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ x.reasons }}" as="r"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;background:{{ r.bg }};color:{{ r.fg }}">{{ r.l }}</span></sc-for></div>
+                              <div style="display:flex;gap:6px;flex-wrap:wrap"><button sc-camel-on-click="{{ x.open }}" style="height:36px;padding:0 12px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;font-weight:600;font-size:13px;cursor:pointer">{{ x.openL }}</button><sc-if value="{{ x.canAdd }}"><button sc-camel-on-click="{{ x.addAddr }}" style="height:36px;padding:0 12px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;font-size:13px;cursor:pointer">Bu müşteriye adres ekle</button></sc-if></div>
+                            </div>
+                          </sc-for>
+                          <sc-if value="{{ cu.needConfirm }}"><label style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-top:1px solid #EEF0F3;font-size:14px;cursor:pointer;background:#FFFFFF"><input type="checkbox" checked="{{ fc.dupOk }}" sc-camel-on-change="{{ on.dupOk }}" style="width:20px;height:20px;accent-color:#B1001A">Kontrol ettim, bu farklı bir müşteri; yeni kayıt aç</label></sc-if>
+                        </div>
+                      </sc-if>
+<label class="gk-field">İletişim tercihi<select aria-label="İletişim tercihi" value="{{ fv.contact }}" data-v="{{ fv.contact }}" sc-camel-on-change="{{ on.contact }}"><option value="bilinmiyor">Bilinmiyor</option><option value="izinli">İzinli</option><option value="istemiyor">İletişim istemiyor</option></select><span style="font-size:12px;font-weight:400;color:#4B525B">Yakın bakım kampanyasına yalnız izinli müşteriler alınır.</span></label>
+                      <sc-if value="{{ cu.addrClosed }}"><button sc-camel-on-click="{{ cu.openAddr }}" style="align-self:flex-start;height:44px;padding:0 16px;border-radius:8px;border:1px dashed #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">+ Adres ekle</button></sc-if>
+                      <sc-if value="{{ cu.addrOpen }}">
+                        <div style="display:flex;flex-direction:column;gap:12px;padding:14px;border:1px solid #E7E9ED;border-radius:12px;background:#FAFBFC;animation:gkIn .22s cubic-bezier(.2,.8,.2,1)">
+                          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:600;flex:1">Adres</span><span style="font-size:12px;color:#A3001A">Zorunlu</span></div>
+                          <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ cu.labels }}" as="o"><button sc-camel-on-click="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:36px;padding:0 12px;border-radius:999px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:600;font-size:13px;cursor:pointer">{{ o.l }}</button></sc-for></div>
+                          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Açık adres *<input value="{{ fv.line }}" sc-camel-on-change="{{ on.line }}" placeholder="Mahalle, sokak, bina ve kapı no" style="height:44px;padding:0 12px;border:1px solid {{ eb.line }};border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><sc-if value="{{ err.line }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.line }}</span></sc-if></label><div class="gk-grid"><label class="gk-field">İl *<input value="{{ fv.city }}" sc-camel-on-change="{{ on.city }}" placeholder="Örn. İzmir" style="border-color:{{ eb.city }}"><sc-if value="{{ err.city }}"><span class="gk-error">{{ err.city }}</span></sc-if></label><label class="gk-field">Bina no *<input value="{{ fv.buildingNo }}" sc-camel-on-change="{{ on.buildingNo }}" placeholder="12/A" style="border-color:{{ eb.buildingNo }}"><sc-if value="{{ err.buildingNo }}"><span class="gk-error">{{ err.buildingNo }}</span></sc-if></label><label class="gk-field">Daire / iş yeri kapı no *<input value="{{ fv.doorNo }}" sc-camel-on-change="{{ on.doorNo }}" placeholder="3 veya Müstakil" style="border-color:{{ eb.doorNo }}"><sc-if value="{{ err.doorNo }}"><span class="gk-error">{{ err.doorNo }}</span></sc-if></label></div>
+                          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+                            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Mahalle *<input value="{{ fv.mah }}" sc-camel-on-change="{{ on.mah }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"></label>
+                            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">İlçe *<input value="{{ fv.ilce }}" sc-camel-on-change="{{ on.ilce }}" placeholder="Bornova" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"></label>
+                          </div>
+                          <span style="font-size:12px;color:#747B85">Haritadaki konum kayıttan sonra işaretlenir; adres metni konumun doğrulandığı anlamına gelmez.</span>
+                        </div>
+                      </sc-if>
+                      
+<sc-if value="{{ cu.addrOpen }}"><section style="padding:14px;border:1px solid #D5D9DF;border-radius:12px;display:flex;flex-direction:column;gap:12px"><label style="display:flex;align-items:center;gap:10px;font-weight:600"><input type="checkbox" checked="{{ fc.withDevice }}" sc-camel-on-change="{{ on.withDevice }}" style="width:20px;height:20px;accent-color:#B1001A">İlk klimayı şimdi ekle</label><span style="font-size:13px;color:#4B525B">Mevcut cihaz kaydı açar. Yeni satılan klima için müşteri kaydından sonra Satış bölümünü kullanın.</span><sc-if value="{{ fc.withDevice }}"><label class="gk-field">Klima modeli<select aria-label="İlk klima modeli" data-v="{{ fv.firstProductId }}" value="{{ fv.firstProductId }}" sc-camel-on-change="{{ on.firstProductId }}"><option value="">Katalogdan seçin</option><sc-for list="{{ cu.products }}" as="p"><option value="{{ p.id }}">{{ p.label }}</option></sc-for></select></label><label class="gk-field">Katalog dışı model (katalogdan seçtiyseniz boş bırakın)<input value="{{ fv.firstExternalModel }}" sc-camel-on-change="{{ on.firstExternalModel }}" placeholder="" style="border-color:{{ eb.firstExternalModel }}"><sc-if value="{{ err.firstExternalModel }}"><span class="gk-error">{{ err.firstExternalModel }}</span></sc-if></label><label class="gk-field">Oda / konum *<input value="{{ fv.firstRoom }}" sc-camel-on-change="{{ on.firstRoom }}" placeholder="Salon" style="border-color:{{ eb.firstRoom }}"><sc-if value="{{ err.firstRoom }}"><span class="gk-error">{{ err.firstRoom }}</span></sc-if></label><label class="gk-field">İç ünite seri no (varsa)<input value="{{ fv.firstSerial }}" sc-camel-on-change="{{ on.firstSerial }}"></label><span class="gk-error">{{ err.firstProductId }} {{ err.firstRoom }} {{ err.firstSerial }}</span></sc-if></section></sc-if>                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Not<textarea value="{{ fv.note }}" sc-camel-on-change="{{ on.note }}" rows="2" style="padding:10px 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;resize:vertical"></textarea></label>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #E7E9ED;flex-wrap:wrap">
+                      <button sc-camel-on-click="{{ tryClose }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Vazgeç</button>
+                      <button sc-camel-on-click="{{ cu.save }}" disabled="{{ saving }}" style="height:44px;padding:0 20px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;opacity:{{ saveOp }}">{{ saveLabel }}</button>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ cu.done }}">
+                    <div style="padding:24px 20px;display:flex;flex-direction:column;gap:16px">
+                      <div style="padding:14px 16px;border-radius:10px;background:#E5F3EB;color:#1B6B3F;font-weight:600">{{ cu.doneText }}</div>
+                      <div style="font-size:14px;color:#4B525B">{{ cu.doneSub }}</div>
+                      <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <button sc-camel-on-click="{{ cu.next }}" style="height:44px;padding:0 18px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600">{{ cu.nextL }}</button>
+                        <button sc-camel-on-click="{{ cu.openFile }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Müşteri dosyasını aç</button>
+                        <button sc-camel-on-click="{{ closeNow }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Kapat</button>
+                      </div>
+                    </div>
+                  </sc-if>
+                </sc-if>
+
+                <sc-if value="{{ mo.address }}">
+                  <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+                    <div style="font-size:14px;color:#4B525B">{{ adr.cname }}</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ adr.labels }}" as="o"><button sc-camel-on-click="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:40px;padding:0 14px;border-radius:999px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:600;cursor:pointer">{{ o.l }}</button></sc-for></div>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Açık adres *<input value="{{ fv.line }}" sc-camel-on-change="{{ on.line }}" style="height:44px;padding:0 12px;border:1px solid {{ eb.line }};border-radius:8px;font-size:15px;font-weight:400"><sc-if value="{{ err.line }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.line }}</span></sc-if></label><div class="gk-grid"><label class="gk-field">İl *<input value="{{ fv.city }}" sc-camel-on-change="{{ on.city }}" placeholder="Örn. İzmir" style="border-color:{{ eb.city }}"><sc-if value="{{ err.city }}"><span class="gk-error">{{ err.city }}</span></sc-if></label><label class="gk-field">Bina no *<input value="{{ fv.buildingNo }}" sc-camel-on-change="{{ on.buildingNo }}" placeholder="12/A" style="border-color:{{ eb.buildingNo }}"><sc-if value="{{ err.buildingNo }}"><span class="gk-error">{{ err.buildingNo }}</span></sc-if></label><label class="gk-field">Daire / iş yeri kapı no *<input value="{{ fv.doorNo }}" sc-camel-on-change="{{ on.doorNo }}" placeholder="3 veya Müstakil" style="border-color:{{ eb.doorNo }}"><sc-if value="{{ err.doorNo }}"><span class="gk-error">{{ err.doorNo }}</span></sc-if></label></div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Mahalle *<input value="{{ fv.mah }}" sc-camel-on-change="{{ on.mah }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">İlçe *<input value="{{ fv.ilce }}" sc-camel-on-change="{{ on.ilce }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></label>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600">Haritada konum</span><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ adr.loc.fg }};background:{{ adr.loc.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ adr.loc.dot }}"></span>{{ adr.loc.label }}</span></div>
+                      <dc-import name="HaritaBileseni" pins="{{ adr.pins }}" center="{{ adr.center }}" zoom="{{ adr.zoom }}" pick-mode="{{ true }}" on-pick="{{ adr.onPick }}" height="240px" note="Pin seçmek için haritaya tıklayın" hint-size="100%,240px"></dc-import>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                        <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Enlem<input inputmode="decimal" value="{{ fv.lat }}" sc-camel-on-change="{{ on.lat }}" style="height:44px;padding:0 12px;border:1px solid {{ eb.coord }};border-radius:8px;font-size:15px;font-weight:400;font-family:'IBM Plex Mono',monospace"></label>
+                        <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Boylam<input inputmode="decimal" value="{{ fv.lng }}" sc-camel-on-change="{{ on.lng }}" style="height:44px;padding:0 12px;border:1px solid {{ eb.coord }};border-radius:8px;font-size:15px;font-weight:400;font-family:'IBM Plex Mono',monospace"></label>
+                      </div>
+                      <sc-if value="{{ err.coord }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.coord }}</span></sc-if>
+                      <label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;cursor:pointer;min-height:32px"><input type="checkbox" checked="{{ fc.verified }}" sc-camel-on-change="{{ on.verified }}" style="width:20px;height:20px;accent-color:#B1001A">Konumu doğruladım</label>
+                      <span style="font-size:12px;color:#747B85;line-height:1.5">Adres metninin bulunması pinin doğru olduğu anlamına gelmez. Doğrulanmamış adresler yakın bakım gruplarına otomatik alınmaz. Sistem adresten otomatik konum tahmini yapmaz.</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #E7E9ED">
+                    <button sc-camel-on-click="{{ tryClose }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Vazgeç</button>
+                    <button sc-camel-on-click="{{ adr.save }}" disabled="{{ saving }}" style="height:44px;padding:0 20px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;opacity:{{ saveOp }}">{{ saveLabel }}</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ mo.appt }}">
+                  <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Müşteri *<sc-raw-select value="{{ fv.customerId }}" data-v="{{ fv.customerId }}" sc-camel-on-change="{{ ap.onCustomer }}" style="height:44px;padding:0 10px;border:1px solid {{ eb.customerId }};border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><sc-for list="{{ ap.customers }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></sc-raw-select></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Adres *<sc-raw-select value="{{ fv.addressId }}" data-v="{{ fv.addressId }}" sc-camel-on-change="{{ ap.onAddress }}" style="height:44px;padding:0 10px;border:1px solid {{ eb.addressId }};border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><sc-for list="{{ ap.addrs }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></sc-raw-select></label>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:13px;font-weight:600">Bu adresteki cihazlar — işlem yapılacakları seçin *</span>
+                      <sc-if value="{{ ap.noAddr }}"><span style="font-size:14px;color:#747B85">Önce müşteri ve adres seçin.</span></sc-if>
+                      <sc-if value="{{ ap.noDevs }}"><span style="font-size:14px;color:#747B85">Bu adreste kayıtlı cihaz yok.</span></sc-if>
+                      <sc-for list="{{ ap.devs }}" as="d">
+                        <label style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid {{ d.bd }};border-radius:10px;cursor:pointer;background:{{ d.bg }};flex-wrap:wrap">
+                          <input type="checkbox" checked="{{ d.checked }}" sc-camel-on-change="{{ d.toggle }}" style="width:20px;height:20px;accent-color:#B1001A">
+                          <span style="flex:1 1 160px;display:flex;flex-direction:column"><span style="font-weight:600;font-size:14px">{{ d.room }}</span><span style="font-size:13px;color:#747B85;font-family:'IBM Plex Mono',monospace">{{ d.title }}</span></span>
+                          <span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ d.st.fg }};background:{{ d.st.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ d.st.dot }}"></span>{{ d.st.label }}</span>
+                        </label>
+                      </sc-for>
+                      <sc-if value="{{ err.deviceIds }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.deviceIds }}</span></sc-if>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">İş türü</span>
+                      <div style="display:flex;gap:8px"><sc-for list="{{ ap.types }}" as="o"><button sc-camel-on-click="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="flex:1;height:44px;border-radius:8px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:600;cursor:pointer">{{ o.l }}</button></sc-for></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Tarih *<input type="date" value="{{ fv.date }}" sc-camel-on-change="{{ on.date }}" style="height:44px;padding:0 10px;border:1px solid {{ eb.date }};border-radius:8px;font-size:15px;font-weight:400"></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Saat *<input type="time" step="900" value="{{ fv.start }}" sc-camel-on-change="{{ on.start }}" style="height:44px;padding:0 10px;border:1px solid {{ eb.start }};border-radius:8px;font-size:15px;font-weight:400"></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Süre<sc-raw-select value="{{ fv.dur }}" data-v="{{ fv.dur }}" sc-camel-on-change="{{ on.dur }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="30">30 dk</option><option value="60">1 saat</option><option value="90">1,5 saat</option><option value="120">2 saat</option><option value="180">3 saat</option></sc-raw-select></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Sorumlu teknisyen *<sc-raw-select value="{{ fv.techId }}" data-v="{{ fv.techId }}" sc-camel-on-change="{{ on.techId }}" style="height:44px;padding:0 10px;border:1px solid {{ eb.techId }};border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><sc-for list="{{ ap.techs }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></sc-raw-select></label>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:start">
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Yol / hazırlık boşluğu<sc-raw-select value="{{ fv.buffer }}" data-v="{{ fv.buffer }}" sc-camel-on-change="{{ on.buffer }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="0">Boşluk yok</option><option value="10">10 dk</option><option value="15">15 dk</option><option value="20">20 dk</option><option value="30">30 dk</option><option value="45">45 dk</option></sc-raw-select><span style="font-size:12px;color:#747B85;font-weight:400">Kullanıcı tanımlı. Haritadan veya trafikten hesaplanmaz.</span></label>
+                      <div style="padding:10px 12px;border-radius:8px;background:#F5F6F8;font-size:14px;line-height:1.5"><sc-if value="{{ ap.hasTime }}">İş {{ ap.endText }}’de biter · teknisyen <strong>{{ ap.freeText }}</strong>’den itibaren müsait</sc-if><sc-if value="{{ ap.noTime }}">Saat seçince bitiş ve sonraki müsaitlik burada görünür.</sc-if></div>
+                    </div>
+                    <sc-if value="{{ ap.off }}"><div style="padding:10px 12px;border-radius:8px;background:#FFF1D1;color:#5C3800;font-size:13px">{{ ap.off }}. Çalışma saati ve mola kontrolü tasarım önerisidir; çekirdekte şimdilik yalnız iş saati çakışması kontrol edilir.</div></sc-if>
+                    <sc-if value="{{ ap.conflict }}">
+                      <div role="alert" style="padding:14px 16px;border-radius:10px;background:#FDECEE;border:1px solid #F3C2C9;display:flex;flex-direction:column;gap:10px">
+                        <div style="font-weight:700;color:#A3001A;font-size:14px">Çakışma: {{ ap.techName }} bu saatte başka işte</div>
+                        <sc-for list="{{ ap.conflicts }}" as="c"><div style="font-size:14px;color:#252B32">{{ c.text }}</div></sc-for>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600">Uygun saatler:</span><sc-for list="{{ ap.slots }}" as="t"><button sc-camel-on-click="{{ t.pick }}" style="height:36px;padding:0 12px;border-radius:999px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;font-weight:600;cursor:pointer">{{ t.t }}</button></sc-for><sc-if value="{{ ap.noSlots }}"><span style="font-size:13px;color:#4B525B">Bu gün için boş saat yok; başka gün seçin.</span></sc-if></div>
+                        <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer"><input type="checkbox" checked="{{ fc.override }}" sc-camel-on-change="{{ on.override }}" style="width:18px;height:18px;accent-color:#B1001A">Çakışmayı biliyorum, yine de bu saate planla</label>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ ap.isEdit }}">
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Değişiklik / erteleme nedeni<input value="{{ fv.changeReason }}" sc-camel-on-change="{{ on.changeReason }}" style="height:44px;padding:0 12px;border:1px solid {{ eb.changeReason }};border-radius:8px;font-size:15px;font-weight:400"><sc-if value="{{ err.changeReason }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.changeReason }}</span></sc-if></label>
+                    </sc-if>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Not<textarea value="{{ fv.note }}" sc-camel-on-change="{{ on.note }}" rows="2" style="padding:10px 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;resize:vertical"></textarea></label>
+                    <span style="font-size:12px;color:#747B85">Planlanan tarih, gerçek tamamlanma tarihinden ayrı tutulur. Bakım tarihi yalnız iş emri tamamlanınca, işaretlenen cihazlarda değişir.</span>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #E7E9ED">
+                    <button sc-camel-on-click="{{ tryClose }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Vazgeç</button>
+                    <button sc-camel-on-click="{{ ap.save }}" disabled="{{ saving }}" style="height:44px;padding:0 20px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;opacity:{{ saveOp }}">{{ saveLabel }}</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ mo.wo }}">
+                  <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                      <span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;color:{{ wo.b.fg }};background:{{ wo.b.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ wo.b.dot }}"></span>{{ wo.b.label }}</span>
+                      <span style="display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:6px;font-size:13px;font-weight:600;background:#F0F1F3;color:#252B32">{{ wo.typeLabel }}</span>
+                      <span style="font-size:14px;color:#4B525B">{{ wo.when }} · {{ wo.tech }}</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+                      <div style="padding:12px 14px;border:1px solid #E7E9ED;border-radius:10px;display:flex;flex-direction:column;gap:6px">
+                        <span style="font-size:12px;font-weight:600;color:#747B85">MÜŞTERİ</span>
+                        <button sc-camel-on-click="{{ wo.openCustomer }}" style="border:none;background:none;padding:0;text-align:left;font-size:16px;font-weight:600;color:#B1001A;cursor:pointer">{{ wo.cName }}</button>
+                        <span style="font-size:14px">{{ wo.phone }}</span>
+                        <sc-if value="{{ wo.tel }}"><a href="{{ wo.tel }}" style="display:inline-flex;align-items:center;justify-content:center;height:44px;border-radius:8px;border:1px solid #D5D9DF;color:#252B32;font-weight:600;text-decoration:none">Müşteriyi ara</a></sc-if>
+                      </div>
+                      <div style="padding:12px 14px;border:1px solid #E7E9ED;border-radius:10px;display:flex;flex-direction:column;gap:6px">
+                        <span style="font-size:12px;font-weight:600;color:#747B85">ADRES · {{ wo.addrLabel }}</span>
+                        <span style="font-size:14px;line-height:1.45">{{ wo.addr }}</span>
+                        <a href="{{ wo.mapUrl }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;height:44px;border-radius:8px;border:1px solid #D5D9DF;color:#252B32;font-weight:600;text-decoration:none">Adresi haritada aç</a>
+                      </div>
+                    </div>
+                    <sc-if value="{{ wo.isMontaj }}"><div style="padding:12px 14px;border-radius:10px;background:#F5F6F8;font-size:14px">Satış {{ wo.saleNo }} · {{ wo.lineText }}</div></sc-if>
+                    <sc-if value="{{ wo.viewMode }}">
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <span style="font-size:13px;font-weight:600">Cihazlar ({{ wo.devCount }})</span>
+                        <sc-for list="{{ wo.devs }}" as="d">
+                          <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #E7E9ED;border-radius:10px;flex-wrap:wrap">
+                            <span style="flex:1 1 160px;display:flex;flex-direction:column"><span style="font-weight:600;font-size:14px">{{ d.room }}</span><span style="font-size:13px;color:#747B85;font-family:'IBM Plex Mono',monospace">{{ d.title }} · SN {{ d.serial }}</span></span>
+                            <sc-if value="{{ d.outcome }}"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ d.outcome.fg }};background:{{ d.outcome.bg }}">{{ d.outcome.label }}</span></sc-if>
+                            <sc-if value="{{ d.showSt }}"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ d.st.fg }};background:{{ d.st.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ d.st.dot }}"></span>{{ d.st.label }}</span></sc-if>
+                          </div>
+                        </sc-for>
+                        <sc-if value="{{ wo.note }}"><div style="font-size:14px;color:#4B525B"><strong>Not:</strong> {{ wo.note }}</div></sc-if>
+                        <sc-if value="{{ wo.cancelNote }}"><div style="font-size:14px;color:#4B525B"><strong>İptal notu:</strong> {{ wo.cancelNote }}</div></sc-if>
+                        <sc-for list="{{ wo.log }}" as="l"><div style="font-size:13px;color:#747B85">Değişiklik ({{ l.d }}): {{ l.text }}</div></sc-for>
+                        <sc-if value="{{ wo.doneInfo }}"><div style="font-size:14px;color:#4B525B">{{ wo.doneInfo }}</div></sc-if>
+                        <sc-if value="{{ wo.fxInfo }}"><div style="font-size:13px;color:#747B85">{{ wo.fxInfo }}</div></sc-if>
+                        <sc-if value="{{ wo.unpaid }}"><div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;padding:12px;border-radius:10px;background:#FFF1D1"><span style="flex:1 1 200px;font-size:14px;color:#5C3800;font-weight:600">Bakım ücreti tahsil edilmedi: {{ wo.feeText }}</span><label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600">Yöntem<sc-raw-select value="{{ fv.feeMethod }}" data-v="{{ fv.feeMethod }}" sc-camel-on-change="{{ on.feeMethod }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><option>Nakit</option><option>Havale / EFT</option><option>Kredi kartı</option></sc-raw-select></label><button sc-camel-on-click="{{ wo.collect }}" disabled="{{ saving }}" style="height:44px;padding:0 14px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;font-weight:600;cursor:pointer">Tahsil edildi</button></div></sc-if>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ wo.completeMode }}">
+                      <div style="display:flex;flex-direction:column;gap:12px">
+                        <div style="font-size:14px;color:#4B525B">Gerçekten işlem yapılan cihazları tek tek işaretleyin. İşaretlenmeyen cihazların önceki bakım tarihi korunur.</div>
+                        <sc-if value="{{ wo.isAriza }}"><div style="padding:10px 12px;border-radius:8px;background:#FFF1D1;color:#5C3800;font-size:13px">Arıza işlemi bakım sayılmaz; cihazların son bakım tarihi değişmez.</div></sc-if>
+                        <sc-for list="{{ wo.items }}" as="d">
+                          <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid {{ d.bd }};border-radius:10px;background:{{ d.bg }}">
+                            <label style="display:flex;align-items:center;gap:12px;cursor:pointer"><input type="checkbox" checked="{{ d.done }}" sc-camel-on-change="{{ d.toggle }}" style="width:22px;height:22px;accent-color:#B1001A"><span style="display:flex;flex-direction:column"><span style="font-weight:600">{{ d.room }}</span><span style="font-size:13px;color:#747B85;font-family:'IBM Plex Mono',monospace">{{ d.title }}</span></span></label>
+                            <sc-if value="{{ d.done }}"><input value="{{ d.action }}" sc-camel-on-change="{{ d.onAction }}" placeholder="Yapılan işlem" aria-label="Yapılan işlem" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px"></sc-if>
+                            <sc-if value="{{ d.notDone }}"><input value="{{ d.reason }}" sc-camel-on-change="{{ d.onReason }}" placeholder="Neden yapılmadı? (gerekli)" aria-label="Yapılmama nedeni" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px"></sc-if>
+                          </div>
+                        </sc-for>
+                        <sc-if value="{{ err.items }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.items }}</span></sc-if>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+                          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Tamamlanma tarihi *<input type="date" value="{{ fv.date }}" sc-camel-on-change="{{ on.date }}" style="height:44px;padding:0 10px;border:1px solid {{ eb.date }};border-radius:8px;font-size:15px;font-weight:400"><sc-if value="{{ err.date }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.date }}</span></sc-if></label>
+                          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Yapan kişi *<sc-raw-select value="{{ fv.by }}" data-v="{{ fv.by }}" sc-camel-on-change="{{ on.by }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Belirtilmedi</option><sc-for list="{{ wo.staff }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></sc-raw-select></label>
+                          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Ücret (₺, varsa)<input inputmode="decimal" autocomplete="off" value="{{ fv.fee }}" sc-camel-on-change="{{ on.fee }}" placeholder="Boş = ücret yok" style="height:44px;padding:0 12px;border:1px solid {{ eb.fee }};border-radius:8px;font-size:15px;font-weight:400"></label>
+                        </div>
+                        <sc-if value="{{ wo.hasFee }}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+                          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Ücret tahsil edildi mi? *<sc-raw-select value="{{ fv.feePaid }}" data-v="{{ fv.feePaid }}" sc-camel-on-change="{{ on.feePaid }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><option value="evet">Evet, tahsil edildi</option><option value="hayir">Hayır, sonra tahsil edilecek</option></sc-raw-select><sc-if value="{{ err.feePaid }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.feePaid }}</span></sc-if></label>
+                          <sc-if value="{{ wo.paidNow }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Ödeme yöntemi<sc-raw-select value="{{ fv.feeMethod }}" data-v="{{ fv.feeMethod }}" sc-camel-on-change="{{ on.feeMethod }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><option>Nakit</option><option>Havale / EFT</option><option>Kredi kartı</option></sc-raw-select></label></sc-if>
+                          <div style="font-size:12px;color:#747B85;align-self:center">{{ wo.feeFx }}</div>
+                        </div></sc-if>
+                        <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">İşlem notu<textarea value="{{ fv.note }}" sc-camel-on-change="{{ on.note }}" rows="2" style="padding:10px 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></textarea></label>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ wo.cancelMode }}">
+                      <div style="display:flex;flex-direction:column;gap:12px">
+                        <div style="padding:12px 14px;border-radius:10px;background:#F5F6F8;font-size:14px">İptal edilecek: {{ wo.typeLabel }} · {{ wo.cName }} · {{ wo.when }}. Cihazların bakım durumu değişmez.</div>
+                        <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">İptal nedeni *<textarea value="{{ fv.cancelNote }}" sc-camel-on-change="{{ on.cancelNote }}" rows="2" style="padding:10px 12px;border:1px solid {{ eb.note }};border-radius:8px;font-size:15px;font-weight:400"></textarea><sc-if value="{{ err.note }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.note }}</span></sc-if></label>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ result }}">
+                      <div style="padding:14px 16px;border-radius:10px;background:#E5F3EB;color:#1B6B3F;display:flex;flex-direction:column;gap:10px">
+                        <span style="font-weight:600">{{ result.text }}</span>
+                        <sc-if value="{{ result.rest }}"><button sc-camel-on-click="{{ result.rest }}" style="align-self:flex-start;height:44px;padding:0 16px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;font-weight:600;cursor:pointer">Kalan cihazlar için randevu planla</button></sc-if>
+                      </div>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #E7E9ED;flex-wrap:wrap">
+                    <sc-for list="{{ wo.actions }}" as="b"><button sc-camel-on-click="{{ b.run }}" disabled="{{ b.dis }}" style="height:44px;padding:0 16px;border-radius:8px;cursor:pointer;font-weight:600;border:1px solid {{ b.bd }};background:{{ b.bg }};color:{{ b.fg }}">{{ b.l }}</button></sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ mo.call }}">
+                  <sc-if value="{{ cl.form }}">
+                    <div style="padding:20px;display:flex;flex-direction:column;gap:18px">
+                      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:14px;border-radius:14px;background:linear-gradient(180deg,#FFFFFF,#FAFBFC);border:1px solid #E7E9ED">
+                        <div style="width:52px;height:52px;border-radius:50%;background:#FBEFF1;color:#B1001A;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex:none">{{ cl.ini }}</div>
+                        <div style="flex:1 1 180px;display:flex;flex-direction:column;gap:4px;min-width:0">
+                          <span style="font-weight:600;font-size:17px">{{ cl.name }}</span>
+                          <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:16px;font-family:'IBM Plex Mono',monospace;letter-spacing:.03em">{{ cl.phone }}</span><sc-if value="{{ cl.kind }}"><span style="display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:6px;font-size:11px;font-weight:700;background:#F0F1F3;color:#4B525B">{{ cl.kind }}</span></sc-if></span>
+                          <span style="display:flex;gap:6px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;background:#ECEEF1;color:#252B32">{{ cl.life }}</span><sc-if value="{{ cl.flagShort }}"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;background:#FDECEE;color:#A3001A">{{ cl.flagShort }}</span></sc-if><sc-if value="{{ cl.noContact }}"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;background:#F0F1F3;color:#5B626B">İletişim istemiyor</span></sc-if></span>
+                        </div>
+                        <sc-if value="{{ cl.tel }}"><a href="{{ cl.tel }}" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 20px;border-radius:12px;background:#252B32;color:#FFFFFF;font-weight:600;text-decoration:none;box-shadow:0 6px 16px rgba(37,43,50,.18)" style-hover="background:#111418"><svg width="18" height="18" sc-camel-view-box="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg>Ara</a></sc-if>
+                      </div>
+                      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+                        <sc-for list="{{ cl.stats }}" as="x"><div style="padding:10px 12px;border-radius:10px;background:{{ x.bg }};display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:11px;font-weight:700;letter-spacing:.04em;color:#747B85">{{ x.l }}</span><span style="font-size:14px;font-weight:600;color:{{ x.fg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.v }}</span></div></sc-for>
+                      </div>
+                      <sc-if value="{{ cl.hasRecent }}">
+                        <div style="display:flex;flex-direction:column;gap:0;border-left:2px solid #E7E9ED;margin-left:6px;padding-left:14px">
+                          <span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#747B85;margin-bottom:6px">SON GÖRÜŞMELER</span>
+                          <sc-for list="{{ cl.recent }}" as="k"><div style="position:relative;padding:4px 0 8px;font-size:13px;line-height:1.45"><span style="position:absolute;left:-20px;top:9px;width:10px;height:10px;border-radius:50%;background:{{ k.dot }};border:2px solid #FFFFFF"></span><strong>{{ k.date }}</strong> · {{ k.res }}<span style="color:#4B525B">{{ k.note }}</span></div></sc-for>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ cl.noContact }}"><div style="padding:10px 12px;border-radius:8px;background:#F0F1F3;font-size:13px">Bu müşteri aranmak istemiyor. Yalnız müşterinin kendi aramasını kayda alın.</div></sc-if>
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <span style="font-size:13px;font-weight:600">Arama</span>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                          <div role="group" aria-label="Arama yönü" style="display:flex;gap:2px;padding:3px;background:#EEF0F3;border-radius:10px"><sc-for list="{{ cl.dirs }}" as="o"><button sc-camel-on-click="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:34px;padding:0 14px;border:none;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;background:{{ o.sbg }};color:{{ o.sfg }};box-shadow:{{ o.ssh }}">{{ o.l }}</button></sc-for></div>
+                          <sc-for list="{{ cl.topics }}" as="o"><button sc-camel-on-click="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:34px;padding:0 12px;border-radius:999px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:600;font-size:13px;cursor:pointer">{{ o.l }}</button></sc-for>
+                        </div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <span style="font-size:13px;font-weight:600">Görüşme sonucu *</span>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+                          <sc-for list="{{ cl.results }}" as="o"><button sc-camel-on-click="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px;border-radius:12px;border:{{ o.bw }} solid {{ o.bd }};background:{{ o.bg }};cursor:pointer;text-align:left;box-shadow:{{ o.sh }}" style-hover="border-color:{{ o.dot }}"><span style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:{{ o.fg }}"><span style="width:10px;height:10px;border-radius:50%;background:{{ o.dot }}"></span>{{ o.l }}</span><span style="font-size:12px;color:#4B525B">{{ o.desc }}</span></button></sc-for>
+                        </div>
+                        <sc-if value="{{ err.result }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.result }}</span></sc-if>
+                      </div>
+                      <sc-if value="{{ cl.needCb }}">
+                        <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:#FFF8E6;border:1px solid #F0D38C;animation:gkIn .2s">
+                          <span style="font-size:13px;font-weight:600;color:#5C3800">Ne zaman tekrar aranacak? *</span>
+                          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><sc-for list="{{ cl.cbChips }}" as="o"><button sc-camel-on-click="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:34px;padding:0 12px;border-radius:999px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:600;font-size:13px;cursor:pointer">{{ o.l }}</button></sc-for><input type="date" min="{{ todayIso }}" aria-label="Tekrar arama tarihi" value="{{ fv.callback }}" sc-camel-on-change="{{ on.callback }}" style="height:36px;padding:0 10px;border:1px solid {{ eb.callback }};border-radius:8px;font-size:14px;background:#FFFFFF"></div>
+                          <sc-if value="{{ cl.cbText }}"><span style="font-size:12px;color:#5C3800">{{ cl.cbText }}</span></sc-if>
+                          <sc-if value="{{ err.callback }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.callback }}</span></sc-if>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ cl.accepted }}"><div style="padding:10px 12px;border-radius:10px;background:#E5F3EB;color:#1B6B3F;font-size:13px;animation:gkIn .2s">Kaydettikten sonra randevu saatini seçeceksiniz. “Kabul etti” tek başına randevu oluşturmaz.</div></sc-if>
+                      <sc-if value="{{ cl.isNo }}"><label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;padding:10px 12px;border-radius:10px;background:#FDECEE"><input type="checkbox" checked="{{ fc.noContact }}" sc-camel-on-change="{{ on.noContact }}" style="width:20px;height:20px;accent-color:#B1001A">Bundan sonra aranmasın (kampanyalardan çıkarılır)</label></sc-if>
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Not<textarea value="{{ fv.note }}" sc-camel-on-change="{{ on.note }}" rows="3" placeholder="Görüşmede ne konuşuldu?" style="padding:10px 12px;border:1px solid #CDD2D9;border-radius:10px;font-size:15px;font-weight:400;resize:vertical"></textarea></label>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;color:#747B85;align-self:center">Hızlı ekle:</span><sc-for list="{{ cl.tpls }}" as="t"><button sc-camel-on-click="{{ t.add }}" style="height:30px;padding:0 10px;border-radius:999px;border:1px dashed #CDD2D9;background:#FFFFFF;font-size:12px;cursor:pointer;color:#252B32" style-hover="border-color:#B1001A;color:#B1001A">+ {{ t.l }}</button></sc-for></div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:1px solid {{ cl.flagBd }};background:{{ cl.flagBg }}">
+                        <label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;cursor:pointer"><input type="checkbox" checked="{{ fc.flagIt }}" sc-camel-on-change="{{ on.flagIt }}" style="width:20px;height:20px;accent-color:#B1001A">Olumsuz deneyim olarak işaretle</label>
+                        <sc-if value="{{ fc.flagIt }}"><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ cl.flagTypes }}" as="o"><button sc-camel-on-click="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="height:34px;padding:0 12px;border-radius:999px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:600;font-size:13px;cursor:pointer">{{ o.l }}</button></sc-for></div><span style="font-size:12px;color:#747B85">Not alanı işaretin gerekçesi olarak kaydedilir; işaret dosyada, listede ve aramada görünür.</span><sc-if value="{{ err.flagType }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.flagType }}</span></sc-if></sc-if>
+                        <sc-if value="{{ cl.flagged }}"><span style="font-size:13px;color:#A3001A;font-weight:600">Mevcut işaret: {{ cl.flagged }}</span></sc-if>
+                      </div>
+                      <span style="font-size:12px;color:#747B85">Arama telefondan siz başlatırsınız; sistem otomatik arama veya mesaj göndermez.</span>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #E7E9ED">
+                      <button sc-camel-on-click="{{ tryClose }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Vazgeç</button>
+                      <button sc-camel-on-click="{{ cl.save }}" disabled="{{ saving }}" style="height:44px;padding:0 20px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;opacity:{{ saveOp }}">{{ saveLabel }}</button>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ cl.done }}">
+                    <div style="padding:24px 20px;display:flex;flex-direction:column;gap:14px">
+                      <div style="padding:14px 16px;border-radius:10px;background:#E5F3EB;color:#1B6B3F;font-weight:600">Görüşme kaydedildi.</div>
+                      <sc-if value="{{ cl.accepted }}"><div style="font-size:14px;color:#4B525B">Müşteri kabul etti, ancak randevu henüz oluşturulmadı. Saati müşteriyle netleştirip planlayın.</div>
+                        <button sc-camel-on-click="{{ cl.plan }}" style="align-self:flex-start;height:44px;padding:0 18px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;font-weight:600;cursor:pointer">Randevu planla</button></sc-if>
+                      <button sc-camel-on-click="{{ closeNow }}" style="align-self:flex-start;height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Kapat</button>
+                    </div>
+                  </sc-if>
+                </sc-if>
+
+                <sc-if value="{{ mo.install }}">
+                  <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+                    <div style="padding:12px 14px;border-radius:10px;background:#F5F6F8;font-size:14px;line-height:1.5"><strong>{{ ins.saleNo }}</strong> · {{ ins.cName }}<br>{{ ins.lineText }}</div>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Satış kalemi *<sc-raw-select value="{{ fv.lineId }}" data-v="{{ fv.lineId }}" sc-camel-on-change="{{ on.lineId }}" style="height:44px;padding:0 10px;border:1px solid {{ eb.lineId }};border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><sc-for list="{{ ins.lines }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></sc-raw-select><sc-if value="{{ err.lineId }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.lineId }}</span></sc-if></label>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Oda / konum *<input value="{{ fv.room }}" sc-camel-on-change="{{ on.room }}" style="height:44px;padding:0 12px;border:1px solid {{ eb.room }};border-radius:8px;font-size:15px;font-weight:400"><sc-if value="{{ err.room }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.room }}</span></sc-if></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">İç ünite seri no<input value="{{ fv.serialIn }}" sc-camel-on-change="{{ on.serialIn }}" style="height:44px;padding:0 12px;border:1px solid {{ eb.serialIn }};border-radius:8px;font-size:15px;font-weight:400;font-family:'IBM Plex Mono',monospace"><sc-if value="{{ err.serialIn }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.serialIn }}</span></sc-if></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Dış ünite seri no<input value="{{ fv.serialOut }}" sc-camel-on-change="{{ on.serialOut }}" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;font-family:'IBM Plex Mono',monospace"><span style="font-size:12px;color:#747B85;font-weight:400">Multi sistemde aynı dış ünite birden fazla iç üniteye bağlı olabilir.</span></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Montaj tarihi *<input type="date" value="{{ fv.date }}" sc-camel-on-change="{{ on.date }}" style="height:44px;padding:0 10px;border:1px solid {{ eb.date }};border-radius:8px;font-size:15px;font-weight:400"><sc-if value="{{ err.date }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.date }}</span></sc-if></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Montajı yapan *<sc-raw-select value="{{ fv.by }}" data-v="{{ fv.by }}" sc-camel-on-change="{{ on.by }}" style="height:44px;padding:0 10px;border:1px solid {{ eb.by }};border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçin</option><sc-for list="{{ ins.staff }}" as="o"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></sc-raw-select><sc-if value="{{ err.by }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ err.by }}</span></sc-if></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Bakım aralığı<sc-raw-select value="{{ fv.interval }}" data-v="{{ fv.interval }}" sc-camel-on-change="{{ on.interval }}" style="height:44px;padding:0 10px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"><option value="">Seçilmedi</option><option value="6">6 ay</option><option value="12">12 ay</option><option value="24">24 ay</option></sc-raw-select></label>
+                    </div>
+                    <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer"><input type="checkbox" checked="{{ fc.baseInstall }}" sc-camel-on-change="{{ on.baseInstall }}" style="width:20px;height:20px;accent-color:#B1001A">İlk bakım için montaj tarihini başlangıç kabul et</label>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Not<textarea value="{{ fv.note }}" sc-camel-on-change="{{ on.note }}" rows="2" style="padding:10px 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400"></textarea></label>
+                    <div style="font-size:13px;color:#4B525B;line-height:1.5;padding:10px 12px;border-radius:8px;background:#E8F0FB">Kaydedildiğinde: müşterinin altında 1 yeni cihaz kaydı oluşur, {{ ins.depot }} stoğundan 1 adet düşer ve rezerv 1 azalır. Diğer adetler beklemede kalır.</div>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid #E7E9ED">
+                    <button sc-camel-on-click="{{ tryClose }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Vazgeç</button>
+                    <button sc-camel-on-click="{{ ins.save }}" disabled="{{ saving }}" style="height:44px;padding:0 20px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;opacity:{{ saveOp }}">{{ saveLabel }}</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ mo.handoff }}">
+                  <div style="padding:20px;display:flex;flex-direction:column;gap:14px;font-size:14px;line-height:1.55">
+                    <div><strong>Çalışan prototip (bu sekmede, bellekte):</strong> müşteri ekleme, adres ve konum doğrulama, cihaz ekleme/düzenleme, randevu planlama ve çakışma kontrolü, iş emri başlatma/tamamlama/iptal/erteleme, görüşme kaydı, yakın bakım grubu ve kampanya planı, satış taslağı/onay/stok kontrolü, montaj kaydı, tahsilat, stok hareketi, kritik eşik, model ekleme ve fotoğraf önizleme, bakım kuralı önizleme ve uygulama, müşteri listesini CSV olarak indirme.</div>
+                    <div><strong>Backend entegrasyonu bekleyenler:</strong> kalıcı kayıt (Node.js + SQLite), fotoğrafın sunucuya yüklenmesi, kullanıcı girişi ve yetkilendirme, saha teknisyeni rolü, geçmiş randevu düzenleme kuralları, içe aktarma, sunucu yedeği, kontrollü iade akışı.</div>
+                    <div><strong>Dosyalar:</strong> gk-data.js (demo veri), gk-rules.js (iş kuralları ve tek servis katmanı GK.ops), HaritaBileseni (değiştirilebilir harita), Ekran* bileşenleri. Ayrıntı: DEVIR-NOTU.md</div>
+                    <div style="color:#747B85">Ürün görselleri ve logo resmî siteden bağlantıyla gösterilir. Fiyat, kişi, konum ve stok sayıları demodur.</div>
+                  </div>
+                </sc-if>
+
+              </div>
+            </div>
+          </sc-if>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="">/*precompiled:index.html*/</script>
+
+
+</body></html>
