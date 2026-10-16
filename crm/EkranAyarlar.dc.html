@@ -95,7 +95,7 @@
         </section>
       </sc-if>
 
-      <sc-if value="{{ isKullanici }}"><section style="background:#fff;border:1px solid #E7E9ED;border-radius:12px;padding:20px"><h2>Erişim</h2><p>Bu panel şu anda yalnız site sahibinin oturumuna açık. Yetkili kullanıcı bütün ekranları yönetebilir.</p><p>Personel kayıtları iş ataması içindir. Personel eklemek, panel giriş yetkisi vermez.</p></section></sc-if>
+      <sc-if value="{{ isKullanici }}"><section style="background:#fff;border:1px solid #E7E9ED;border-radius:12px;padding:20px"><h2>Erişim</h2><p>Bu herkese açık bir demodur. Kayıtlar yalnız bu tarayıcıda tutulur; başka cihazlarla paylaşılmaz. Gerçek müşteri verisi girmeyin.</p><p>Personel kayıtları iş ataması içindir. Personel eklemek, panel giriş yetkisi vermez.</p></section></sc-if>
       <sc-if value="{{ isVeri }}">
         <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px">
           <h2 style="margin:0;font-size:17px;font-weight:600">Veri aktarımı ve yedekleme</h2><p>Tam adres kontrolüyle CSV müşteri aktarımı, JSON yedeği ve işlem geçmişi.</p><button onClick="{{ openData }}" style="align-self:flex-start;height:44px;padding:0 16px;border-radius:8px;border:1px solid #B1001A;background:#fff;color:#B1001A;cursor:pointer;font-weight:600">Veri yönetimini aç</button>
@@ -103,7 +103,7 @@
           <h2 style="margin:0;font-size:17px;font-weight:600">Dışa aktarım</h2>
           <span style="font-size:13px;color:#4B525B">Müşteri listesini CSV olarak indirir. Bu bir veri dışa aktarımıdır; tam sunucu yedeği değildir.</span>
           <button onClick="{{ exportCsv }}" style="align-self:flex-start;height:44px;padding:0 16px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">Müşteri listesini indir (CSV)</button>
-          <div style="padding:12px 14px;border-radius:10px;border:1px dashed #CDD2D9;font-size:13px;color:#4B525B">Veri yönetiminden bütün CRM kayıtlarını JSON olarak yedekleyebilir ve geri yükleyebilirsiniz. Fotoğraflar dosya deposunda tutulur; JSON yedeği fotoğraf dosyalarını içermez. Gerçek müşteri verisi, veritabanı ve kullanıcı yüklemeleri GitHub deposuna konmaz.</div>
+          <div style="padding:12px 14px;border-radius:10px;border:1px dashed #CDD2D9;font-size:13px;color:#4B525B">Veri yönetiminden bütün CRM kayıtlarını JSON olarak yedekleyebilir ve geri yükleyebilirsiniz. Demo fotoğrafları bu tarayıcıda tutulur ve JSON yedeğine eklenir. Gerçek müşteri verisi, veritabanı ve kullanıcı yüklemeleri GitHub deposuna konmaz.</div>
         </section>
       </sc-if>
     </div>
