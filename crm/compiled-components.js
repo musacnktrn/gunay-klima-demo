@@ -155,9 +155,20 @@ class Component extends DCLogic {
 return Component;};
 window.GKCompiled["EkranBugun.dc.html"]=function(DCLogic,StreamableLogic,React){
 
+// [codex] Informational copy only. No provider, account, storage or request callbacks.
+const ROADMAP = [
+  { id: 'santral', title: 'Santral ve şirket numarası', description: 'Müşteri aramada 0232’yi görecek; santral seçimi bekleniyor.' },
+  { id: 'musteri-karti', title: 'Gelen çağrıda müşteri kartı', description: 'Arayanın adresi, cihazı ve bakımı görünecek; santral bağlantısı bekleniyor.' },
+  { id: 'bildirim', title: 'Kaçan çağrı ve mesai dışı', description: 'Cevapsız aramalar bildirilecek; çalışma saatleri ve bildirim yolu seçilecek.' },
+  { id: 'sms', title: 'SMS hatırlatmaları', description: 'Randevu ve bakım zamanı hatırlatılacak; SMS bağlantısı ve izinler bekleniyor.' },
+  { id: 'specto', title: 'Specto CX talepleri', description: 'Keşif, fiyat teklifi, arıza ve bakım toplanacak; bağlantı Musa ile kurulacak.' },
+  { id: 'outlook', title: 'info@ Outlook mail özeti', description: 'Önemli e-postalar özetlenecek; posta hesabı Musa ile bağlanacak.' },
+  { id: 'personel', title: 'Personel hesapları ve roller', description: 'Herkes kendi hesabıyla çalışacak; kişiler ve yetkileri belirlenecek.' },
+  { id: 'yedek', title: 'Düzenli yedekleme', description: 'Kayıtlar düzenli yedeklenecek; ortak sistem kurulumu bekleniyor.' }
+];
 const WOC = { planlandi: ['#E8F0FB', '#1D4F91', '#B9CDEB'], islemde: ['#FFF1D1', '#5C3800', '#F0D38C'], tamamlandi: ['#E5F3EB', '#1B6B3F', '#B6DCC5'] };
 class Component extends DCLogic {
-  state = { pv: 'saat', pday: null };
+  state = { pv: 'saat', pday: null, roadmapOpen: null };
   tlRef = React.createRef();
   componentDidMount() { this.tick = setInterval(() => this.forceUpdate(), 30000); this.hookWheel(); }
   componentDidUpdate() { this.hookWheel(); }
@@ -239,8 +250,11 @@ class Component extends DCLogic {
       excludedText: g.excluded + ' müşterinin iletişim izni uygun olmadığı için gruba alınmadı. Konumu doğrulanmamış adresler hesaba katılmaz.',
       open: go('harita', { group: true })
     };
-    const t = today;
+    const t = today, roadmapOpen = this.state.roadmapOpen === null ? !mobile : this.state.roadmapOpen;
     return {
+      roadmapFeatures: ROADMAP, roadmapOpen, roadmapClosed: !roadmapOpen,
+      roadmapToggleLabel: roadmapOpen ? 'Listeyi daralt' : 'Özellikleri göster',
+      toggleRoadmap: () => this.setState({ roadmapOpen: !roadmapOpen }),
       nextJob: (() => { if (!mobile) return null; const w = wos.find(x => x.status === 'islemde') || wos.find(x => x.status === 'planlandi'); if (!w) return null; const c = R.byId(db.customers, w.customerId), a = R.byId(db.addresses, w.addressId); return { kicker: w.status === 'islemde' ? 'ŞU AN İŞLEMDE' : 'SIRADAKİ İŞ', time: w.start, type: R.T[w.type], devText: w.type === 'montaj' ? (w.qty || 1) + ' cihaz montajı' : w.deviceIds.length + ' cihaz', cName: c.name, addr: a.label + ' · ' + a.line + ', ' + a.mah, tech: R.staffName(db, w.techId), status: R.woBadge(w).label, dir: 'https://www.google.com/maps/dir/?api=1&destination=' + (a.lat != null && a.verified ? a.lat + ',' + a.lng : encodeURIComponent(a.line + ', ' + a.mah + ', ' + a.ilce + ', İzmir')), tel: F.tel(c.phone) || '#', open: () => act.open('wo', { woId: w.id }) }; })(),
       notMobile: !mobile, dateText: F.date(t) + ', ' + F.weekday(t),
       newCustomer: () => act.open('customer', { type: 'Kişi', contact: 'bilinmiyor' }), planNew: () => act.open('appt', { type: 'bakim', date: today, dur: '60' }), toCalendar: go('bakim', { view: 'randevu' }),
