@@ -4,3 +4,13 @@
 .gk-tools-button{height:44px;padding:0 16px;border:1px solid #b1001a;border-radius:8px;background:white;color:#b1001a;font:600 14px inherit;cursor:pointer;margin-bottom:12px}
 
 @media(max-width:640px){.gk-search-results{position:fixed!important;left:12px!important;right:12px!important;top:60px!important;max-height:min(440px,65vh)!important;width:auto!important;background:#fff!important;box-shadow:0 12px 32px #252b3230!important}}
+
+/* [codex] v2 phone safe areas: browser keyboard/dynamic viewport and installed app. */
+html,body{overscroll-behavior:none}#workspace-bar{height:calc(44px + env(safe-area-inset-top))!important;padding-top:calc(6px + env(safe-area-inset-top))!important}
+.gk-bottom-nav{height:calc(68px + env(safe-area-inset-bottom))!important;padding-bottom:env(safe-area-inset-bottom)!important}
+[role=dialog]{scroll-padding-bottom:80px} [role=dialog]>div:last-child{padding-bottom:max(12px,env(safe-area-inset-bottom))!important}
+.gk-search-results button{color:#252B32}input,select,textarea{max-width:100%;color:#252B32}button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+@media(max-width:640px){.gk-search-results{top:calc(96px + env(safe-area-inset-top))!important}button{touch-action:manipulation}input,select,textarea{min-width:0}}
+
+[role=dialog] label{min-width:0}[role=dialog] input:not([type=checkbox]):not([type=radio]),[role=dialog] select,[role=dialog] textarea{min-width:0;box-sizing:border-box;width:100%}
+.gk-side-nav>button{flex-shrink:0}

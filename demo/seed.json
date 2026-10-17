@@ -174,7 +174,21 @@
       "img": "/assets/catalog-38938df1a054.png",
       "src": "https://www.gunayklima.com/yeni-msz-ln-legendera-duvar-tipi-klima-serisi",
       "threshold": 1,
-      "price": null
+      "price": null,
+      "variants": [
+        {
+          "name": "Kırmızı",
+          "img": "/assets/variant-ln-red.jpg"
+        },
+        {
+          "name": "Siyah",
+          "img": "/assets/variant-ln-black.jpg"
+        },
+        {
+          "name": "Gümüş",
+          "img": "/assets/variant-ln-silver.jpg"
+        }
+      ]
     },
     {
       "id": "p6",
@@ -187,7 +201,21 @@
       "img": "/assets/catalog-649746e5d87e.jpg",
       "src": "https://www.gunayklima.com/msz-ef-kirigamine-zen-duvar-tipi-split-klima-serisi",
       "threshold": null,
-      "price": null
+      "price": null,
+      "variants": [
+        {
+          "name": "Siyah",
+          "img": "/assets/variant-ef-black.jpg"
+        },
+        {
+          "name": "Gümüş",
+          "img": "/assets/variant-ef-silver.jpg"
+        },
+        {
+          "name": "Beyaz",
+          "img": "/assets/variant-ef-white.jpg"
+        }
+      ]
     },
     {
       "id": "p7",
@@ -709,7 +737,8 @@
       "lineId": null,
       "interval": 12,
       "intervalDemo": true,
-      "note": "Eski satış kaydı bu sisteme aktarılmadı."
+      "note": "Eski satış kaydı bu sisteme aktarılmadı.",
+      "variant": "Beyaz"
     },
     {
       "id": "d5",
@@ -838,7 +867,8 @@
       "lineId": null,
       "interval": 12,
       "intervalDemo": true,
-      "note": ""
+      "note": "",
+      "variant": "Beyaz"
     },
     {
       "id": "d12",
@@ -911,7 +941,8 @@
       "saleId": null,
       "lineId": null,
       "interval": null,
-      "note": "Bakım aralığı müşteriyle konuşulmadı."
+      "note": "Bakım aralığı müşteriyle konuşulmadı.",
+      "variant": "Siyah"
     }
   ],
   "history": [
@@ -1470,9 +1501,10 @@
       "kind": "giris",
       "productId": "p5",
       "depotId": "w1",
-      "qty": 2,
+      "qty": 1,
       "cost": null,
-      "reason": "Tedarikçi girişi (seri düzeyinde, kapasite belirtilmedi)"
+      "reason": "Tedarikçi girişi (seri düzeyinde, kapasite belirtilmedi)",
+      "variant": "Kırmızı"
     },
     {
       "id": "m5",
@@ -1534,6 +1566,17 @@
       "saleId": "s2",
       "deviceId": "d7",
       "customerId": "c3"
+    },
+    {
+      "id": "m4b",
+      "date": "2026-09-10",
+      "kind": "giris",
+      "productId": "p5",
+      "depotId": "w1",
+      "qty": 1,
+      "cost": null,
+      "reason": "Tedarikçi girişi (seri düzeyinde, kapasite belirtilmedi)",
+      "variant": "Siyah"
     }
   ],
   "calls": [

@@ -38,14 +38,30 @@
       </div>
     </sc-if>
     <sc-if value="{{ cardView }}">
-      <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:grid;grid-template-columns:{{ cardCols }};gap:12px">
         <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
-          <button onClick="{{ r.open }}" style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;border:1px solid #E7E9ED;border-radius:12px;background:#FFFFFF;cursor:pointer;text-align:left">
-            <span style="display:flex;gap:8px;align-items:baseline"><span style="font-weight:600;font-size:16px;flex:1">{{ r.name }}</span><span style="font-size:12px;color:#747B85">{{ r.type }} · {{ r.life }}</span></span><sc-if value="{{ r.flag }}"><span style="align-self:flex-start;display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;background:#FDECEE;color:#A3001A">{{ r.flag }}</span></sc-if>
-            <span style="font-size:14px;color:{{ r.phoneFg }}">{{ r.phone }}</span>
-            <span style="font-size:13px;color:#4B525B">{{ r.area }} · {{ r.addrN }} adres · {{ r.devN }} cihaz</span>
-            <span style="display:flex;gap:6px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;color:{{ r.st.fg }};background:{{ r.st.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.st.dot }}"></span>{{ r.st.label }}</span><sc-if value="{{ r.locMissing }}"><span style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;background:#FFF1D1;color:#7A4A00">Konum eksik</span></sc-if></span>
-          </button>
+          <div style="display:flex;flex-direction:column;border:1px solid #E7E9ED;border-radius:14px;background:#FFFFFF;overflow:hidden;transition:box-shadow .22s,transform .22s" style-hover="box-shadow:0 12px 28px rgba(37,43,50,.09);transform:translateY(-2px)">
+            <button onClick="{{ r.open }}" style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;border:none;background:transparent;cursor:pointer;text-align:left">
+              <span style="display:flex;gap:12px;align-items:center">
+                <span style="width:42px;height:42px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;background:{{ r.avBg }};color:{{ r.avFg }}">{{ r.ini }}</span>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:16px">{{ r.name }}</span><span style="font-size:12px;color:#747B85">{{ r.type }} · {{ r.life }}</span></span>
+                <span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;flex:none;color:{{ r.st.fg }};background:{{ r.st.bg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.st.dot }}"></span>{{ r.st.label }}</span>
+              </span>
+              <span style="display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px;line-height:1.45">
+                <span style="color:#747B85">Telefon</span><span style="color:{{ r.phoneFg }};font-family:'IBM Plex Mono',monospace">{{ r.phone }}</span>
+                <span style="color:#747B85">Adres</span><span style="color:#252B32">{{ r.addrLine }}</span>
+                <span style="color:#747B85">Klimalar</span><span style="color:#252B32">{{ r.devLine }}</span>
+                <span style="color:#747B85">Sonraki bakım</span><span style="color:#252B32">{{ r.nextLine }}</span>
+                <span style="color:#747B85">Son temas</span><span style="color:#4B525B">{{ r.lastLine }}</span>
+                <sc-if value="{{ r.balLine }}"><span style="color:#747B85">Açık bakiye</span><span style="color:#7A4A00;font-weight:600">{{ r.balLine }}</span></sc-if>
+              </span>
+              <sc-if value="{{ r.hasTags }}"><span style="display:flex;gap:6px;flex-wrap:wrap"><sc-if value="{{ r.flag }}"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;background:#FDECEE;color:#A3001A">{{ r.flag }}</span></sc-if><sc-if value="{{ r.locMissing }}"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;background:#FFF1D1;color:#7A4A00">Konum eksik</span></sc-if><sc-if value="{{ r.appt }}"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:600;background:#E8F0FB;color:#1D4F91">{{ r.appt }}</span></sc-if></span></sc-if>
+            </button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #EEF0F3">
+              <button onClick="{{ r.call }}" style="height:44px;border:none;border-right:1px solid #EEF0F3;background:#FFFFFF;cursor:pointer;font-size:13px;font-weight:600;color:#252B32" style-hover="background:#F5F6F8">Görüşme kaydı</button>
+              <button onClick="{{ r.plan }}" style="height:44px;border:none;background:#FFFFFF;cursor:pointer;font-size:13px;font-weight:600;color:#B1001A" style-hover="background:#FBEFF1">Bakım planla</button>
+            </div>
+          </div>
         </sc-for>
       </div>
     </sc-if>
@@ -75,8 +91,9 @@
           </div></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button onClick="{{ addDeviceTop }}" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #B1001A;background:#fff;color:#B1001A;cursor:pointer;font-weight:600">+ Klima ekle</button><button onClick="{{ plan }}" style="height:44px;padding:0 16px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;white-space:nowrap">Bakım planla</button>
-          <button onClick="{{ logCall }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500;white-space:nowrap">Görüşme kaydı</button>
+          <sc-if value="{{ notMobile }}"><button onClick="{{ plan }}" style="height:44px;padding:0 16px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;white-space:nowrap">Bakım planla</button>
+          <button onClick="{{ logCall }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500;white-space:nowrap">Görüşme kaydı</button></sc-if>
+          <button onClick="{{ addDevice }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600;white-space:nowrap">+ Klima ekle</button>
           <button onClick="{{ edit }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Düzenle</button>
           <button onClick="{{ flagBtn.run }}" title="{{ flagBtn.help }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid {{ flagBtn.bd }};background:#FFFFFF;cursor:pointer;font-weight:600;color:{{ flagBtn.fg }};white-space:nowrap">{{ flagBtn.l }}</button>
           <button onClick="{{ askArchive }}" title="Müşteriyi aktif listeden çıkarır; geçmiş kayıtlar silinmez." style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500;color:#4B525B">Pasife al</button>
@@ -116,8 +133,8 @@
       <sc-if value="{{ noAddrs }}"><div style="padding:24px;border:1px dashed #CDD2D9;border-radius:12px;color:#4B525B;font-size:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">Klima eklemek için önce adres ekleyin.<button onClick="{{ addAddress }}" style="height:40px;padding:0 14px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">Adres ekle</button></div></sc-if>
       <sc-for list="{{ devGroups }}" as="g" hint-placeholder-count="1">
         <section style="display:flex;flex-direction:column;gap:12px">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0;font-size:17px;font-weight:600;flex:1">{{ g.title }} <span style="font-weight:400;color:#747B85;font-size:14px">· {{ g.sub }}</span></h2><button onClick="{{ g.addDevice }}" style="height:40px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">+ Yeni klima ekle</button></div>
-          <sc-if value="{{ g.empty }}"><span style="font-size:14px;color:#747B85">Bu adreste kayıtlı cihaz yok.</span></sc-if>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0;font-size:17px;font-weight:600;flex:1">{{ g.title }} <span style="font-weight:400;color:#747B85;font-size:14px">· {{ g.sub }}</span></h2><button onClick="{{ g.addDevice }}" style="height:40px;padding:0 14px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">+ Bu adrese klima ekle</button></div>
+          <sc-if value="{{ g.empty }}"><button onClick="{{ g.addDevice }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:120px;border:1px dashed #CDD2D9;border-radius:12px;background:#FFFFFF;cursor:pointer;color:#4B525B;font-size:14px" style-hover="border-color:#B1001A;color:#B1001A"><span style="font-size:24px;line-height:1">+</span>Bu adreste kayıtlı klima yok · Klima ekle</button></sc-if>
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
             <sc-for list="{{ g.devs }}" as="d" hint-placeholder-count="3">
               <article style="background:#FFFFFF;border:1px solid {{ d.bd }};border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .22s cubic-bezier(.4,0,.2,1),transform .22s cubic-bezier(.4,0,.2,1)" style-hover="box-shadow:0 12px 28px rgba(37,43,50,.09);transform:translateY(-2px)">
@@ -179,10 +196,17 @@
     <sc-if value="{{ tab.gorusmeler }}">
       <button onClick="{{ logCall }}" style="align-self:flex-start;height:44px;padding:0 16px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">+ Görüşme kaydı ekle</button>
       <sc-if value="{{ noCalls }}"><span style="font-size:14px;color:#747B85">Görüşme kaydı yok.</span></sc-if>
-      <sc-for list="{{ callsList }}" as="k"><div style="padding:12px 16px;border:1px solid #E7E9ED;border-radius:12px;background:#FFFFFF;display:flex;flex-direction:column;gap:4px"><span style="font-weight:600;font-size:14px">{{ k.date }} · {{ k.result }}</span><sc-if value="{{ k.cb }}"><span style="font-size:13px;color:#7A4A00">{{ k.cb }}</span></sc-if><span style="font-size:13px;color:#4B525B">{{ k.note }}</span></div></sc-for>
+      <sc-for list="{{ callsList }}" as="k"><div style="padding:12px 16px;border:1px solid #E7E9ED;border-radius:12px;background:#FFFFFF;display:flex;flex-direction:column;gap:4px"><span style="font-weight:600;font-size:14px">{{ k.date }} · {{ k.result }}</span><sc-if value="{{ k.cb }}"><span style="font-size:13px;color:#7A4A00">{{ k.cb }}</span></sc-if><sc-if value="{{ k.det }}"><span style="font-size:13px;color:#252B32;font-weight:500">{{ k.det }}</span></sc-if><span style="font-size:13px;color:#4B525B">{{ k.note }}</span></div></sc-for>
     </sc-if>
   </sc-if>
 
+  <sc-if value="{{ mobileBar }}">
+    <div style="position:sticky;bottom:8px;z-index:20;display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:8px;padding:8px;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border:1px solid #E7E9ED;border-radius:16px;box-shadow:0 10px 28px rgba(37,43,50,.14);animation:gkIn .3s cubic-bezier(.2,.8,.2,1)">
+      <a href="{{ c.telOrHash }}" style="display:flex;align-items:center;justify-content:center;height:48px;border-radius:12px;background:#252B32;color:#FFFFFF;font-weight:600;text-decoration:none">Ara</a>
+      <button onClick="{{ logCall }}" style="height:48px;border-radius:12px;border:1px solid #D5D9DF;background:#FFFFFF;font-weight:600;cursor:pointer">Görüşme</button>
+      <button onClick="{{ plan }}" style="height:48px;border-radius:12px;border:none;background:#B1001A;color:#FFFFFF;font-weight:600;cursor:pointer;box-shadow:0 6px 14px rgba(177,0,26,.25)">Bakım planla</button>
+    </div>
+  </sc-if>
   <sc-if value="{{ devDetail }}">
     <div onClick="{{ closeDev }}" style="position:fixed;inset:0;background:rgba(20,24,28,.45);z-index:2000"></div>
     <div role="dialog" aria-modal="true" aria-label="Cihaz ayrıntısı" style="animation:gkSlideR .28s cubic-bezier(.2,.8,.2,1);position:fixed;z-index:2001;top:{{ dlgTop }};bottom:0;right:0;width:{{ dlgW }};background:#FFFFFF;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.15);border-radius:{{ dlgR }}">
@@ -247,6 +271,7 @@
               </div>
               <sc-if value="{{ df.external }}"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Model / marka adı<input value="{{ df.v.externalModel }}" onChange="{{ df.on.externalModel }}" placeholder="Örn. Diğer marka duvar tipi (müşteri beyanı)" style="height:44px;padding:0 12px;border:1px solid #CDD2D9;border-radius:8px;font-size:15px;font-weight:400;background:#FFFFFF"></label></sc-if>
               <sc-if value="{{ df.e.productId }}"><span style="font-size:13px;color:#A3001A;font-weight:500">{{ df.e.productId }}</span></sc-if>
+              <sc-if value="{{ df.hasVars }}"><div style="display:flex;flex-direction:column;gap:6px;animation:gkIn .2s"><span style="font-size:13px;font-weight:600">Renk / varyasyon</span><div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ df.vars }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.sel }}" style="display:flex;align-items:center;gap:8px;height:44px;padding:0 12px 0 6px;border-radius:999px;border:{{ o.bw }} solid {{ o.bd }};background:#FFFFFF;cursor:pointer;font-weight:600;font-size:13px;color:#252B32"><span style="position:relative;width:32px;height:32px;border-radius:50%;overflow:hidden;background:#F5F6F8;flex:none"><sc-if value="{{ o.img }}"><img src="{{ o.img }}" alt="" onError="{{ hideImg }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></sc-if></span>{{ o.l }}</button></sc-for></div><span style="font-size:12px;color:#747B85">Bilinmiyorsa seçmeden bırakın.</span></div></sc-if>
             </section>
 
             <section style="display:flex;flex-direction:column;gap:12px">

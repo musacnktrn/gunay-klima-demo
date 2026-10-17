@@ -30,7 +30,7 @@
 
   <div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:stretch">
     <sc-if value="{{ showPanel }}">
-      <aside style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;display:flex;flex-direction:column;height:{{ panelH }};min-height:0;overflow:hidden">
+      <aside style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;position:relative;height:{{ panelH }};min-height:{{ panelMinH }};overflow:hidden"><div style="position:{{ panelPos }};inset:0;display:flex;flex-direction:column;min-height:0">
         <div role="tablist" style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #E7E9ED;flex:none">
           <sc-for list="{{ tabs }}" as="t"><button role="tab" aria-selected="{{ t.sel }}" onClick="{{ t.pick }}" style="height:48px;border:none;border-bottom:2px solid {{ t.bd }};background:#FFFFFF;cursor:pointer;font-size:13px;font-weight:600;color:{{ t.fg }}">{{ t.l }}</button></sc-for>
         </div>
@@ -145,12 +145,12 @@
             </sc-for>
           </sc-if>
         </div>
-      </aside>
+      </div></aside>
     </sc-if>
 
     <sc-if value="{{ showMap }}">
-      <div style="position:relative;height:{{ mapH }};min-height:0">
-        <dc-import name="HaritaBileseni" pins="{{ pins }}" route="{{ route }}" center="{{ center }}" radius-km="{{ radiusKm }}" selected-id="{{ sel }}" on-select="{{ onPin }}" business="{{ business }}" view="{{ view }}" on-view="{{ onView }}" focus="{{ focus }}" zoom="{{ 15 }}" height="100%" hint-size="100%,100%"></dc-import>
+      <div style="position:relative;min-width:0;order:{{ mapOrder }}">
+        <dc-import name="HaritaBileseni" pins="{{ pins }}" route="{{ route }}" center="{{ center }}" radius-km="{{ radiusKm }}" selected-id="{{ sel }}" on-select="{{ onPin }}" business="{{ business }}" view="{{ view }}" on-view="{{ onView }}" focus="{{ focus }}" zoom="{{ 15 }}" ratio="{{ mapRatio }}" hint-size="100%,520px"></dc-import>
         <sc-if value="{{ cardOnMap }}">
           <div style="position:absolute;top:12px;right:12px;width:min(320px,calc(100% - 24px));z-index:700;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;box-shadow:0 10px 28px rgba(37,43,50,.16);padding:14px;display:flex;flex-direction:column;gap:8px">
             <div style="display:flex;gap:8px;align-items:flex-start"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:16px">{{ card.name }}</span><span style="font-size:13px;color:#4B525B">{{ card.addr }}</span></div><button onClick="{{ closeCard }}" aria-label="Kartı kapat" style="width:36px;height:36px;border:none;background:#F5F6F8;border-radius:8px;cursor:pointer;font-size:18px;flex:none">×</button></div>

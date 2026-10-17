@@ -15,7 +15,7 @@
  })();
  async function transaction(fn){const {database,seed,engine}=await ready;return new Promise((resolve,reject)=>{
   const tx=database.transaction('demo','readwrite'),store=tx.objectStore('demo'),q=store.get('state');let result;
-  q.onsuccess=()=>{try{const state=q.result||{db:structuredClone(seed),revision:0,receipts:[],audit:[]};state.db.today=engine.todayTR();result=fn(state,engine);store.put(state,'state');}catch(e){tx.abort();reject(e);}};
+  q.onsuccess=()=>{try{const state=q.result||{db:structuredClone(seed),revision:0,receipts:[],audit:[]};state.db.today=engine.todayTR();if(!state.catalogV2){for(const p of state.db.products){const source=seed.products.find(x=>x.id===p.id&&x.series===p.series&&x.code===p.code);if(source?.variants?.length&&!Object.hasOwn(p,'variants'))p.variants=structuredClone(source.variants);}state.catalogV2=true;}result=fn(state,engine);store.put(state,'state');}catch(e){tx.abort();reject(e);}};
   tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error||Error('Demo kaydı bu tarayıcıya yazılamadı.'));tx.onabort=()=>reject(tx.error||Error('Demo işlemi iptal edildi.'));
  });}
  const state=()=>transaction(s=>display({ok:true,db:s.db,revision:s.revision,workspace:'demo'}));
@@ -24,13 +24,15 @@
   const key=JSON.stringify({op:input.op,payload:input.payload}),old=s.receipts.find(x=>x.id===input.requestId);
   if(old)return old.key===key?display({...old.result,ok:true,replayed:true,db:s.db,revision:s.revision}):{ok:false,status:409,error:'İşlem kimliği farklı veriyle tekrar kullanıldı.'};
   if(input.revision!==s.revision)return display({ok:false,status:409,error:'Başka bir sekme demoyu güncelledi. Formu kontrol edip tekrar kaydedin.',db:s.db,revision:s.revision});
-  const payload=normalize(input.payload),photos=new Map();
+  const payload=normalize(JSON.parse(JSON.stringify(input.payload??{}))),photos=new Map();
   // Local demo photos remain in IndexedDB. Server validators still see a permitted image path.
-  if(input.op==='saveProduct'&&payload.img?.startsWith('data:image/')){photos.set('new',payload.img);payload.img='/assets/demo-photo.png';}
-  if(input.op==='restoreBackup')for(const p of payload.backup?.db?.products||[])if(p.img?.startsWith('data:image/')){photos.set(p.id,p.img);p.img='/assets/demo-photo.png';}
+  const stash=(p,key)=>{if(p.img?.startsWith('data:image/')){photos.set(key,p.img);p.img='/assets/demo-photo.png';}for(const [i,v]of(p.variants||[]).entries())if(v.img?.startsWith('data:image/')){photos.set(key+':'+i,v.img);v.img='/assets/demo-photo.png';}};
+  const unstash=(p,key)=>{if(photos.has(key))p.img=photos.get(key);for(const [i,v]of(p.variants||[]).entries())if(photos.has(key+':'+i))v.img=photos.get(key+':'+i);};
+  if(input.op==='saveProduct')stash(payload,'new');
+  if(input.op==='restoreBackup')for(const p of payload.backup?.db?.products||[])stash(p,p.id);
   const r=engine.execute(s.db,input.op,payload);if(!r.ok)return {...r,status:422};
-  if(input.op==='saveProduct'&&photos.has('new'))r.db.products.find(p=>p.id===r.id).img=photos.get('new');
-  if(input.op==='restoreBackup')for(const p of r.db.products)if(photos.has(p.id))p.img=photos.get(p.id);
+  if(input.op==='saveProduct')unstash(r.db.products.find(p=>p.id===r.id),'new');
+  if(input.op==='restoreBackup')for(const p of r.db.products)unstash(p,p.id);
   s.db=r.db;s.revision++;const result=Object.fromEntries(Object.entries(r).filter(([k])=>k!=='db'));
   s.receipts.push({id:input.requestId,key,result});s.receipts=s.receipts.slice(-200);
   s.audit.unshift({revision:s.revision,operation:input.op,actor:'Bu tarayıcıdaki demo',createdAt:new Date().toISOString()});s.audit=s.audit.slice(0,200);

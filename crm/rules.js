@@ -78,6 +78,8 @@ window.GK = (() => {
     activeStaff: function (db) { return db.staff.filter(function (s) { return s.active; }); },
     model: function (db, dev) {
       var p = dev.productId && byId(db.products, dev.productId);
+      var vv = p && dev.variant && (p.variants || []).find(function (x) { return x.name === dev.variant; });
+      if (vv && vv.img) p = Object.assign({}, p, { img: vv.img });
       if (!p) return { code: null, series: dev.externalModel || 'Model belirtilmedi', title: dev.externalModel || 'Model belirtilmedi', level: 'dis', img: null, levelLabel: 'Katalog dışı' };
       return { code: p.code, series: p.series, title: p.code || p.series, level: p.level, img: p.img, type: p.type, levelLabel: p.level === 'seri' ? 'Seri düzeyinde · model kodu belirtilmedi' : p.series };
     },
@@ -109,17 +111,17 @@ window.GK = (() => {
     contact: function (c) { var x = CONTACT[c.contact] || CONTACT.bilinmiyor; return badge(x[0], x[1]); },
     woBadge: function (w) { var x = WOST[w.status]; return badge(x[0], x[1]); },
     plannedFor: function (db, devId) { return db.workOrders.filter(function (w) { return (w.status === 'planlandi' || w.status === 'islemde') && w.deviceIds.indexOf(devId) >= 0 && w.date >= db.today; }).sort(function (a, b) { return (a.date + a.start).localeCompare(b.date + b.start); })[0] || null; },
-    lastCall: function (db, cId) { var c = db.calls.filter(function (k) { return k.customerId === cId; }).sort(function (a, b) { return b.date.localeCompare(a.date); }); return c[0] || null; },
+    lastCall: function (db, cId) { var c = db.calls.filter(function (k) { return k.customerId === cId; }).reverse().sort(function (a, b) { return b.date.localeCompare(a.date); }); return c[0] || null; },
     // Stok: fiziksel yalnız hareketlerden, rezerve onaylı satışların takılmamış kalemlerinden.
-    stock: function (db, pId, wId) {
+    stock: function (db, pId, wId, v) {
       var ph = 0, rs = 0;
       db.movements.forEach(function (m) {
-        if (m.productId !== pId) return;
+        if (m.productId !== pId || (v && m.variant !== v)) return;
         if (m.kind === 'transfer') { if (m.depotId === wId) ph -= m.qty; if (m.toDepotId === wId) ph += m.qty; return; }
         if (m.depotId !== wId) return;
         ph += m.kind === 'cikis' ? -m.qty : m.qty;
       });
-      db.sales.forEach(function (s) { if (s.status !== 'onayli') return; s.lines.forEach(function (l) { if (l.productId === pId && l.depotId === wId) rs += l.qty - l.installed; }); });
+      db.sales.forEach(function (s) { if (s.status !== 'onayli') return; s.lines.forEach(function (l) { if (l.productId === pId && l.depotId === wId && (!v || l.variant === v)) rs += l.qty - l.installed; }); });
       return { physical: ph, reserved: rs, avail: ph - rs };
     },
     stockTotal: function (db, pId) { var t = { physical: 0, reserved: 0, avail: 0 }; db.depots.forEach(function (w) { var s = R.stock(db, pId, w.id); t.physical += s.physical; t.reserved += s.reserved; t.avail += s.avail; }); return t; },
@@ -137,8 +139,8 @@ window.GK = (() => {
     },
     pendingUnits: function (s) { if (s.status !== 'onayli') return 0; var n = 0; s.lines.forEach(function (l) { n += l.qty - l.installed; }); return n; },
     stockProblems: function (db, s) {
-      var need = {}; s.lines.forEach(function (l) { var k = l.productId + '|' + l.depotId; need[k] = (need[k] || 0) + l.qty - l.installed; });
-      var out = []; Object.keys(need).forEach(function (k) { var a = k.split('|'), st = R.stock(db, a[0], a[1]); if (need[k] > st.avail) out.push({ productId: a[0], depotId: a[1], need: need[k], st: st }); });
+      var need = {}; s.lines.forEach(function (l) { var k = l.productId + '|' + l.depotId + '|' + (l.variant || ''); need[k] = (need[k] || 0) + l.qty - l.installed; });
+      var out = []; Object.keys(need).forEach(function (k) { var a = k.split('|'), st = R.stock(db, a[0], a[1], a[2] || undefined); if (need[k] > st.avail) out.push({ variant: a[2] || '', productId: a[0], depotId: a[1], need: need[k], st: st }); });
       return out;
     },
     conflicts: function (db, f) {
@@ -195,6 +197,42 @@ window.GK = (() => {
       var label = c.active === false ? 'Pasif' : last ? ({ aday: 'Aday', teklif: 'Teklif aşamasında', satis: 'Satış yapıldı', montaj: 'Montajı yapıldı', bakim: 'Bakım müşterisi' })[last.k] : 'Yeni kayıt';
       var due = devs.some(function (d) { return R.status(db, d).key === 'gecikti'; });
       return { stages: st, label: label, risk: !!c.flag || due, riskText: c.flag ? R.FLAGS[c.flag.type] : due ? 'Bakımı geciken cihaz var' : '' };
+    },
+    callSummary: function (db, k) {
+      var d = k.det || {}, p = [];
+      if (k.topic) p.push(k.topic);
+      if (d.devs && d.devs.length) p.push(d.devs.length + ' cihaz');
+      if (d.belirti && d.belirti.length) p.push(d.belirti.join(', '));
+      if (d.code) p.push('Hata kodu ' + d.code);
+      if (d.urgency) p.push(d.urgency);
+      if (d.model) { var pr = byId(db.products, d.model); p.push((d.qty || 1) + ' × ' + (pr ? R.pTitle(pr) : 'model')); }
+      if (d.room) p.push(d.room);
+      if (d.price) p.push('Söylenen fiyat ' + d.price + ' ₺');
+      if (d.promise) p.push('Ödeme sözü ' + d.promise + ' ₺' + (d.promiseDate ? ' · ' + F.date(d.promiseDate) : '') + (d.method ? ' · ' + d.method : ''));
+      if (d.when) p.push(d.when);
+      if (d.konu && d.konu.length) p.push(d.konu.join(', '));
+      if (d.severity) p.push('Önem: ' + d.severity);
+      if (d.question) p.push(d.question);
+      if (k.requests && k.requests.length) p.push('Ek talep: ' + k.requests.join(' · '));
+      return p.join(' · ');
+    },
+    composeLine: function (a) { if (!a) return ''; var b = (a.block || '').replace(/\s*blok$/i, ''); return [a.street, a.no ? 'No:' + a.no : '', a.building, b ? b + ' Blok' : '', a.floor ? 'Kat:' + a.floor : '', a.door ? 'D:' + a.door : ''].filter(function (x) { return x && String(x).trim(); }).join(' ').trim(); },
+    splitLine: function (line) {
+      var s = String(line || ''), o = { street: '', no: '', building: '', block: '', floor: '', door: '' };
+      var mNo = s.match(/No\s*:?\s*([0-9]+[A-Za-z]?(?:\/[0-9A-Za-z]+)?)/i); if (mNo) o.no = mNo[1];
+      var mD = s.match(/\bD\s*:?\s*([0-9]+)/); if (mD) o.door = mD[1];
+      var mK = s.match(/\b(?:Kat|K)\s*:?\s*(-?[0-9]+|Zemin)/i); if (mK) o.floor = mK[1];
+      var mB = s.match(/\b([A-Z0-9])\s*Blok/i); if (mB) o.block = mB[1];
+      if (mNo) o.street = s.slice(0, mNo.index).replace(/^.*?Mah\.?,?\s*/i, '').replace(/[,·\s]+$/, '').trim();
+      return o;
+    },
+    validateAddr: function (a, p) {
+      var e = {}; p = p || '';
+      if (!(a.street || '').trim() || a.street.trim().length < 3) e[p + 'street'] = 'Cadde veya sokak adı gerekli.';
+      if (!(a.no || '').trim()) e[p + 'no'] = 'Bina / kapı numarası gerekli.'; else if (!/\d/.test(a.no)) e[p + 'no'] = 'Kapı numarası rakam içermeli.';
+      if (!(a.mah || '').trim()) e[p + 'mah'] = 'Mahalle gerekli.';
+      if (!(a.ilce || '').trim()) e[p + 'ilce'] = 'İlçe gerekli.';
+      return e;
     },
     norm: function (s) { return String(s || '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); },
     lev: function (a, b) { if (a === b) return 0; if (!a.length || !b.length) return Math.max(a.length, b.length); var p = [], i, j; for (j = 0; j <= b.length; j++) p[j] = j; for (i = 1; i <= a.length; i++) { var c = [i]; for (j = 1; j <= b.length; j++) c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); p = c; } return p[b.length]; },
@@ -272,21 +310,34 @@ window.GK = (() => {
     },
     // Müşteri + isteğe bağlı ilk adres tek kayıtta. Konum (pin) sonradan doğrulanır.
     saveCustomerFull: function (db, f) {
-      var ae = {};
-      if (f.withAddr && !f.id && !(f.line || '').trim()) ae.line = 'Açık adres gerekli ya da adresi kaldırın.';
+      var ae = {}, addrs = f.id ? [] : (f.withAddr ? (f.addrs || []) : []);
+      addrs.forEach(function (a, i) { if(a.street!==undefined)Object.assign(ae, R.validateAddr(a, 'a' + i + '_')); });
+      var devs = f.id ? [] : (f.devs || []).filter(function (d) { return d.productId || (d.room || '').trim() || (d.serialIn || '').trim(); });
+      if (devs.length && !addrs.length) ae.devs = 'Klima eklemek için önce adres girin.';
+      var seen = {};
+      devs.forEach(function (d) { if (!d.productId && !(d.externalModel || '').trim()) ae.devs = 'Her klima satırında model seçin.'; var sn = (d.serialIn || '').trim().toUpperCase(); if (sn) { if (seen[sn]) ae.devs = 'Aynı seri numarası iki satırda yazılmış: ' + sn; seen[sn] = 1; if (db.devices.some(function (x) { return x.serialIn && x.serialIn.toUpperCase() === sn; })) ae.devs = 'Seri numarası ' + sn + ' başka bir cihazda kayıtlı.'; } });
       var r = ops.saveCustomer(db, f);
       if (!r.ok) { r.fields = Object.assign({}, r.fields, ae); return r; }
-      if (Object.keys(ae).length) return fail('Adres bilgisi eksik.', ae);
-      if (!f.withAddr || f.id) return r;
-      var r2 = ops.saveAddress(r.db, { customerId: r.id, label: f.label || 'Ev', line: f.line, mah: f.mah, ilce: f.ilce, lat: '', lng: '', verified: false });
-      if (!r2.ok) return r2;
-      return { ok: true, id: r.id, addressId: r2.id, db: r2.db };
+      if (Object.keys(ae).length) return fail('Adres veya klima bilgisi eksik.', ae);
+      if (!addrs.length) return r;
+      var cur = r.db, ids = [];
+      for (var i = 0; i < addrs.length; i++) { var a = addrs[i]; var r2 = ops.saveAddress(cur, Object.assign({}, a, { customerId: r.id, label: a.label || (i ? 'İş yeri' : 'Ev'), lat: a.lat || '', lng: a.lng || '', verified: false })); if (!r2.ok) return r2; cur = r2.db; ids.push(r2.id); }
+      var n = 0;
+      for (var j = 0; j < devs.length; j++) { var d = devs[j]; var r3 = ops.saveDevice(cur, { customerId: r.id, addressId: ids[d.addrIdx || 0] || ids[0], productId: d.productId, variant: d.variant || null, externalModel: d.externalModel || '', room: (d.room || '').trim() || 'Belirtilmedi', serialIn: (d.serialIn || '').trim() || null, serialOut: null, fromGunay: null, interval: null, installDate: null, installBy: null, note: '' }); if (!r3.ok) return r3; cur = r3.db; n++; }
+      return { ok: true, id: r.id, addressId: ids[0], addrCount: ids.length, devCount: n, db: cur };
     },
     // Olası mükerrer kayıt: telefon, ad (Türkçe karakter ve yazım farkı toleranslı) ve adres karşılaştırılır.
     archiveCustomer: function (db, id) { return { ok: true, db: with_(db, { customers: put(db.customers, { id: id, active: false }) }) }; },
     saveAddress: function (db, f) {
       var e = {};
-      if (!f.line || !f.line.trim()) e.line = 'Açık adres gerekli.';
+      if (f.street !== undefined) { Object.assign(e, R.validateAddr(f)); f = Object.assign({}, f, { line: R.composeLine(f) }); }
+      var LN = (f.line || '').trim();
+      if (f.street !== undefined) LN = LN || 'x'.repeat(10) + '1';
+      if (!LN) e.line = 'Açık adres gerekli.';
+      else if (LN.length < 10) e.line = 'Adres çok kısa. Sokak/cadde, bina ve kapı numarasını yazın.';
+      else if (!/\d/.test(LN)) e.line = 'Bina veya kapı numarası eksik. Tam adresi yazın.';
+      if (!(f.mah || '').trim()) e.mah = 'Mahalle gerekli.';
+      if (!(f.ilce || '').trim()) e.ilce = 'İlçe gerekli.';
       var lat = f.lat === '' || f.lat == null ? null : Number(String(f.lat).replace(',', '.')), lng = f.lng === '' || f.lng == null ? null : Number(String(f.lng).replace(',', '.'));
       if ((lat == null) !== (lng == null) || (lat != null && (isNaN(lat) || isNaN(lng)))) e.coord = 'Enlem ve boylamı birlikte, sayı olarak girin.';
       if (f.verified && lat == null) e.coord = 'Konumu doğrulamak için önce haritadan pin seçin veya koordinat girin.';
@@ -294,7 +345,7 @@ window.GK = (() => {
       if (!e.coord && lat != null && (lat < 35.8 || lat > 42.2 || lng < 25.6 || lng > 44.9)) e.coord = 'Koordinat Türkiye dışında görünüyor. Enlem (≈38,4) ve boylam (≈27,2) yer değiştirmiş olabilir.';
       if (Object.keys(e).length) return fail('Adres kaydedilemedi.', e);
       var id = f.id || uid('a');
-      return { ok: true, id: id, db: with_(db, { addresses: put(db.addresses, { id: id, customerId: f.customerId, label: f.label || 'Ev', line: f.line.trim(), mah: f.mah || '', ilce: f.ilce || '', lat: lat, lng: lng, verified: !!f.verified && lat != null }) }) };
+      return { ok: true, id: id, db: with_(db, { addresses: put(db.addresses, { id: id, customerId: f.customerId, label: f.label || 'Ev', line: f.line.trim(), mah: f.mah || '', ilce: f.ilce || '', street: f.street, no: f.no, building: f.building || '', block: f.block || '', floor: f.floor || '', door: f.door || '', il: f.il || f.city || '', city: f.city || f.il || '', buildingNo: f.buildingNo || f.no || '', doorNo: f.doorNo || f.door || '', directions: f.directions || '', lat: lat, lng: lng, verified: !!f.verified && lat != null, src: lat == null ? (f.mah ? 'mahalle' : null) : f.verified ? 'harita' : (f.src || 'adres'), vBy: f.verified && lat != null ? (f.vBy || null) : null, vAt: f.verified && lat != null ? db.today : null }) }) };
     },
     saveDevice: function (db, f) {
       var e = {};
@@ -319,13 +370,16 @@ window.GK = (() => {
       if (!f.techId) e.techId = 'Sorumlu teknisyen seçin.';
       if (f.date && !f.id && f.date < db.today) e.date = 'Geçmiş tarihe randevu açılamaz. Yapılmış işi Bakım › Geçmiş’ten kaydedin.';
       if (f.start && !/^\d{2}:\d{2}$/.test(f.start)) e.start = 'Saati SS:DD biçiminde girin.';
+      var price = P.num(f.price);
+      if (f.price && (price == null || price < 0)) e.price = 'Ücreti sayı olarak girin.';
+      else if (price != null && price > 1000000) e.price = 'Ücret olağan dışı yüksek görünüyor.';
       var old = f.id && byId(db.workOrders, f.id);
       if (old && (old.date !== f.date || old.start !== f.start || old.techId !== f.techId) && !(f.changeReason || '').trim()) e.changeReason = 'Tarih/saat değişikliği için neden yazın.';
       if (!e.techId && !e.date && R.conflicts(db, f).length && !f.override) e.start = 'Teknisyenin bu saatte başka işi var.';
       if (Object.keys(e).length) return fail('Randevu kaydedilemedi.', e);
       var id = f.id || uid('wo');
       var log = (old && old.log || []).slice(); if (old && f.changeReason) log.push({ date: db.today, text: F.date(old.date) + ' ' + old.start + ' → ' + F.date(f.date) + ' ' + f.start + ' · ' + f.changeReason });
-      var w = { id: id, customerId: f.customerId, addressId: f.addressId, type: f.type, date: f.date, start: f.start, dur: Number(f.dur), buffer: Number(f.buffer || 0), techId: f.techId, status: old ? old.status : 'planlandi', deviceIds: f.deviceIds || [], note: f.note || '', saleId: f.saleId, lineId: f.lineId, qty: f.qty, log: log, campaignId: f.campaignId };
+      var w = { id: id, customerId: f.customerId, addressId: f.addressId, type: f.type, date: f.date, start: f.start, dur: Number(f.dur), buffer: Number(f.buffer || 0), techId: f.techId, status: old ? old.status : 'planlandi', deviceIds: f.deviceIds || [], note: f.note || '', price: price, priceKind: price != null ? (f.priceKind || 'kesin') : null, saleId: f.saleId, lineId: f.lineId, qty: f.qty, log: log, campaignId: f.campaignId };
       return { ok: true, id: id, db: with_(db, { workOrders: put(db.workOrders, w) }) };
     },
     collectFee: function (db, f) { if (!f.method) return fail('Ödeme yöntemini seçin.', { feeMethod: 'Yöntem seçin.' }); return { ok: true, db: with_(db, { workOrders: put(db.workOrders, { id: f.id, feePaid: true, feeMethod: f.method, feePaidAt: db.today }) }) }; },
@@ -352,8 +406,9 @@ window.GK = (() => {
       if (f.result === 'tekrar_ara' && !f.callback) e.callback = 'Tekrar arama tarihini seçin.';
       if (f.result === 'tekrar_ara' && f.callback && f.callback < db.today) e.callback = 'Tekrar arama tarihi bugünden önce olamaz.';
       if (f.flagIt && !f.flagType) e.flagType = 'Olumsuzluk türünü seçin.';
+      if (f.det && f.det.promiseDate && f.det.promiseDate < db.today) e.result = 'Ödeme sözü tarihi bugünden önce olamaz.';
       if (Object.keys(e).length) return fail('Görüşme kaydedilemedi.', e);
-      var k = { id: uid('k'), customerId: f.customerId, date: db.today, result: f.result, dir: f.dir || 'giden', topic: f.topic || '', callback: f.result === 'tekrar_ara' ? f.callback : null, note: f.note || '', campaignId: f.campaignId || null, addressId: f.addressId || null };
+      var k = { id: uid('k'), customerId: f.customerId, date: db.today, result: f.result, dir: f.dir || 'giden', topic: f.topic || '', det: f.det || {}, requests: (f.reqs || []).map(function (x) { return String(x).trim(); }).filter(Boolean), callback: f.result === 'tekrar_ara' ? f.callback : null, note: f.note || '', campaignId: f.campaignId || null, addressId: f.addressId || null };
       var patch = { calls: db.calls.concat([k]) };
       if (f.noContact) patch.customers = put(db.customers, { id: f.customerId, contact: 'istemiyor' });
       if (f.flagIt && f.flagType) { var cc = byId(patch.customers || db.customers, f.customerId); patch.customers = put(patch.customers || db.customers, { id: f.customerId, flag: { type: f.flagType, note: f.note || 'Görüşmede işaretlendi', date: db.today }, flagLog: (cc.flagLog || []).concat([{ date: db.today, action: 'isaret', type: f.flagType, note: f.note || 'Görüşmede işaretlendi' }]) }); }
@@ -375,6 +430,7 @@ window.GK = (() => {
       if (!(f.lines || []).length) e.lines = 'En az bir satış kalemi ekleyin.';
       (f.lines || []).forEach(function (l) { var q = Number(l.qty), p = l.price == null ? null : Number(l.price), dsc = Number(l.disc || 0); if (!(q >= 1) || Math.floor(q) !== q) e.lines = 'Adet 1 veya daha büyük tam sayı olmalı.'; else if (q > 999) e.lines = 'Bir kalemde en fazla 999 adet olabilir.'; if (p == null || isNaN(p)) e.lines = 'Her kalem için birim satış fiyatı girin.'; else if (!(p > 0)) e.lines = 'Birim satış fiyatı 0 olamaz.'; if (p > 0 && dsc > q * p) e.lines = 'Satır indirimi satır tutarını (' + F.money(q * p) + ') aşamaz.'; if (dsc < 0) e.lines = 'İndirim negatif olamaz.'; if (l.cost != null && l.cost !== '' && Number(l.cost) < 0) e.lines = 'Alış maliyeti negatif olamaz.'; });
       if (f.date && f.date > db.today) e.date = 'Satış tarihi ileri bir tarih olamaz.';
+      (f.lines || []).forEach(function (l) { var lp = byId(db.products, l.productId); if (lp && (lp.variants || []).length && !l.variant) e.lines = 'Renk / varyasyon seçin: ' + R.pTitle(lp); });
       if (Object.keys(e).length) return fail('Satış kaydedilemedi.', e);
       var year = db.today.slice(0,4), n = db.sales.length + 1;
       var id = f.id || uid('s');
@@ -417,9 +473,9 @@ window.GK = (() => {
       if (f.serialIn && db.devices.some(function (d) { return d.serialIn && d.serialIn.toUpperCase() === f.serialIn.trim().toUpperCase(); })) e.serialIn = 'Bu iç ünite seri numarası başka bir cihazda kayıtlı.';
       if (Object.keys(e).length) return fail('Montaj kaydedilemedi.', e);
       var did = uid('d');
-      var dev = { id: did, customerId: s.customerId, addressId: s.addressId, productId: l.productId, room: f.room.trim(), serialIn: f.serialIn ? f.serialIn.trim() : null, serialOut: f.serialOut ? f.serialOut.trim() : null, system: f.system || null, installDate: f.date, installBy: f.by, fromGunay: true, saleId: s.id, lineId: l.id, interval: f.interval ? Number(f.interval) : null, baseRule: f.baseInstall ? 'install' : null, note: f.note || '' };
+      var dev = { id: did, customerId: s.customerId, addressId: s.addressId, productId: l.productId, variant: l.variant || null, room: f.room.trim(), serialIn: f.serialIn ? f.serialIn.trim() : null, serialOut: f.serialOut ? f.serialOut.trim() : null, system: f.system || null, installDate: f.date, installBy: f.by, fromGunay: true, saleId: s.id, lineId: l.id, interval: f.interval ? Number(f.interval) : null, baseRule: f.baseInstall ? 'install' : null, note: f.note || '' };
       var lines = s.lines.map(function (x) { return x.id === l.id ? Object.assign({}, x, { installed: x.installed + 1 }) : x; });
-      var patch = { devices: db.devices.concat([dev]), sales: put(db.sales, { id: s.id, lines: lines }), movements: db.movements.concat([{ id: uid('m'), date: f.date, kind: 'cikis', productId: l.productId, depotId: l.depotId, qty: 1, reason: 'Montaj', saleId: s.id, deviceId: did, customerId: s.customerId }]) };
+      var patch = { devices: db.devices.concat([dev]), sales: put(db.sales, { id: s.id, lines: lines }), movements: db.movements.concat([{ id: uid('m'), date: f.date, kind: 'cikis', productId: l.productId, variant: l.variant || null, depotId: l.depotId, qty: 1, reason: 'Montaj', saleId: s.id, deviceId: did, customerId: s.customerId }]) };
       if (f.woId) patch.workOrders = put(db.workOrders, { id: f.woId, status: 'tamamlandi', completedAt: f.date, completedBy: f.by, deviceIds: [did] });
       return { ok: true, id: did, db: with_(db, patch) };
     },
@@ -433,10 +489,12 @@ window.GK = (() => {
       if (f.kind === 'transfer' && (!f.toDepotId || f.toDepotId === f.depotId)) e.toDepotId = 'Farklı bir hedef depo seçin.';
       if ((f.kind === 'cikis' || f.kind === 'duzeltme') && !(f.reason || '').trim()) e.reason = 'Çıkış ve sayım düzeltmesi için gerekçe yazın.';
       var dec = f.kind === 'cikis' || f.kind === 'transfer' || (f.kind === 'duzeltme' && f.dir === 'eksik');
-      if (!Object.keys(e).length && dec) { var st = R.stock(db, f.productId, f.depotId); if (q > st.avail) e.qty = 'Bu depoda satılabilir ' + st.avail + ' adet var (fiziksel ' + st.physical + ', rezerve ' + st.reserved + '). Stok negatif olamaz; rezerve ürün başka iş için düşülemez.'; }
+      var mp = f.productId && byId(db.products, f.productId);
+      if (mp && (mp.variants || []).length && !f.variant) e.variant = 'Renk / varyasyon seçin.';
+      if (!Object.keys(e).length && dec) { var st = R.stock(db, f.productId, f.depotId, f.variant || undefined); if (q > st.avail) e.qty = 'Bu depoda satılabilir ' + st.avail + ' adet var (fiziksel ' + st.physical + ', rezerve ' + st.reserved + '). Stok negatif olamaz; rezerve ürün başka iş için düşülemez.'; }
       if (Object.keys(e).length) return fail('Stok hareketi kaydedilemedi.', e);
       var cost = f.cost === '' || f.cost == null ? null : Number(String(f.cost).replace(/\./g, '').replace(',', '.'));
-      var m = { id: uid('m'), date: f.date, kind: f.kind, productId: f.productId, depotId: f.depotId, toDepotId: f.kind === 'transfer' ? f.toDepotId : undefined, qty: f.kind === 'duzeltme' && f.dir === 'eksik' ? -q : q, cost: f.kind === 'giris' ? cost : null, reason: f.reason || (f.kind === 'giris' ? 'Stok girişi' : '') };
+      var m = { id: uid('m'), date: f.date, kind: f.kind, productId: f.productId, variant: f.variant || null, depotId: f.depotId, toDepotId: f.kind === 'transfer' ? f.toDepotId : undefined, qty: f.kind === 'duzeltme' && f.dir === 'eksik' ? -q : q, cost: f.kind === 'giris' ? cost : null, reason: f.reason || (f.kind === 'giris' ? 'Stok girişi' : '') };
       return { ok: true, db: with_(db, { movements: db.movements.concat([m]) }) };
     },
     saveProduct: function (db, f) {
@@ -445,10 +503,11 @@ window.GK = (() => {
       if (!(f.series || '').trim()) e.series = 'Seri / ürün adı gerekli.';
       if (!f.cat) e.cat = 'Kategori seçin.';
       if (!f.seriesLevel && !(f.code || '').trim()) e.code = 'Tam model kodunu yazın veya "Seri düzeyinde kayıt" seçin.';
+      var vn = {}; (f.variants || []).forEach(function (v) { var n = (v.name || '').trim().toLocaleLowerCase('tr'); if (!n) return; if (vn[n]) e.variants = 'Aynı renk / varyasyon iki kez yazılmış: ' + v.name; vn[n] = 1; });
       if (f.code && db.products.some(function (p) { return p.id !== f.id && p.code && p.code.toUpperCase() === f.code.trim().toUpperCase(); })) e.code = 'Bu model kodu katalogda zaten var.';
       if (Object.keys(e).length) return fail('Model kaydedilemedi.', e);
       var id = f.id || uid('p');
-      var p = { id: id, brand: f.brand.trim(), series: f.series.trim(), type: f.type || '', code: f.seriesLevel ? null : f.code.trim().toUpperCase(), level: f.seriesLevel ? 'seri' : 'model', cat: f.cat, img: f.img || null, src: f.src || '', capacity: f.capacity || '', tech: f.tech || '', threshold: f.threshold === '' || f.threshold == null ? null : Number(f.threshold), price: null, parentId: f.parentId || null };
+      var p = { id: id, brand: f.brand.trim(), series: f.series.trim(), type: f.type || '', code: f.seriesLevel ? null : f.code.trim().toUpperCase(), level: f.seriesLevel ? 'seri' : 'model', cat: f.cat, img: f.img || null, src: f.src || '', capacity: f.capacity || '', tech: f.tech || '', threshold: f.threshold === '' || f.threshold == null ? null : Number(f.threshold), price: null, parentId: f.parentId || null, variants: (f.variants || []).filter(function (v) { return v.name && v.name.trim(); }).map(function (v) { return { name: v.name.trim(), img: v.img || null }; }) };
       return { ok: true, id: id, db: with_(db, { products: put(db.products, p) }) };
     },
     setThreshold: function (db, f) { return { ok: true, db: with_(db, { products: put(db.products, { id: f.id, threshold: f.value === '' ? null : Number(f.value) }) }) }; },

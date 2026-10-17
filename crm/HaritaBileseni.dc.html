@@ -8,8 +8,14 @@
 <body>
 <x-dc>
 
-<div style="position:relative;isolation:isolate;z-index:0;touch-action:pan-x pan-y;width:100%;height:{{ height }};min-height:180px;border-radius:12px;overflow:hidden;background:#EEF0F3;border:1px solid #E7E9ED">
+<sc-if value="{{ full }}"><div onClick="{{ toggleFull }}" style="position:fixed;inset:0;background:rgba(20,24,28,.55);z-index:2399;animation:gkFadeBg .2s ease"></div></sc-if>
+<div ref="{{ boxRef }}" style="position:{{ pos }};inset:{{ inset }};z-index:{{ z }};isolation:isolate;touch-action:pan-x pan-y;width:{{ w }};height:{{ h }};aspect-ratio:{{ ar }};min-height:200px;border-radius:{{ rad }};overflow:hidden;background:#EEF0F3;border:1px solid #E7E9ED;box-shadow:{{ sh }};animation:{{ anim }}">
   <div ref="{{ mapRef }}" style="position:absolute;inset:0"></div>
+  <div style="position:absolute;left:10px;bottom:{{ ctlBottom }};z-index:1000;display:flex;flex-direction:column;gap:6px">
+    <button onClick="{{ toggleFull }}" title="{{ fullTitle }}" aria-label="{{ fullTitle }}" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 10px;border-radius:8px;border:1px solid #CDD2D9;background:#FFFFFF;color:#252B32;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 6px rgba(37,43,50,.12)" style-hover="border-color:#B1001A;color:#B1001A"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ fullIcon }}"></path></svg>{{ fullLabel }}</button>
+    <sc-if value="{{ canReset }}"><button onClick="{{ resetSize }}" style="height:30px;padding:0 10px;border-radius:8px;border:1px solid #CDD2D9;background:#FFFFFF;color:#4B525B;font-size:12px;font-weight:600;cursor:pointer">Boyutu sıfırla</button></sc-if>
+  </div>
+  <sc-if value="{{ showHandle }}"><div onPointerDown="{{ startDrag }}" onDoubleClick="{{ resetSize }}" title="Sürükleyerek büyütün veya küçültün · çift tıkla sıfırla" role="separator" aria-orientation="horizontal" aria-label="Harita yüksekliği" style="position:absolute;left:0;right:0;bottom:0;height:18px;z-index:1001;cursor:ns-resize;display:flex;align-items:center;justify-content:center;background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.9));touch-action:none" style-hover="background:linear-gradient(rgba(255,255,255,0),rgba(251,239,241,.95))"><span style="width:56px;height:5px;border-radius:3px;background:#A0A6AE;box-shadow:0 1px 0 #FFFFFF"></span></div></sc-if>
   <div style="position:absolute;right:10px;top:10px;z-index:500;background:#FFFFFF;border:1px solid #E7E9ED;border-radius:6px;padding:4px 8px;font-size:12px;font-weight:600;color:#4B525B;pointer-events:none">{{ note }}</div>
   <sc-if value="{{ loading }}" hint-placeholder-val="{{ true }}">
     <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#747B85;z-index:600;background:#EEF0F3">Harita yükleniyor…</div>
