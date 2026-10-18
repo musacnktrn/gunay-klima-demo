@@ -92,6 +92,7 @@
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <sc-if value="{{ notMobile }}"><button onClick="{{ plan }}" style="height:44px;padding:0 16px;border-radius:8px;border:none;background:#B1001A;color:#FFFFFF;cursor:pointer;font-weight:600;white-space:nowrap">Bakım planla</button>
+          <sc-if value="{{ isDemo }}"><button class="ds-button" onClick="{{ demoSms }}">SMS gönder</button></sc-if>
           <button onClick="{{ logCall }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500;white-space:nowrap">Görüşme kaydı</button></sc-if>
           <button onClick="{{ addDevice }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600;white-space:nowrap">+ Klima ekle</button>
           <button onClick="{{ edit }}" style="height:44px;padding:0 14px;border-radius:8px;border:1px solid #D5D9DF;background:#FFFFFF;cursor:pointer;font-weight:500">Düzenle</button>

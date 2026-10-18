@@ -6,16 +6,16 @@
  const display=x=>walk(x,s=>s.startsWith('/assets/')?base.pathname+s.slice(1):s);
  const normalize=x=>walk(x,s=>s.startsWith(base.pathname+'assets/')?'/'+s.slice(base.pathname.length):s);
  const ready=(async()=>{
-  const [engine,response]=await Promise.all([import(new URL('demo/engine.mjs',base)),nativeFetch(new URL('demo/seed.json',base))]);
+  const [engine,response,suite]=await Promise.all([import(new URL('demo/engine.mjs',base)),nativeFetch(new URL('demo/seed.json',base)),import(new URL('demo/demo-suite.mjs',base))]);
   if(!response.ok)throw Error('Demo verileri yüklenemedi.');
   const seed=await response.json(),today=engine.todayTR(),delta=(Date.parse(today)-Date.parse(seed.today))/86400000;
   const shifted=walk(seed,s=>/^\d{4}-\d{2}-\d{2}$/.test(s)?new Date(Date.parse(s)+delta*86400000).toISOString().slice(0,10):s);shifted.today=today;
   const database=await new Promise((resolve,reject)=>{const r=indexedDB.open('gunay-pages-demo-v1',1);r.onupgradeneeded=()=>r.result.createObjectStore('demo');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
-  return {engine,seed:shifted,database};
+  return {engine,seed:shifted,database,suite,provider:new suite.SimulationProvider()};
  })();
- async function transaction(fn){const {database,seed,engine}=await ready;return new Promise((resolve,reject)=>{
+ async function transaction(fn){const {database,seed,engine,suite}=await ready;return new Promise((resolve,reject)=>{
   const tx=database.transaction('demo','readwrite'),store=tx.objectStore('demo'),q=store.get('state');let result;
-  q.onsuccess=()=>{try{const state=q.result||{db:structuredClone(seed),revision:0,receipts:[],audit:[]};state.db.today=engine.todayTR();if(!state.catalogV2){for(const p of state.db.products){const source=seed.products.find(x=>x.id===p.id&&x.series===p.series&&x.code===p.code);if(source?.variants?.length&&!Object.hasOwn(p,'variants'))p.variants=structuredClone(source.variants);}state.catalogV2=true;}result=fn(state,engine);store.put(state,'state');}catch(e){tx.abort();reject(e);}};
+  q.onsuccess=()=>{try{const state=q.result||{db:structuredClone(seed),revision:0,receipts:[],audit:[]};state.db.today=engine.todayTR();if(!state.catalogV2){for(const p of state.db.products){const source=seed.products.find(x=>x.id===p.id&&x.series===p.series&&x.code===p.code);if(source?.variants?.length&&!Object.hasOwn(p,'variants'))p.variants=structuredClone(source.variants);}state.catalogV2=true;}suite.initializeSuite(state.db);result=fn(state,engine);store.put(state,'state');}catch(e){tx.abort();reject(e);}};
   tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error||Error('Demo kaydı bu tarayıcıya yazılamadı.'));tx.onabort=()=>reject(tx.error||Error('Demo işlemi iptal edildi.'));
  });}
  const state=()=>transaction(s=>display({ok:true,db:s.db,revision:s.revision,workspace:'demo'}));
@@ -30,10 +30,13 @@
   const unstash=(p,key)=>{if(photos.has(key))p.img=photos.get(key);for(const [i,v]of(p.variants||[]).entries())if(photos.has(key+':'+i))v.img=photos.get(key+':'+i);};
   if(input.op==='saveProduct')stash(payload,'new');
   if(input.op==='restoreBackup')for(const p of payload.backup?.db?.products||[])stash(p,p.id);
+  const person=s.db.demoSuite.people.find(p=>p.id===sessionStorage.getItem('gk-demo-person'));
+  if(person?.role==='technician'&&!(['startWO','completeWO'].includes(input.op)&&s.db.workOrders.some(w=>w.id===(payload.id||payload)&&w.techId===person.staffId)))return {ok:false,status:403,error:'Bu görünümde bu işlem için yetki yok.'};
+  if(person?.role==='office'&&['saveBusiness','restoreBackup'].includes(input.op))return {ok:false,status:403,error:'Bu görünümde bu işlem için yetki yok.'};
   const r=engine.execute(s.db,input.op,payload);if(!r.ok)return {...r,status:422};
   if(input.op==='saveProduct')unstash(r.db.products.find(p=>p.id===r.id),'new');
   if(input.op==='restoreBackup')for(const p of r.db.products)unstash(p,p.id);
-  s.db=r.db;s.revision++;const result=Object.fromEntries(Object.entries(r).filter(([k])=>k!=='db'));
+  s.db=r.db;if(input.op==='saveSale'&&payload.demoRequestId){const request=s.db.demoSuite.requests.find(x=>x.id===payload.demoRequestId);if(request&&request.customerId===payload.customerId)request.saleId=r.id;}s.revision++;const result=Object.fromEntries(Object.entries(r).filter(([k])=>k!=='db'));
   s.receipts.push({id:input.requestId,key,result});s.receipts=s.receipts.slice(-200);
   s.audit.unshift({revision:s.revision,operation:input.op,actor:'Bu tarayıcıdaki demo',createdAt:new Date().toISOString()});s.audit=s.audit.slice(0,200);
   return display({...r,revision:s.revision});
@@ -50,6 +53,7 @@
   const p=url.pathname.slice(new URL(apiPrefix).pathname.length);if(p==='state')return json(await state());if(p==='audit')return json(await transaction(s=>({ok:true,rows:s.audit})));if(p==='backup')return json(await backup());return json({ok:false,error:'Demo işlemi yok.'},404);
  };
  window.GKApi={space:'demo',path:p=>apiPrefix+p,state,
+  async demo(op,payload={}){const {suite,provider}=await ready;const requestId=crypto.randomUUID();if(op==='startCall'||op==='sms')await provider.dispatch(op==='sms'?'sms':'call',op==='sms'?provider.planSms({...payload,requestId}):provider.planCall({...payload,requestId}));return transaction((s,engine)=>{try{const r=suite.simulate(s.db,op,payload,engine,sessionStorage.getItem('gk-demo-person'));if(!r.ok)return r;s.db=r.db;s.revision++;s.audit.unshift({revision:s.revision,operation:'demo:'+op,actor:'Simülasyon',createdAt:new Date().toISOString()});s.audit=s.audit.slice(0,200);return display({...r,revision:s.revision});}catch(e){return {ok:false,error:e.message};}});},
   async action(op,payload,revision){const key=JSON.stringify({op,payload});if(!pending||pending.key!==key)pending={key,requestId:crypto.randomUUID(),revision};try{const r=await run({op,payload,revision:pending.revision,requestId:pending.requestId});if(r.ok||r.status<500)pending=null;return r;}catch(e){throw Error('Bu tarayıcıya kayıt yapılamadı. '+e.message);}},
   upload,
   async switchSpace(){if(!confirm('Yalnız bu tarayıcıdaki demo değişiklikleri sıfırlansın mı?'))return;const {seed}=await ready;await transaction(s=>{s.db=structuredClone(seed);s.revision++;s.receipts=[];s.audit=[];});location.reload();},

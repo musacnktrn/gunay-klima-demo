@@ -3,7 +3,7 @@ window.GKCompiled=Object.create(null);
 window.GKCompiled["EkranAyarlar.dc.html"]=function(DCLogic,StreamableLogic,React){
 
 const SEL = { bg: '#FBEFF1', fg: '#B1001A', bd: '#B1001A' }, UNS = { bg: '#FFFFFF', fg: '#252B32', bd: '#CDD2D9' };
-const SECT = [['isletme', 'İşletme bilgileri'], ['katalog', 'Klima kataloğu'], ['personel', 'Personel'], ['depolar', 'Depolar'], ['bakim', 'Bakım ayarları'], ['kur', 'Döviz kurları'], ['kullanici', 'Kullanıcılar'], ['veri', 'Veri aktarımı']];
+const SECT = [['isletme', 'İşletme bilgileri'], ['katalog', 'Klima kataloğu'], ['personel', 'Personel'], ['depolar', 'Depolar'], ['bakim', 'Bakım ayarları'], ['kur', 'Döviz kurları'], ['kullanici', 'Kullanıcılar'], ['veri', 'Veri aktarımı']].concat(window.GKApi.demo ? [['santral','Santral'],['sms','SMS'],['yedekleme','Yedekleme']] : []);
 const MFK = ['brand', 'series', 'type', 'cat', 'code', 'threshold', 'src', 'capacity', 'tech', 'seriesLevel'];
 class Component extends DCLogic {
   state = this.init(this.props.params || {});
@@ -34,7 +34,7 @@ class Component extends DCLogic {
       mAlign: mobile ? 'flex-end' : 'center', mPad: mobile ? '0' : '24px', mRadius: mobile ? '16px 16px 0 0' : '16px',
       section: s.section, onSection: e => set({ section: e.target.value }),
       sections: SECT.map(([k, l]) => ({ k, l, sel: s.section === k, fw: s.section === k ? 600 : 500, bg: s.section === k ? '#FBEFF1' : 'transparent', fg: s.section === k ? '#B1001A' : '#252B32', pick: () => set({ section: k }) })),
-      isIsletme: sec.isletme, isKatalog: sec.katalog, isPersonel: sec.personel, isDepolar: sec.depolar, isBakim: sec.bakim, isKur: sec.kur, isKullanici: sec.kullanici, isVeri: sec.veri,
+      isIsletme: sec.isletme, isKatalog: sec.katalog, isPersonel: sec.personel && !window.GKApi.demo, demoPersonel: sec.personel && !!window.GKApi.demo, demoSantral: sec.santral, demoSMS: sec.sms, demoYedek: sec.yedekleme, isDepolar: sec.depolar, isBakim: sec.bakim, isKur: sec.kur, isKullanici: sec.kullanici, isVeri: sec.veri,
       openData:()=>window.GKApi.tools('data'),openBusiness:()=>window.GKApi.tools('business'),openHours:()=>window.GKApi.tools('hours'),biz: db.business, logoSrc: db.img.logo,
       shownN: db.products.length, newModel: () => openMf({ brand: 'Mitsubishi Electric', seriesLevel: false }),
       cats: [{ id: '', name: 'Tümü', count: db.products.length }].concat(db.categories.map(c=>Object.assign({},c,{count:db.products.filter(p=>p.cat===c.id).length}))).map(c => Object.assign({ l: c.name + ' · ' + c.count + ' kayıt', sel: s.cat === c.id, pick: () => set({ cat: c.id }) }, s.cat === c.id ? SEL : UNS)),
@@ -155,20 +155,10 @@ class Component extends DCLogic {
 return Component;};
 window.GKCompiled["EkranBugun.dc.html"]=function(DCLogic,StreamableLogic,React){
 
-// [codex] Informational copy only. No provider, account, storage or request callbacks.
-const ROADMAP = [
-  { id: 'santral', title: 'Santral ve şirket numarası', description: 'Müşteri aramada 0232’yi görecek; santral seçimi bekleniyor.' },
-  { id: 'musteri-karti', title: 'Gelen çağrıda müşteri kartı', description: 'Arayanın adresi, cihazı ve bakımı görünecek; santral bağlantısı bekleniyor.' },
-  { id: 'bildirim', title: 'Kaçan çağrı ve mesai dışı', description: 'Cevapsız aramalar bildirilecek; çalışma saatleri ve bildirim yolu seçilecek.' },
-  { id: 'sms', title: 'SMS hatırlatmaları', description: 'Randevu ve bakım zamanı hatırlatılacak; SMS bağlantısı ve izinler bekleniyor.' },
-  { id: 'specto', title: 'Specto CX talepleri', description: 'Keşif, fiyat teklifi, arıza ve bakım toplanacak; bağlantı Musa ile kurulacak.' },
-  { id: 'outlook', title: 'info@ Outlook mail özeti', description: 'Önemli e-postalar özetlenecek; posta hesabı Musa ile bağlanacak.' },
-  { id: 'personel', title: 'Personel hesapları ve roller', description: 'Herkes kendi hesabıyla çalışacak; kişiler ve yetkileri belirlenecek.' },
-  { id: 'yedek', title: 'Düzenli yedekleme', description: 'Kayıtlar düzenli yedeklenecek; ortak sistem kurulumu bekleniyor.' }
-];
+// [codex] Daily CRM view with integrated demo summary host.
 const WOC = { planlandi: ['#E8F0FB', '#1D4F91', '#B9CDEB'], islemde: ['#FFF1D1', '#5C3800', '#F0D38C'], tamamlandi: ['#E5F3EB', '#1B6B3F', '#B6DCC5'] };
 class Component extends DCLogic {
-  state = { pv: 'saat', pday: null, roadmapOpen: null };
+  state = { pv: 'saat', pday: null };
   tlRef = React.createRef();
   componentDidMount() { this.tick = setInterval(() => this.forceUpdate(), 30000); this.hookWheel(); }
   componentDidUpdate() { this.hookWheel(); }
@@ -250,11 +240,8 @@ class Component extends DCLogic {
       excludedText: g.excluded + ' müşterinin iletişim izni uygun olmadığı için gruba alınmadı. Konumu doğrulanmamış adresler hesaba katılmaz.',
       open: go('harita', { group: true })
     };
-    const t = today, roadmapOpen = this.state.roadmapOpen === null ? !mobile : this.state.roadmapOpen;
+    const t = today;
     return {
-      roadmapFeatures: ROADMAP, roadmapOpen, roadmapClosed: !roadmapOpen,
-      roadmapToggleLabel: roadmapOpen ? 'Listeyi daralt' : 'Özellikleri göster',
-      toggleRoadmap: () => this.setState({ roadmapOpen: !roadmapOpen }),
       nextJob: (() => { if (!mobile) return null; const w = wos.find(x => x.status === 'islemde') || wos.find(x => x.status === 'planlandi'); if (!w) return null; const c = R.byId(db.customers, w.customerId), a = R.byId(db.addresses, w.addressId); return { kicker: w.status === 'islemde' ? 'ŞU AN İŞLEMDE' : 'SIRADAKİ İŞ', time: w.start, type: R.T[w.type], devText: w.type === 'montaj' ? (w.qty || 1) + ' cihaz montajı' : w.deviceIds.length + ' cihaz', cName: c.name, addr: a.label + ' · ' + a.line + ', ' + a.mah, tech: R.staffName(db, w.techId), status: R.woBadge(w).label, dir: 'https://www.google.com/maps/dir/?api=1&destination=' + (a.lat != null && a.verified ? a.lat + ',' + a.lng : encodeURIComponent(a.line + ', ' + a.mah + ', ' + a.ilce + ', İzmir')), tel: F.tel(c.phone) || '#', open: () => act.open('wo', { woId: w.id }) }; })(),
       notMobile: !mobile, dateText: F.date(t) + ', ' + F.weekday(t),
       newCustomer: () => act.open('customer', { type: 'Kişi', contact: 'bilinmiyor' }), planNew: () => act.open('appt', { type: 'bakim', date: today, dur: '60' }), toCalendar: go('bakim', { view: 'randevu' }),
@@ -594,6 +581,7 @@ class Component extends DCLogic {
         save: () => act.submit(s.flagForm.mode === 'set' ? 'flagCustomer' : 'clearFlag', { id: c.id, type: s.flagForm.type, note: s.flagForm.note }, () => { set({ flagForm: null }); act.toast(s.flagForm.mode === 'set' ? 'Müşteri olumsuz deneyim olarak işaretlendi.' : 'Olumsuzluk çözüldü olarak kapatıldı; kayıt geçmişte duruyor.'); }, r => set({ flagForm: Object.assign({}, s.flagForm, { err: r.error }) })) } : null,
       mobileBar: mobile, back: go('musteriler', {}),
       addDevice: () => { if (addrs.length) { this.setState({ tab: 'klimalar' }); this.openForm({ addressId: addrs[0].id }); } else { act.toast('Klima bir adrese takılır. Önce adres ekleyin.'); act.open('address', { customerId: c.id, label: 'Ev', after: 'file' }); } }, plan: () => { const a = addrs[0]; planFor(a ? a.id : '', a ? R.devicesAt(db, a.id).filter(d => R.isDue(db, d)).map(d => d.id) : []); },
+      demoSms: ()=>window.GKDemoUI?.sms(c.id), isDemo:!!window.GKApi.demo,
       logCall: () => act.open('call', { customerId: c.id }), edit: () => act.open('customer', Object.assign({}, c, { phoneUnknown: !c.phone, phoneIntl: !!(c.phone && c.phone[0] === '+'), phone: c.phone ? (c.phone[0] === '+' ? c.phone : window.GK.P.tr(c.phone)) : '' })),
       archiveAsk: s.archiveAsk, askArchive: () => set({ archiveAsk: true }), cancelArchive: () => set({ archiveAsk: false }), doArchive: () => act.submit('archiveCustomer', c.id, () => { act.toast(c.name + ' pasife alındı. Geçmiş kayıtlar korundu.'); act.go('musteriler', {}); }),
       tabs: tabsDef.map(([k, l]) => ({ l, sel: s.tab === k, bd: s.tab === k ? '#B1001A' : 'transparent', fg: s.tab === k ? '#B1001A' : '#4B525B', pick: () => set({ tab: k }) })), tab,
@@ -684,9 +672,9 @@ window.GKCompiled["EkranSatis.dc.html"]=function(DCLogic,StreamableLogic,React){
 const SEL = { bg: '#FBEFF1', fg: '#B1001A', bd: '#B1001A' }, UNS = { bg: '#FFFFFF', fg: '#252B32', bd: '#CDD2D9' };
 const num = v => { if (v === '' || v == null) return null; const n = Number(String(v).replace(/\./g, '').replace(',', '.')); return isNaN(n) ? null : n; };
 class Component extends DCLogic {
-  state = { filter: (this.props.params || {}).filter || 'all', wiz: (this.props.params || {}).newSale ? { step: 1, lines: [], date: this.props.db && this.props.db.today, cq: '', pq: '' } : null, pay: null, payErr: {}, payError: '', stockErr: null, cancelAsk: false, cancelNote: '', cancelErr: '', wizErr: '' };
+  state = { filter: (this.props.params || {}).filter || 'all', wiz: (this.props.params || {}).newSale ? { step: 1, lines: [], date: this.props.db && this.props.db.today, customerId:this.props.params?.customerId,addressId:this.props.params?.addressId,note:this.props.params?.note,quoteRequestId:this.props.params?.quoteRequestId, cq: '', pq: '' } : null, pay: null, payErr: {}, payError: '', stockErr: null, cancelAsk: false, cancelNote: '', cancelErr: '', wizErr: '' };
   _pt = (this.props.params || {}).t;
-  componentDidUpdate() { const p = this.props.params || {}; const changed = this._pt !== p.t; this._pt = p.t; if (changed) this.setState({ filter: p.filter || 'all', wiz: p.newSale ? { step: 1, lines: [], date: this.props.db.today, cq: '', pq: '' } : null, stockErr: null, cancelAsk: false }); }
+  componentDidUpdate() { const p = this.props.params || {}; const changed = this._pt !== p.t; this._pt = p.t; if (changed) this.setState({ filter: p.filter || 'all', wiz: p.newSale ? { step: 1, lines: [], date: this.props.db.today, customerId:p.customerId,addressId:p.addressId,note:p.note,quoteRequestId:p.quoteRequestId,cq: '', pq: '' } : null, stockErr: null, cancelAsk: false }); }
   renderVals() {
     const db = this.props.db, act = this.props.act, bp = this.props.bp;
     if (!db || !window.GK) return {};
@@ -750,7 +738,7 @@ class Component extends DCLogic {
       });
       const short = lines.some(l => l.short), stepOk = [true, !!c, !!a, lines.length > 0 && lines.every(l => Number(l.qty) > 0 && num(l.price) != null), !!wz.date, true];
       const names = ['Müşteri', 'Montaj adresi', 'Kalemler', 'Tarih ve not', 'Özet'];
-      const payload = confirm => ({ id: wz.id, no: wz.no, customerId: wz.customerId, addressId: wz.addressId, date: wz.date, note: wz.note, confirm, lines: wz.lines.map(l => ({ id: l.id, productId: l.productId, variant: l.variant || null, depotId: l.depotId, qty: Number(l.qty), price: num(l.price), cost: num(l.cost), disc: num(l.disc) || 0 })) });
+      const payload = confirm => ({ id: wz.id, no: wz.no, customerId: wz.customerId, addressId: wz.addressId, date: wz.date, note: wz.note, demoRequestId:wz.quoteRequestId, confirm, lines: wz.lines.map(l => ({ id: l.id, productId: l.productId, variant: l.variant || null, depotId: l.depotId, qty: Number(l.qty), price: num(l.price), cost: num(l.cost), disc: num(l.disc) || 0 })) });
       base.wz = {
         title: wz.id ? 'Taslağı düzenle · ' + wz.no : 'Yeni satış', error: s.wizErr,
         steps: names.map((l, i) => { const n = i + 1, cur = wz.step === n, dis = !stepOk.slice(0, n).every(Boolean); return { n, l, dis, bg: cur ? '#FBEFF1' : 'transparent', fg: cur ? '#B1001A' : dis ? '#A0A6AE' : '#252B32', nbg: cur ? '#B1001A' : n < wz.step ? '#2E9E5E' : '#A0A6AE', pick: () => !dis && upd({ step: n }) }; }),
@@ -814,8 +802,8 @@ class Component extends DCLogic {
     this.map.on('moveend', () => { const ce = this.map.getCenter(); this.props.onView && this.props.onView({ lat: ce.lat, lng: ce.lng, zoom: this.map.getZoom() }); });
     if (window.ResizeObserver) { this.ro = new ResizeObserver(() => this.map && this.map.invalidateSize({ pan: false })); this.ro.observe(el); }
     this.focusKey = this.props.focus && this.props.focus.key;
-    const tl = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { attribution: 'Harita © Esri · Esri, HERE, Garmin, © OpenStreetMap katkıda bulunanlar', maxZoom: 16, maxNativeZoom: 16 });
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 16, pane: 'overlayPane' }).addTo(this.map);
+    const tl = L.tileLayer('/gunay-klima-demo/assets/demo-map-tile.svg', { attribution: 'Şematik demo altlığı · yol haritası değildir', maxZoom: 16, maxNativeZoom: 16 });
+    L.tileLayer('/gunay-klima-demo/assets/demo-map-tile.svg', { maxZoom: 19, maxNativeZoom: 16, pane: 'overlayPane' }).addTo(this.map);
     let errs = 0; tl.on('tileerror', () => { if (++errs > 8 && !this.state.failed) this.setState({ failed: true }); });
     tl.addTo(this.map);
     this.map.on('click', e => { if (this.props.pickMode && this.props.onPick) this.props.onPick(+e.latlng.lat.toFixed(6), +e.latlng.lng.toFixed(6)); });
@@ -885,7 +873,8 @@ const IC = {
   ayarlar: 'M4 6h9 M17 6h3 M15 4v4 M4 12h3 M11 12h9 M9 10v4 M4 18h11 M19 18h1 M17 16v4',
   daha: 'M5 12h.01 M12 12h.01 M19 12h.01'
 };
-const LABEL = { bugun: 'Bugün', musteriler: 'Müşteriler', satis: 'Satış', bakim: 'Bakım', harita: 'Harita', depo: 'Depo', raporlar: 'Raporlar', ayarlar: 'Ayarlar' };
+IC.cagrilar = IC.musteriler; IC.talepler = IC.bakim; IC.mail = IC.daha;
+const LABEL = { cagrilar: 'Çağrılar', talepler: 'Talepler', mail: 'Mail', bugun: 'Bugün', musteriler: 'Müşteriler', satis: 'Satış', bakim: 'Bakım', harita: 'Harita', depo: 'Depo', raporlar: 'Raporlar', ayarlar: 'Ayarlar' };
 const SAN = { price: v => window.GK.P.money(v), phone: (v, m) => window.GK.P.phone(v, m && m.phoneIntl), fee: v => window.GK.P.money(v), serialIn: v => window.GK.P.serial(v), serialOut: v => window.GK.P.serial(v), lat: v => window.GK.P.dec(v), lng: v => window.GK.P.dec(v), room: v => String(v).slice(0, 40), name: v => String(v).replace(/\s{2,}/g, ' ').slice(0, 80), person: v => String(v).slice(0, 60), line: v => String(v).slice(0, 140), street: v => String(v).slice(0, 80), no: v => String(v).replace(/[^0-9A-Za-zÇĞİÖŞÜçğıöşü\/-]/g, '').slice(0, 8), building: v => String(v).slice(0, 60), block: v => String(v).slice(0, 10), floor: v => String(v).slice(0, 8), door: v => String(v).slice(0, 30), directions: v => String(v).slice(0, 120), mah: v => String(v).slice(0, 40), ilce: v => String(v).slice(0, 40) };
 const KEYS = ['price','priceKind','street','no','building','block','floor','door','directions','il','dupOk','withAddr','feePaid','feeMethod','dir','topic','flagIt','flagType','buffer','name','type','phone','phoneUnknown','contact','note','person','label','line','mah','ilce','lat','lng','verified','customerId','addressId','date','start','dur','techId','override','changeReason','result','callback','noContact','lineId','serialIn','serialOut','room','by','interval','baseInstall','fee','cancelNote'];
 const SEL = { bg: '#FBEFF1', fg: '#B1001A', bd: '#B1001A' }, UNS = { bg: '#FFFFFF', fg: '#252B32', bd: '#CDD2D9' };
@@ -941,6 +930,7 @@ class Component extends DCLogic {
   componentWillUnmount() { window.removeEventListener('online',this.onNetwork);window.removeEventListener('offline',this.onNetwork);clearInterval(this.refreshTimer);window.removeEventListener('focus',this.onFocus);clearTimeout(this.geoT);clearTimeout(this.autoLocT); if (this.wo) this.wo.disconnect(); if (this.bro) this.bro.disconnect(); if (this.rro) this.rro.disconnect(); if (this.wro) this.wro.disconnect(); document.removeEventListener('visibilitychange', this.onVis); if (this.ero) this.ero.disconnect(); if (this.mo) this.mo.disconnect(); window.removeEventListener('resize', this.onR); window.removeEventListener('keydown', this.onK); clearTimeout(this.bt); clearTimeout(this.tt); }
   componentDidUpdate() {
     this.attachObs();
+    window.dispatchEvent(new Event('gk-form-state'));
     const cur = this.state.modal, prev = this._pm; this._pm = cur;
     if (cur && cur !== prev) setTimeout(() => {
       const el = this.panelRef.current; if (!el) return;
@@ -955,6 +945,7 @@ class Component extends DCLogic {
   makeAct() {
     return {
       go: (screen, params) => {
+        if (window.GKApi.demo && sessionStorage.getItem('gk-demo-person')) { const role = this.state.db?.demoSuite?.people.find(x => x.id === sessionStorage.getItem('gk-demo-person')); if (role?.role === 'technician' && !['bugun','bakim'].includes(screen)) return this.toast('Bu görünümde yalnız kendi işleriniz var.'); }
         const el = this.mainRef.current, rk = (sc, p) => sc + '|' + ((p && (p.customerId || p.saleId)) || '');
         if (el) this.scrollMem[rk(this.state.screen, this.state.params)] = el.scrollTop;
         const nk = rk(screen, params || {});
@@ -963,6 +954,7 @@ class Component extends DCLogic {
           requestAnimationFrame(() => { restore(); setTimeout(restore, 120); });
         });
       },
+      sms: (customerId, workOrderId) => window.GKDemoUI?.sms(customerId, workOrderId),
       open: (modal, m) => { if(modal==='customer'&&!m?.id)m=Object.assign({withAddr:true,addrs:[{label:'Ev',il:'',ilce:''}],devs:[]},m||{}); if (modal === 'address' && m && m.street === undefined) m = Object.assign({}, m, window.GK.R.splitLine(m.line || ''), { il: m.il || m.city || '', no: m.no || m.buildingNo || window.GK.R.splitLine(m.line||'').no || '', door: m.door || m.doorNo || window.GK.R.splitLine(m.line||'').door || '' }); this.lastFocus = document.activeElement; this.setState({ modal, m: Object.assign({}, m || {}), err: {}, formError: null, askClose: false, result: null }); },
       close: () => this.closeNow(),
       toast: (t, tone) => this.toast(t, tone),
@@ -987,7 +979,7 @@ class Component extends DCLogic {
     }catch(e){const r={ok:false,fields:{},error:e.message||'Bağlantı kurulamadı. Formunuz korunuyor.'};this.setState({saving:false,formError:r.error});this.toast(r.error,'err');bad&&bad(r);}
   }
   tryClose = () => { if (this.state.m.dirty && !this.state.result && !this.state.m.doneId && !this.state.m.callDone) this.setState({ askClose: true }); else this.closeNow(); };
-  closeNow = () => this.setState({ geo: null, modal: null, m: {}, err: {}, formError: null, askClose: false, result: null });
+  closeNow = () => {window.GKDemoUI?.cancelPendingCustomer();this.setState({ geo: null, modal: null, m: {}, err: {}, formError: null, askClose: false, result: null });};
   fh(k) { return this.h[k] || (this.h[k] = e => { const v0 = e && e.target ? (e.target.type === 'checkbox' ? e.target.checked : e.target.value) : e; const v = SAN[k] && typeof v0 === 'string' ? SAN[k](v0, this.state.m) : v0; this.setState(s => ({ m: Object.assign({}, s.m, { [k]: v, dirty: true }), err: Object.assign({}, s.err, { [k]: null, coord: k === 'lat' || k === 'lng' ? null : s.err.coord }) })); }); }
   setM(p) { this.setState(s => ({ m: Object.assign({}, s.m, p, { dirty: true }) })); }
   btn(l, run, kind, dis) { const k = kind === 'p' ? { bg: '#B1001A', fg: '#FFFFFF', bd: '#B1001A' } : kind === 'd' ? { bg: '#FFFFFF', fg: '#A3001A', bd: '#A3001A' } : { bg: '#FFFFFF', fg: '#252B32', bd: '#D5D9DF' }; return Object.assign({ l, run, dis: !!dis }, k); }
@@ -1021,7 +1013,10 @@ class Component extends DCLogic {
       ready: !!(s.db && GK) && !s.fakeLoad, notReady: !(s.db && GK) || s.fakeLoad
     };
     if (!s.db || !GK) return base;
-    const db = s.db, R = GK.R, F = GK.F, D = GK.D, m = s.m, err = s.err || {};
+    const db = s.db, preview = db.demoSuite?.people.find(x => x.id === sessionStorage.getItem('gk-demo-person')), technician = preview?.role === 'technician';
+    const R = GK.R, F = GK.F, D = GK.D, m = s.m, err = s.err || {};
+    if (window.GKApi.demo) window.GKDemoHost = {app: this, act};
+    const contextCustomerId = m.customerId || db.workOrders.find(w=>w.id===m.woId)?.customerId;
     const go = (scr, p) => () => act.go(scr, p);
     const navItem = (id, count) => { const cur = s.screen === id; return { id, label: LABEL[id] || 'Daha', icon: IC[id], cur, fw: cur ? 600 : 500, bg: cur ? '#FBEFF1' : 'transparent', fg: cur ? '#B1001A' : '#252B32', go: go(id), count }; };
     const overdue = db.devices.filter(d => R.status(db, d).key === 'gecikti').length;
@@ -1036,11 +1031,11 @@ class Component extends DCLogic {
     const gs = s.geo && s.geo.idx === -1 ? s.geo : null, gOpen = s.modal === 'address' && gs;
     const geo = { show: !!(gOpen && !gs.picked && (gs.loading || gs.err || gs.none || (gs.items && gs.items.length))), loading: !!(gs && gs.loading && !(gs.items || []).length), err: gs && gs.err, none: !!(gs && gs.none && !gs.loading), picked: gOpen && gs.picked,
       items: gOpen && !gs.picked ? (gs.items || []).map(x => ({ main: x.main, sub: x.sub, pick: () => { this.setM({ street: x.road || m.street, no: m.no || x.house || '', mah: x.mah || m.mah, ilce: x.ilce || m.ilce, lat: String(+x.lat.toFixed(6)), lng: String(+x.lng.toFixed(6)), verified: false, src: 'adres' }); this.setState({ geo: { idx: -1, picked: x.main + (x.sub ? ', ' + x.sub.split(',')[0] : '') } }); } })) : [] }; eb.note = err.note ? '#C8102E' : '#CDD2D9';
-    const moreIds = ['satis', 'depo', 'raporlar', 'ayarlar'];
+    const moreIds = window.GKApi.demo ? ['cagrilar','talepler','mail','satis','depo','raporlar','ayarlar'] : ['satis','depo','raporlar','ayarlar'];
     const mnav = ['bugun', 'musteriler', 'bakim', 'harita'].map(id => navItem(id)).concat([{ label: 'Daha', icon: IC.daha, cur: moreIds.indexOf(s.screen) >= 0, fw: moreIds.indexOf(s.screen) >= 0 ? 600 : 500, fg: moreIds.indexOf(s.screen) >= 0 ? '#B1001A' : '#4B525B', go: () => this.setState({ more: !s.more }) }]);
     mnav.forEach(n => { if (n.id) n.fg = n.cur ? '#B1001A' : '#4B525B'; });
     const fabMap = { bugun: ['Bakım planla', () => act.open('appt', { type: 'bakim', date: db.today, dur: '60' })], bakim: ['Bakım planla', () => act.open('appt', { type: 'bakim', date: db.today, dur: '60' })], musteriler: ['Yeni müşteri', () => act.open('customer', { type: 'Kişi', contact: 'bilinmiyor' })], satis: ['Yeni satış', go('satis', { newSale: true })], depo: ['Stok hareketi', go('depo', { move: true })] };
-    const fab = fabMap[s.screen] && !s.params.customerId && !s.params.saleId ? { show: true, label: fabMap[s.screen][0], run: fabMap[s.screen][1] } : { show: false };
+    const fab = !technician && fabMap[s.screen] && !s.params.customerId && !s.params.saleId ? { show: true, label: fabMap[s.screen][0], run: fabMap[s.screen][1] } : { show: false };
 
     // arama
     let sr = { none: false };
@@ -1083,12 +1078,14 @@ class Component extends DCLogic {
       logoOk: !s.logoFail, logoFail: !!s.logoFail, logoErr: () => this.setState({ logoFail: true }),
       safeTop: this.props.embed ? (this.props.safeTop || 0) : 0, safeBottom: this.props.embed ? (this.props.safeBottom || 0) : 0, navH: 68 + (this.props.embed ? (this.props.safeBottom || 0) : 0), fabBottom: 84 + (this.props.embed ? (this.props.safeBottom || 0) : 0), mFootPad: 12 + (this.props.embed && mobile ? (this.props.safeBottom || 0) : 0),
       sideW: bp === 'tablet' ? 208 : 236, logoW: mobile ? 'auto' : ((bp === 'tablet' ? 208 : 236) - 24 - 12) + 'px', logoChipH: mobile ? 40 : 46, logoImgH: mobile ? 26 : 32, topH: mobile ? 60 : 68, padX: mobile ? 12 : 24, mainPad: mobile ? '16px 12px 96px' : bp === 'tablet' ? '20px 20px 40px' : '24px 32px 48px',
-      nav: [navItem('bugun'), navItem('musteriler'), navItem('satis'), navItem('bakim', overdue), navItem('harita'), navItem('depo')],
-      nav2: [navItem('raporlar'), navItem('ayarlar')], mnav, more: s.more, closeMore: () => this.setState({ more: false }),
+      nav: [navItem('bugun'), navItem('musteriler'), navItem('satis'), navItem('bakim', overdue), navItem('harita'), navItem('depo')].concat(window.GKApi.demo ? [navItem('cagrilar', db.demoSuite?.calls.filter(c=>c.status==='cevapsiz'&&!c.returned).length),navItem('talepler'),navItem('mail')] : []).filter(n=>!technician || ['bugun','bakim'].includes(n.id)),
+      nav2: technician ? [] : [navItem('raporlar'), navItem('ayarlar')], mnav: technician ? ['bugun','bakim'].map(id=>navItem(id)) : mnav, more: s.more, closeMore: () => this.setState({ more: false }),
+      isTechnician: technician, normalToday: !technician && is.bugun, normalBakim: !technician && is.bakim,
+      demoHasCustomer: !!contextCustomerId && !!window.GKApi.demo, demoCall: ()=>window.GKDemoUI?.startCall(contextCustomerId), demoSMS: ()=>window.GKDemoUI?.sms(contextCustomerId, m.woId || m.id),
       moreItems: moreIds.map(id => ({ label: LABEL[id], icon: IC[id], go: go(id) })), fab,
-      q: s.q, onQ: e => this.setState({ q: e.target.value, sOpen: true, sIdx: 0 }), onQFocus: () => this.setState({ sOpen: true }),
+      q: technician ? '' : s.q, onQ: e => !technician && this.setState({ q: e.target.value, sOpen: true, sIdx: 0 }), onQFocus: () => !technician && this.setState({ sOpen: true }),
       onQKey: e => { if (e.key === 'ArrowDown' && flat.length) { e.preventDefault(); this.setState({ sIdx: (sIdx + 1) % flat.length, sOpen: true }); } else if (e.key === 'ArrowUp' && flat.length) { e.preventDefault(); this.setState({ sIdx: (sIdx - 1 + flat.length) % flat.length }); } else if (e.key === 'Enter' && flat[sIdx]) { e.preventDefault(); flat[sIdx].go(); e.target.blur(); } }, closeSearch: () => s.sOpen && this.setState({ sOpen: false }),
-      sOpen: s.sOpen && (!!res || !!sr.hasSug), sr, srMin: mobile ? '0' : '420px', searchPh: mobile ? 'Ara' : 'Müşteri, telefon, seri no, model veya mahalle ara',
+      sOpen: !technician && s.sOpen && (!!res || !!sr.hasSug), sr, srMin: mobile ? '0' : '420px', searchPh: mobile ? 'Ara' : 'Müşteri, telefon, seri no, model veya mahalle ara',
       offline: s.offline, toast: s.toast, toastDot: s.toast && s.toast.tone === 'err' ? '#FF6B7D' : '#5CD18E', toastBottom: mobile ? 84 + (this.props.embed ? (this.props.safeBottom || 0) : 0) : 24,
       scen: s.scen, closeScen: () => this.setState({ scen: false }), scenW: mobile ? '100%' : '440px', scenarios,
       toggleOffline: () => this.setState({ offline: !s.offline }), showLoading: () => { this.setState({ scen: false, fakeLoad: true }); setTimeout(() => this.setState({ fakeLoad: false }), 1400); },
@@ -1150,7 +1147,7 @@ class Component extends DCLogic {
                 level: x.score >= 3 ? 'Büyük olasılıkla aynı' : x.score === 2 ? 'Olası eşleşme' : 'Benzer kayıt', lvFg: x.score >= 3 ? '#A3001A' : '#7A4A00',
                 reasons: x.reasons.map(([l, t]) => ({ l, bg: RB[t][0], fg: RB[t][1] })), openL: c.active === false ? 'Pasif kaydı aç' : 'Mevcut müşteriyi aç', open: go('musteriler', { customerId: c.id }), canAdd: c.active !== false && !m.id, addAddr: () => act.open('address', { customerId: c.id, label: m.label || 'Ev', line: m.line || '', mah: m.mah || '', ilce: m.ilce || '', after: 'file' }) }; }) };
         })(),
-        save: () => { const strong = R.dupes(db, Object.assign({}, m, { line: m.addrs && m.addrs[0] ? R.composeLine(m.addrs[0]) : '' })).some(x => x.score >= 3); if (strong && !m.dupOk && !m.id) { this.setState({ formError: 'Aynı telefon veya aynı ad ve adresle kayıtlı müşteri var. Mevcut kaydı açın ya da farklı müşteri olduğunu onaylayın.' }); return; } this.submit('saveCustomerFull', m, r => { if (m.id) { this.toast('Müşteri bilgileri güncellendi.'); this.closeNow(); } else this.setState(st => ({ m: Object.assign({}, st.m, { doneId: r.id, addrDoneId: r.addressId || null, devDone: r.devCount || 0 }) })); }); },
+        save: () => { const strong = R.dupes(db, Object.assign({}, m, { line: m.addrs && m.addrs[0] ? R.composeLine(m.addrs[0]) : '' })).some(x => x.score >= 3); if (strong && !m.dupOk && !m.id) { this.setState({ formError: 'Aynı telefon veya aynı ad ve adresle kayıtlı müşteri var. Mevcut kaydı açın ya da farklı müşteri olduğunu onaylayın.' }); return; } this.submit('saveCustomerFull', m, r => { if (m.id) { this.toast('Müşteri bilgileri güncellendi.'); this.closeNow(); } else { window.GKDemoUI?.customerSaved(r.id); this.setState(st => ({ m: Object.assign({}, st.m, { doneId: r.id, addrDoneId: r.addressId || null, devDone: r.devCount || 0 }) })); } }); },
         addAddr: () => act.open('address', { customerId: m.doneId, label: 'Ev', after: 'file' }),
         openFile: go('musteriler', { customerId: m.doneId })
       };

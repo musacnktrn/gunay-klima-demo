@@ -1,4 +1,4 @@
-# Günay Klima CRM — GitHub Pages demosu
+# Günay Klima CRM · GitHub Pages demosu
 
 ureten: codex
 

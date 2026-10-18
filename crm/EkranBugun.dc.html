@@ -8,29 +8,6 @@
 <body>
 <x-dc>
 <div style="display:flex;flex-direction:column;gap:24px;max-width:1360px;margin:0 auto" data-screen-label="Bugün">
-  <!-- [codex] Static roadmap. These cards never enable integrations or start actions. -->
-  <section class="gk-roadmap" aria-labelledby="gk-roadmap-title">
-    <div class="gk-roadmap-head">
-      <div class="gk-roadmap-intro">
-        <span class="gk-roadmap-kicker">SIRADAKİ ADIMLAR <span aria-hidden="true">·</span> 8 ÖZELLİK</span>
-        <h2 id="gk-roadmap-title">Hazırlanan özellikler</h2>
-        <p>Henüz kullanılamıyor. Bağlantılar ve kurulumlar tamamlandığında açılacak.</p>
-      </div>
-      <button type="button" class="gk-roadmap-toggle" onClick="{{ toggleRoadmap }}" aria-expanded="{{ roadmapOpen }}" aria-controls="gk-roadmap-list">
-        <span>{{ roadmapToggleLabel }}</span>
-        <svg class="gk-roadmap-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
-      </button>
-    </div>
-    <ul id="gk-roadmap-list" class="gk-roadmap-list" hidden="{{ roadmapClosed }}">
-      <sc-for list="{{ roadmapFeatures }}" as="feature">
-        <li class="gk-roadmap-card" aria-disabled="true" data-feature="{{ feature.id }}">
-          <div class="gk-roadmap-status"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"></path></svg><span>Henüz kullanılamıyor</span></div>
-          <h3>{{ feature.title }}</h3>
-          <p>{{ feature.description }}</p>
-        </li>
-      </sc-for>
-    </ul>
-  </section>
   <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
     <div style="flex:1 1 240px"><h1 style="margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em">Bugün</h1><div style="font-size:15px;color:#747B85;margin-top:4px">{{ dateText }}</div></div>
     <sc-if value="{{ notMobile }}">
@@ -39,6 +16,7 @@
     </sc-if>
   </div>
 
+  <div data-demo-host="summary"></div>
   <sc-if value="{{ nextJob }}">
     <section style="border-radius:18px;overflow:hidden;background:#B1001A;color:#FFFFFF;box-shadow:0 14px 30px rgba(177,0,26,.28);animation:gkIn .35s cubic-bezier(.2,.8,.2,1)">
       <button onClick="{{ nextJob.open }}" style="width:100%;border:none;background:transparent;color:#FFFFFF;text-align:left;padding:16px 16px 14px;display:flex;flex-direction:column;gap:6px;cursor:pointer">

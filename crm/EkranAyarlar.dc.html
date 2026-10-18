@@ -45,6 +45,10 @@
         </div>
       </sc-if>
 
+      <sc-if value="{{ demoPersonel }}"><div data-demo-host="personel"></div></sc-if>
+      <sc-if value="{{ demoSantral }}"><div data-demo-host="santral"></div></sc-if>
+      <sc-if value="{{ demoSMS }}"><div data-demo-host="sms"></div></sc-if>
+      <sc-if value="{{ demoYedek }}"><div data-demo-host="yedekleme"></div></sc-if>
       <sc-if value="{{ isPersonel }}"><button onClick="{{ openHours }}" class="gk-tools-button">Personel bilgileri, mesai ve mola düzenle</button>
         <section style="background:#FFFFFF;border:1px solid #E7E9ED;border-radius:12px;overflow:hidden">
           <div style="padding:14px 18px;border-bottom:1px solid #EEF0F3;display:flex;align-items:center;gap:8px"><h2 style="margin:0;font-size:17px;font-weight:600;flex:1">Personel</h2><button onClick="{{ newStaff }}" style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #B1001A;background:#FFFFFF;color:#B1001A;cursor:pointer;font-weight:600">+ Yeni personel</button></div>
