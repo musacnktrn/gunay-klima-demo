@@ -25,7 +25,7 @@ export function initializeSuite(db) {
     ['demo-r2', 'kesif', c2, 'Yeni oda için yerinde keşif istiyorum.'],
     ['demo-r3', 'teklif', null, 'Salon için klima fiyat teklifi rica ederim.'],
     ['demo-r4', 'bakim', c, 'Sezon öncesi iki cihaz için bakım talebi.']
-  ].map(([id, type, customer, note]) => ({id, ...normalizeSpecto({externalId: id, type, name: customer?.name || 'Örnek Deniz', phone: customer?.phone || '0500 000 90 01', createdAt: stamp}, db), customerId: customer?.id || null, note}));
+  ].map(([id, type, customer, note]) => {const normalized=normalizeSpecto({externalId: id, type, name: customer?.name || 'Örnek Deniz', phone: customer?.phone || '0500 000 90 01', createdAt: stamp}, db);return {id,...normalized,customerId:normalized.match.status==='matched'?normalized.match.customerId:null,note};});
   db.demoSuite = {version: 1,
     switchboard: {line: '0232 461 74 25', extensions: [{number: '101', name: 'Yönetim'}, {number: '102', name: 'Büro'}, {number: '103', name: 'Teknisyen'}], start: '08:30', end: '18:00', outside: 'Yönetim dahili 101', greeting: 'Günay Klima’ya hoş geldiniz. Mesai dışında mesajınızı bırakabilirsiniz.'},
     calls: [
@@ -111,10 +111,15 @@ export function simulate(db, op, payload, engine, personId) {
     id = uid(); d.requests.unshift({id, source: 'mail', externalId: m.id, type: m.type, label: {ariza: 'Arıza', teklif: 'Fiyat teklifi', bakim: 'Bakım', kesif: 'Keşif'}[m.type], name: m.from, phone: next.customers.find(c => c.id === m.customerId)?.phone || '', customerId: m.customerId, status: 'new', priority: m.type === 'ariza' ? 100 : 50, note: m.summary, createdAt: now}); m.requestId = id; m.read = true;
   } else if (op === 'person') {
     need(text(p.name, 80) && Object.hasOwn(roles, p.role), 'Ad ve rol seçin.');
-    if (p.role === 'technician') need(next.staff.some(t => t.id === p.staffId), 'İşleri eşleştirmek için teknisyen seçin.');
+    let staffId=p.staffId;
+    if(p.role==='technician'){
+      const existing=staffId?lookup(next.staff,staffId):null;
+      const result=engine.execute(next,'saveStaff',existing?{...existing,name:text(p.name,80)}:{name:text(p.name,80),phone:'',active:true,hours:{start:'08:30',end:'18:00',brk:['12:30','13:30']}});
+      need(result.ok,result.error);next.staff=result.db.staff;staffId=result.id;
+    }
     const person = p.id ? lookup(d.people, p.id) : {id: uid()};
     need(!(person.role === 'admin' && p.role !== 'admin' && d.people.filter(x => x.role === 'admin').length === 1), 'En az bir yönetici kalmalı.');
-    Object.assign(person, {name: text(p.name, 80), role: p.role, staffId: p.role === 'technician' ? p.staffId : null}); if (!p.id) d.people.push(person);
+    Object.assign(person, {name: text(p.name, 80), role: p.role, staffId: p.role === 'technician' ? staffId : null}); if (!p.id) d.people.push(person);
   } else if (op === 'switchboard') {
     need(/^([01]\d|2[0-3]):[0-5]\d$/.test(p.start) && /^([01]\d|2[0-3]):[0-5]\d$/.test(p.end) && p.start < p.end, 'Mesai saatlerini kontrol edin.');
     need(text(p.greeting) && text(p.line), 'Şirket hattı ve karşılama metni gerekli.');

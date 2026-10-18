@@ -4,7 +4,7 @@
   "short_name": "Günay Klima",
   "description": "Satış, klima, bakım, konum ve depo takibi. Bu sürüm cihazda saklanan bir demodur.",
   "lang": "tr",
-  "start_url": "/gunay-klima-demo/crm/index.html?space=demo&source=homescreen",
+  "start_url": "/gunay-klima-demo/open.html?source=homescreen",
   "scope": "/gunay-klima-demo/",
   "display": "standalone",
   "background_color": "#F5F6F8",
