@@ -770,6 +770,7 @@ class Component extends DCLogic {
   mapRef = React.createRef();
   state = { failed: false, ready: false };
   componentDidMount() {
+    this.disposed = false;
     this.tries = 0;
     if (!window.L && !document.getElementById('gk-leaflet-js')) {
       const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = './leaflet.css'; document.head.appendChild(css);
@@ -788,14 +789,15 @@ class Component extends DCLogic {
     this.dragCleanup=up; document.body.style.cursor = 'ns-resize'; document.body.style.userSelect = 'none';
     window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
   };
-  componentWillUnmount() { this.disposed=true;clearTimeout(this.tileFallbackTimer);window.removeEventListener('online',this.useRealTiles);window.removeEventListener('offline',this.useFallbackTiles);clearTimeout(this.resizeTimer);if(this.dragCleanup)this.dragCleanup(); if (this.onKey) window.removeEventListener('keydown', this.onKey, true); clearTimeout(this.t); if (this.ro) this.ro.disconnect(); if(this.map){this.map.stop();this.map.off();this.map.remove();this.map=null;} }
+  componentWillUnmount() { this.disposed=true;clearTimeout(this.tileDeadline);clearTimeout(this.tileFallbackTimer);window.removeEventListener('online',this.useRealTiles);window.removeEventListener('offline',this.useFallbackTiles);clearTimeout(this.resizeTimer);if(this.dragCleanup)this.dragCleanup(); if (this.onKey) window.removeEventListener('keydown', this.onKey, true); clearTimeout(this.t); if (this.ro) this.ro.disconnect(); if(this.map){this.map.stop();this.map.off();this.map.remove();this.map=null;} }
   boot() {
+    if (this.disposed) return;
     if (window.L) return this.init();
     if (++this.tries > 50) return this.setState({ failed: true });
     this.t = setTimeout(() => this.boot(), 150);
   }
   init() {
-    const L = window.L, el = this.mapRef.current; if (!el || this.map) return;
+    const L = window.L, el = this.mapRef.current; if (this.disposed || !el || this.map) return;
     const v = this.props.view, c = v || this.props.center || { lat: 38.4585, lng: 27.2115 };
     this.mk = {};
     this.map = L.map(el, { maxZoom: 18, scrollWheelZoom: true, wheelPxPerZoomLevel: 110, zoomSnap: 0.25, zoomDelta: 0.5, tap: true }).setView([c.lat, c.lng], (v && v.zoom) || this.props.zoom || 15);
@@ -805,25 +807,44 @@ class Component extends DCLogic {
     const base = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { attribution: 'Harita © Esri · Esri, HERE, Garmin, © OpenStreetMap katkıda bulunanlar', maxZoom: 18, maxNativeZoom: 16 });
     const reference = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 16, pane: 'overlayPane' });
     const fallback = L.tileLayer('/gunay-klima-demo/assets/demo-map-tile.svg', { maxZoom: 18, attribution: 'Bu altlık gerçek yol haritası değildir' });
+    const loaded = new Set();
+    const tilesReady = () => {
+      if (this.disposed || !this.map) return;
+      clearTimeout(this.tileDeadline); el.dataset.mapReady = 'true'; this.setState({ ready: true });
+    };
+    fallback.on('load', () => { if (el.dataset.mapSource === 'fallback') tilesReady(); });
     this.useFallbackTiles = () => {
       if (this.disposed || !this.map) return;
-      base.remove(); reference.remove(); fallback.addTo(this.map); el.dataset.mapSource = 'fallback';
+      if (el.dataset.mapSource === 'fallback' && this.map.hasLayer(fallback)) return;
+      clearTimeout(this.tileDeadline); clearTimeout(this.tileFallbackTimer);
+      el.dataset.mapReady = 'false'; this.setState({ ready: false }); el.dataset.mapSource = 'fallback';
+      base.remove(); reference.remove(); fallback.addTo(this.map);
     };
     this.useRealTiles = () => {
       if (this.disposed || !this.map) return;
-      clearTimeout(this.tileFallbackTimer); fallback.remove(); el.dataset.mapSource = 'esri';
+      if (el.dataset.mapSource === 'esri' && this.map.hasLayer(base) && this.map.hasLayer(reference)) return;
+      clearTimeout(this.tileFallbackTimer); clearTimeout(this.tileDeadline); loaded.clear();
+      el.dataset.mapReady = 'false'; this.setState({ ready: false }); fallback.remove(); el.dataset.mapSource = 'esri';
+      // Do not present pins on an empty basemap as a completed map. A stalled initial
+      // tile batch gets the same local fallback as a failed/offline tile batch.
+      this.tileDeadline = setTimeout(this.useFallbackTiles, 15000);
       base.addTo(this.map); reference.addTo(this.map);
     };
     for (const layer of [base, reference]) {
-      let errors = 0;
-      layer.on('loading', () => { errors = 0; });
+      let errors = 0, images = 0;
+      layer.on('loading', () => { errors = 0; images = 0; });
+      layer.on('tileload', () => { images++; });
       layer.on('tileerror', () => { errors++; });
-      layer.on('load', () => { if (errors && el.dataset.mapSource === 'esri') this.tileFallbackTimer = setTimeout(this.useFallbackTiles, 0); });
+      layer.on('load', () => {
+        if (el.dataset.mapSource !== 'esri') return;
+        if (errors) { this.tileFallbackTimer = setTimeout(this.useFallbackTiles, 0); return; }
+        if (images) loaded.add(layer);
+        if (loaded.size === 2) tilesReady();
+      });
     }
     window.addEventListener('online', this.useRealTiles); window.addEventListener('offline', this.useFallbackTiles);
     if (navigator.onLine === false) this.useFallbackTiles(); else this.useRealTiles();
     this.map.on('click', e => { if (this.props.pickMode && this.props.onPick) this.props.onPick(+e.latlng.lat.toFixed(6), +e.latlng.lng.toFixed(6)); });
-    this.setState({ ready: true });
     this.sync();
     this.resizeTimer=setTimeout(() => !this.disposed && this.map && this.map.invalidateSize(),250);
   }
