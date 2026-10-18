@@ -186,9 +186,7 @@ document.addEventListener('click', event => {
   if(url.protocol==='tel:'){
     event.preventDefault(); event.stopImmediatePropagation();
     const match=matchCustomer(db(),value.slice(4));startCall(match.status==='matched'?match.customerId:null,value.slice(4));
-  }else if(!['blob:','data:'].includes(url.protocol)&&url.origin!==location.origin){event.preventDefault();event.stopImmediatePropagation();toast('Dış bağlantı açılmadı (demo).');}
+  }
 }, true);
-const nativeOpen=window.open.bind(window);
-window.open=(url,...args)=>{const target=new URL(url,location.href);if(target.origin!==location.origin){toast('Dış bağlantı açılmadı (demo).');return null;}return nativeOpen(url,...args);};
 window.GKDemoUI = {sms, startCall, incoming, cancelPendingCustomer(){pendingCustomer=null;}, async customerSaved(customerId) {if (!pendingCustomer) return; const pending = pendingCustomer; pendingCustomer = null; await run(pending.kind, {id: pending.id, customerId}, 'Yeni müşteri gelen kayda bağlandı.');}};
 queue();
