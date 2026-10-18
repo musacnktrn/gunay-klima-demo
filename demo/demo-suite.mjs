@@ -14,8 +14,40 @@ const need = (ok, message) => { if (!ok) throw Error(message); };
 const text = (v, max = 2000) => String(v ?? '').trim().slice(0, max);
 const lookup = (rows, id) => { const row = rows.find(x => x.id === id); need(row, 'Kayıt bulunamadı.'); return row; };
 const addDays = (day, n) => new Date(Date.parse(day) + n * 86400000).toISOString().slice(0, 10);
+const names = Object.freeze({request: 'Deniz Eren', admin: 'Murat Aksoy', office: 'Ece Yıldırım', project: 'Ihlamur Proje Ofisi', dealer: 'Derya Şen', accounting: 'Burak Sezer', customer: 'Pelin Soyer'});
+const mailCopy = {
+  'demo-m1': {from: ['Örnek Proje', names.project], body: ['Yeni açılacak örnek ofisimizin iki odası için uygun kapasite ve montaj dahil teklif rica ederiz. Keşif için uygun günü birlikte belirleyebiliriz.', 'Yeni açılacak ofisimizin iki odası için uygun kapasite ve montaj dahil teklif rica ederiz. Keşif için uygun günü birlikte belirleyebiliriz.']},
+  'demo-m2': {from: ['Örnek Bayi Masası', names.dealer], body: ['Bu kurgusal duyuru ürün eğitim toplantısının gündemini içerir. Herhangi bir gerçek kampanya, fiyat veya tarih taahhüdü değildir.', 'Ürün bilgilendirme toplantısının gündemini paylaşıyoruz. Teknik ekibinizin uygun olduğu günü bildirmenizi rica ederiz.']},
+  'demo-m3': {from: ['Örnek Muhasebe', names.accounting], subject: ['Servis faturası örneği', 'Servis faturası kontrolü'], summary: ['Tamamlanan servis için örnek fatura kontrolü.', 'Tamamlanan servisin fatura bilgileri kontrol edilecek.'], body: ['Örnek servis faturasında adres ve işlem açıklamasının kontrol edilmesi rica ediliyor. Bu demo bir ödeme veya gerçek belge içermez.', 'Son servis faturasındaki adres ve işlem açıklamasını kontrol edebilir misiniz?']},
+  'demo-m4': {from: ['Örnek Müşteri', names.customer]}
+};
+export function migrateSuiteContent(db) {
+  const d = db.demoSuite;
+  if (d?.version !== 1 || d.contentRevision >= 2) return false;
+  // Stable seed identity + exact old value, never a global name/text replacement.
+  const request = d.requests.find(r => r.id === 'demo-r3' && r.externalId === 'demo-r3' && r.source === 'specto' && normalizePhone(r.phone) === normalizePhone('0500 000 90 01'));
+  if (request?.name === 'Örnek Deniz') request.name = names.request;
+  for (const [id, role, previous, next] of [['demo-admin', 'admin', 'Örnek Yönetici', names.admin], ['demo-office', 'office', 'Örnek Büro', names.office]]) {
+    const person = d.people.find(p => p.id === id && p.role === role);
+    // Every historical person edit wrote staffId (including null for office/admin).
+    if (person?.name === previous && !Object.hasOwn(person, 'staffId')) person.name = next;
+  }
+  for (const mail of d.mails) {
+    const copy = mailCopy[mail.id]; if (!copy || (mail.id === 'demo-m4' && mail.customerId)) continue;
+    for (const [field, [previous, next]] of Object.entries(copy)) if (mail[field] === previous) mail[field] = next;
+  }
+  // A converted seeded email keeps its identity; preserve user notes and all links/statuses.
+  for (const request of d.requests) {
+    const copy = request.source === 'mail' && mailCopy[request.externalId]; if (!copy) continue;
+    if (request.externalId === 'demo-m4' && (request.customerId || d.mails.find(m => m.id === 'demo-m4')?.customerId)) continue;
+    if (copy.from && request.name === copy.from[0]) request.name = copy.from[1];
+    if (copy.summary && request.note === copy.summary[0]) request.note = copy.summary[1];
+  }
+  d.contentRevision = 2;
+  return true;
+}
 export function initializeSuite(db) {
-  if (db.demoSuite?.version === 1) return false;
+  if (db.demoSuite?.version === 1) return migrateSuiteContent(db);
   // New content is nested. Never replace customers, devices, calls or an old user's edits.
   const c = db.customers.find(c => c.active !== false && normalizePhone(c.phone));
   const c2 = db.customers.find(x => x.id !== c?.id && x.active !== false && normalizePhone(x.phone)) || c;
@@ -25,8 +57,8 @@ export function initializeSuite(db) {
     ['demo-r2', 'kesif', c2, 'Yeni oda için yerinde keşif istiyorum.'],
     ['demo-r3', 'teklif', null, 'Salon için klima fiyat teklifi rica ederim.'],
     ['demo-r4', 'bakim', c, 'Sezon öncesi iki cihaz için bakım talebi.']
-  ].map(([id, type, customer, note]) => {const normalized=normalizeSpecto({externalId: id, type, name: customer?.name || 'Örnek Deniz', phone: customer?.phone || '0500 000 90 01', createdAt: stamp}, db);return {id,...normalized,customerId:normalized.match.status==='matched'?normalized.match.customerId:null,note};});
-  db.demoSuite = {version: 1,
+  ].map(([id, type, customer, note]) => {const normalized=normalizeSpecto({externalId: id, type, name: customer?.name || names.request, phone: customer?.phone || '0500 000 90 01', createdAt: stamp}, db);return {id,...normalized,customerId:normalized.match.status==='matched'?normalized.match.customerId:null,note};});
+  db.demoSuite = {version: 1, contentRevision: 2,
     switchboard: {line: '0232 461 74 25', extensions: [{number: '101', name: 'Yönetim'}, {number: '102', name: 'Büro'}, {number: '103', name: 'Teknisyen'}], start: '08:30', end: '18:00', outside: 'Yönetim dahili 101', greeting: 'Günay Klima’ya hoş geldiniz. Mesai dışında mesajınızı bırakabilirsiniz.'},
     calls: [
       {id: 'demo-call1', customerId: c?.id, phone: c?.phone, name: c?.name, direction: 'gelen', status: 'cevapsiz', date: db.today, time: '08:12', outside: true, voicemail: 'Bakım randevum için dönüş rica ediyorum.', notified: true, duration: 0},
@@ -34,13 +66,13 @@ export function initializeSuite(db) {
       {id: 'demo-call3', customerId: null, phone: '0500 000 90 02', name: 'Kayıtsız numara', direction: 'gelen', status: 'cevapsiz', date: db.today, time: '07:45', outside: true, notified: true, voicemail: '', duration: 0}
     ], requests,
     mails: [
-      ['demo-m1', 'Yeni ofis için teklif', 'Örnek Proje', 'yüksek', 'İki çalışma odası için klima seçimi ve teklif isteniyor.', 'Yeni açılacak örnek ofisimizin iki odası için uygun kapasite ve montaj dahil teklif rica ederiz. Keşif için uygun günü birlikte belirleyebiliriz.', 'teklif'],
-      ['demo-m2', 'Bayi duyurusu', 'Örnek Bayi Masası', 'normal', 'Yeni dönem ürün bilgilendirme toplantısı duyurusu.', 'Bu kurgusal duyuru ürün eğitim toplantısının gündemini içerir. Herhangi bir gerçek kampanya, fiyat veya tarih taahhüdü değildir.', 'kesif'],
-      ['demo-m3', 'Servis faturası örneği', 'Örnek Muhasebe', 'normal', 'Tamamlanan servis için örnek fatura kontrolü.', 'Örnek servis faturasında adres ve işlem açıklamasının kontrol edilmesi rica ediliyor. Bu demo bir ödeme veya gerçek belge içermez.', 'bakim'],
-      ['demo-m4', 'Servis sonrası ses şikâyeti', c?.name || 'Örnek Müşteri', 'yüksek', 'Son kontrolden sonra cihazdan ses geldiği bildiriliyor.', 'Son servisten sonra iç ünitede titreşim sesi duyuyorum. Cihazın yeniden kontrol edilmesini rica ederim.', 'ariza']
+      ['demo-m1', 'Yeni ofis için teklif', names.project, 'yüksek', 'İki çalışma odası için klima seçimi ve teklif isteniyor.', mailCopy['demo-m1'].body[1], 'teklif'],
+      ['demo-m2', 'Bayi duyurusu', names.dealer, 'normal', 'Yeni dönem ürün bilgilendirme toplantısı duyurusu.', mailCopy['demo-m2'].body[1], 'kesif'],
+      ['demo-m3', mailCopy['demo-m3'].subject[1], names.accounting, 'normal', mailCopy['demo-m3'].summary[1], mailCopy['demo-m3'].body[1], 'bakim'],
+      ['demo-m4', 'Servis sonrası ses şikâyeti', c?.name || names.customer, 'yüksek', 'Son kontrolden sonra cihazdan ses geldiği bildiriliyor.', 'Son servisten sonra iç ünitede titreşim sesi duyuyorum. Cihazın yeniden kontrol edilmesini rica ederim.', 'ariza']
     ].map(([id, subject, from, priority, summary, body, type]) => ({id, subject, from, priority, summary, body, type, customerId: id === 'demo-m4' ? c?.id : null, read: false, date: db.today})),
     sms: [], templateTexts: {}, rules: {appointment: true, maintenance: true},
-    people: [{id: 'demo-admin', name: 'Örnek Yönetici', role: 'admin'}, {id: 'demo-office', name: 'Örnek Büro', role: 'office'}, ...db.staff.filter(t => t.active).map(t => ({id: 'demo-' + t.id, name: t.name, role: 'technician', staffId: t.id}))],
+    people: [{id: 'demo-admin', name: names.admin, role: 'admin'}, {id: 'demo-office', name: names.office, role: 'office'}, ...db.staff.filter(t => t.active).map(t => ({id: 'demo-' + t.id, name: t.name, role: 'technician', staffId: t.id}))],
     backupPlan: {enabled: true, time: '02:00'}, backups: [{id: 'demo-backup1', at: addDays(db.today, -1) + 'T02:00:00+03:00', status: 'Hazır', note: 'Gece planı, demo kaydı'}]
   };
   return true;
